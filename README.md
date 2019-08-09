@@ -8,7 +8,7 @@
 * UDT[<https://github.com/594422814/UDT_pytorch>]
 * Vital[<https://github.com/abnerwang/py-Vital.git>]
 * MDNet[<https://github.com/hyeonseobnam/py-MDNet.git>]
-* DaSiamRPN[<https://github.com/foolwood/DaSiamRPN>][*]
+* DaSiamRPN[<https://github.com/foolwood/DaSiamRPN>,<https://github.com/songheony/DaSiamRPN>][*]
 * SiamDW[<https://github.com/researchmm/SiamDW>]
 * SiamFC[<https://github.com/huanglianghua/siamfc-pytorch>]
 * SiamRPN[<https://github.com/huanglianghua/siamrpn-pytorch>]
@@ -29,7 +29,7 @@ Optional:
 pip install yaml easydict
 ```
 
-Note that, some experts would need to use python 2.x (e.g. DaSiamRPN).
+[*] Since the original code is for Python2, I've modified it very little to be compatible with Python3.
 
 ## Author
 
