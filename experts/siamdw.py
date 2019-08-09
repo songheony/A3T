@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 from easydict import EasyDict as edict
 from .expert import Expert
-from external.SiamDW.lib.tracker.siamrpn import SiamRPN
+from external.SiamDW.lib.tracker.siamfc import SiamFC
 import external.SiamDW.lib.models.models as models
 from external.SiamDW.lib.utils.utils import load_pretrain
 
@@ -10,13 +10,14 @@ from external.SiamDW.lib.utils.utils import load_pretrain
 class SiamDW(Expert):
     def __init__(self):
         super().__init__("SiamDW")
-        net_file = "/home/heonsong/Desktop/AAA/TripleA/external/SiamDW/snapshot/CIResNet22_RPN.pth"
+        # TODO: edit this path
+        net_file = "/home/heonsong/Desktop/AAA/AAA-journal/external/SiamDW/CIResNet22FC_G.pth"
         info = edict()
-        info.arch = "SiamRPNRes22"
-        info.dataset = "NOUSE"
-        info.epoch_test = True
-        self.tracker = SiamRPN(info)
-        self.net = models.__dict__["SiamRPNRes22"](anchors_nums=5)
+        info.arch = "SiamFCRes22"
+        info.dataset = "OTB"
+        info.epoch_test = False
+        self.tracker = SiamFC(info)
+        self.net = models.__dict__["SiamFCRes22"](anchors_nums=5)
         self.net = load_pretrain(self.net, net_file)
         self.net.eval()
         self.net = self.net.cuda()

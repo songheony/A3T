@@ -18,15 +18,16 @@
 ## Requirements
 
 ```sh
-conda create -n [ENV_NAME] python=[PYTHON_VERSION>=3.6]
-conda install pytorch torchvision cudatoolkit=[CUDA_VERSION] -c pytorch
-conda install matplotlib pywget shapely
+conda create -n [ENV_NAME] python=[PYTHON_VERSION>=3.7]
+conda install pytorch torchvision cudatoolkit=[CUDA_VERSION>=1.0] -c pytorch
+conda install matplotlib pywget shapely pandas
 pip install ortools opencv-python opencv-contrib-python
 ```
 
-Optional:
+Optional (for experts):
 ```sh
 pip install yaml easydict
+sudo apt install ninja-build
 ```
 
 [*] Since the original code is for Python2, I've modified it very little to be compatible with Python3.

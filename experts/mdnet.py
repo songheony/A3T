@@ -20,8 +20,9 @@ class MDnet(Expert):
 
     def init(self, image, box):
         # Init model
+        # TODO: edit this path
         self.model = MDNet(
-            "/home/heonsong/Desktop/AAA/TripleA/external/MDNet/models/mdnet_imagenet_vid.pth"
+            "/home/heonsong/Desktop/AAA/AAA-journal/external/py_MDNet/models/mdnet_imagenet_vid.pth"
         )
         if self.opts["use_gpu"]:
             self.model = self.model.cuda()

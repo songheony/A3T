@@ -16,7 +16,8 @@ class UDT(Expert):
     def __init__(self):
         super(UDT, self).__init__("UDT")
         # default parameter and load feature extractor network
-        self.net_file = ""
+        # TODO: edit this path
+        self.net_file = "/home/heonsong/Desktop/AAA/AAA-journal/external/UDT_pytorch/train/work/checkpoint.pth.tar"
         self.config = TrackerConfig()
         self.net = DCFNet(self.config)
         self.net.load_param(self.net_file)

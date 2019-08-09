@@ -13,7 +13,7 @@ class Expert(object):
     def update(self, image):
         raise NotImplementedError()
 
-    def track(self, img_files, box):
+    def track(self, img_files, box, visualize=False):
         frame_num = len(img_files)
         boxes = np.zeros((frame_num, 4))
         boxes[0] = box

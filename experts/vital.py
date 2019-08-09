@@ -10,10 +10,11 @@ from external.py_Vital.gnet.g_pretrain import g_pretrain
 from external.py_Vital.tracking.run_tracker import forward_samples, train
 
 
-class SiamFC(Expert):
+class Vital(Expert):
     def __init__(self):
-        super(SiamFC, self).__init__("SiamFC")
-        self.opts = yaml.safe_load(open("./tracking/options.yaml", "r"))
+        super(Vital, self).__init__("Vital")
+        # TODO: edit this path and edit the file
+        self.opts = yaml.safe_load(open("/home/heonsong/Desktop/AAA/AAA-journal/external/py_Vital/tracking/options.yaml", "r"))
 
     def init(self, image, box):
         self.frame = 0

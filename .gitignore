@@ -108,3 +108,7 @@ external/
 
 # vscode
 .vscode/
+
+# result and report
+results/
+reports/
