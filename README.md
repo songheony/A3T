@@ -6,6 +6,8 @@
 * ECO[<https://github.com/StrangerZhang/pyECO>,<https://github.com/wwdguu/pyCFTrackers>]
 * TADT[<https://github.com/ZikunZhou/TADT-python>]
 * UDT[<https://github.com/594422814/UDT_pytorch>]
+* Vital[<https://github.com/abnerwang/py-Vital.git>]
+* MDNet[<https://github.com/hyeonseobnam/py-MDNet.git>]
 * DaSiamRPN[<https://github.com/foolwood/DaSiamRPN>][*]
 * SiamDW[<https://github.com/researchmm/SiamDW>]
 * SiamFC[<https://github.com/huanglianghua/siamfc-pytorch>]

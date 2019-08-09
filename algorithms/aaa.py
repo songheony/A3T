@@ -49,7 +49,7 @@ class WAADelayed:
 
 class AAA(Algorithm):
     def __init__(self, n_experts):
-        super(Algorithm, self).__init__("Ours")
+        super(AAA, self).__init__("Ours")
 
         # Threshold for detecting anchor frame
         self.threshold = 0.74
