@@ -24,6 +24,13 @@ conda install matplotlib pywget shapely
 pip install ortools opencv-python opencv-contrib-python
 ```
 
+Optional:
+```sh
+pip install yaml easydict
+```
+
+Note that, some experts would need to use python 2.x (e.g. DaSiamRPN).
+
 ## Author
 
 👤 **Heon Song**
