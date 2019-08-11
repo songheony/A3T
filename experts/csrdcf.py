@@ -3,14 +3,14 @@ import numpy as np
 from .expert import Expert
 
 sys.path.append("external/pyCFTrackers")
-from cftracker.eco import ECO as Tracker
-from lib.eco.config import otb_deep_config
+from cftracker.csrdcf import CSRDCF as Tracker
+from cftracker.config import csrdcf_config
 
 
-class ECO(Expert):
+class CSRDCF(Expert):
     def __init__(self):
-        super(ECO, self).__init__("ECO")
-        self.tracker = Tracker(config=otb_deep_config.OTBDeepConfig())
+        super(CSRDCF, self).__init__("CSRDCF")
+        self.tracker = Tracker(config=csrdcf_config.CSRDCFConfig())
 
     def init(self, image, box):
         image = np.array(image)

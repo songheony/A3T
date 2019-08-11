@@ -1,20 +1,30 @@
+import sys
 import numpy as np
 import yaml
 import torch
 from .expert import Expert
-from external.py_Vital.modules.model import MDNet, BCELoss, set_optimizer
-from external.py_Vital.modules.sample_generator import SampleGenerator
-from external.py_Vital.tracking.bbreg import BBRegressor
-from external.py_Vital.gnet.g_init import NetG
-from external.py_Vital.gnet.g_pretrain import g_pretrain
-from external.py_Vital.tracking.run_tracker import forward_samples, train
+
+sys.path.append("external/py_Vital")
+sys.path.append("external/py_Vital/gnet")
+sys.path.append("external/py_Vital/tracking")
+from modules.model import MDNet, BCELoss, set_optimizer
+from modules.sample_generator import SampleGenerator
+from bbreg import BBRegressor
+from g_init import NetG
+from g_pretrain import g_pretrain
+from run_tracker import forward_samples, train
 
 
 class Vital(Expert):
     def __init__(self):
         super(Vital, self).__init__("Vital")
         # TODO: edit this path and edit the file
-        self.opts = yaml.safe_load(open("/home/heonsong/Desktop/AAA/AAA-journal/external/py_Vital/tracking/options.yaml", "r"))
+        self.opts = yaml.safe_load(
+            open(
+                "/home/heonsong/Desktop/AAA/AAA-journal/external/py_Vital/tracking/options.yaml",
+                "r",
+            )
+        )
 
     def init(self, image, box):
         self.frame = 0

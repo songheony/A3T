@@ -1,15 +1,13 @@
+import sys
 import numpy as np
 import cv2
 import torch
 from .expert import Expert
-from external.UDT_pytorch.track.UDT import TrackerConfig
-from external.UDT_pytorch.track.util import (
-    crop_chw,
-    cxy_wh_2_rect1,
-    rect1_2_cxy_wh,
-    cxy_wh_2_bbox,
-)
-from external.UDT_pytorch.track.net import DCFNet
+
+sys.path.append("external/UDT_pytorch/track")
+from UDT import TrackerConfig
+from util import crop_chw, cxy_wh_2_rect1, rect1_2_cxy_wh, cxy_wh_2_bbox
+from net import DCFNet
 
 
 class UDT(Expert):

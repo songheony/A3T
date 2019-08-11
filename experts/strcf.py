@@ -3,14 +3,13 @@ import numpy as np
 from .expert import Expert
 
 sys.path.append("external/pyCFTrackers")
-from cftracker.eco import ECO as Tracker
-from lib.eco.config import otb_deep_config
+from cftracker.strcf import STRCF as Tracker
 
 
-class ECO(Expert):
+class STRCF(Expert):
     def __init__(self):
-        super(ECO, self).__init__("ECO")
-        self.tracker = Tracker(config=otb_deep_config.OTBDeepConfig())
+        super(STRCF, self).__init__("STRCF")
+        self.tracker = Tracker()
 
     def init(self, image, box):
         image = np.array(image)

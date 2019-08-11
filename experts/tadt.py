@@ -1,23 +1,23 @@
+import sys
 import numpy as np
 import cv2
 import torch
 from .expert import Expert
-from external.TADT_python.defaults import _C as cfg
-from external.TADT_python.tadt_tracker import Tadt_Tracker, cal_srch_window_location
-from external.TADT_python.backbone_v2 import build_vgg16
-from external.TADT_python.feature_utils_v2 import (
+
+sys.path.append("external/TADT_python")
+from defaults import _C as cfg
+from tadt_tracker import cal_srch_window_location
+from backbone_v2 import build_vgg16
+from siamese import SiameseNet
+from feature_utils_v2 import (
     get_subwindow_feature,
     generate_patch_feature,
     round_python2,
     features_selection,
     resize_tensor,
 )
-from external.TADT_python.tracking_utils import (
-    calculate_scale,
-    generate_2d_window,
-    cal_window_size,
-)
-from external.TADT_python.taf import taf_model
+from tracking_utils import calculate_scale, generate_2d_window, cal_window_size
+from taf import taf_model
 
 
 class TADT(Expert):
@@ -26,12 +26,17 @@ class TADT(Expert):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def init(self, image, box):
-        self.model = build_vgg16(cfg)
-        self.tracker = Tadt_Tracker(
-            cfg, model=self.model, device=self.device, display=False
-        )
+        # ---------------trackers parameters initialization--------------------------
+        self.config = cfg
+        self.rescale = 1
 
-        img = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+        # -------------model initialization--------------------
+        self.model = build_vgg16(self.config).to(self.device)
+        self.model.train()
+        self.siamese_model = SiameseNet().to(self.device)
+        self.toc = 0
+
+        img = np.array(image)
         self.target_location = box
         origin_target_size = np.sqrt(self.target_location[2] * self.target_location[3])
         origin_image_size = img.shape[0:2][::-1]  # [width,height]
@@ -94,7 +99,7 @@ class TADT(Expert):
         # self.exemplar_features = fuse_feature(patch_features)
 
     def update(self, image):
-        img = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+        img = np.array(image)
         image = cv2.resize(
             img,
             tuple((np.ceil(np.array(img.shape[0:2][::-1]) * self.rescale)).astype(int)),

@@ -54,6 +54,9 @@ class AAA(Algorithm):
         # Threshold for detecting anchor frame
         self.threshold = 0.74
 
+        # Whether reset offline tracker
+        self.reset_offline = True
+
         # The number of experts
         self.n_experts = n_experts
 
@@ -102,11 +105,20 @@ class AAA(Algorithm):
             # Caluclate optimal path
             self.offline.run(self.detections)
 
-            # Add final box properly
-            path = self.offline.ids[:-1] + [
-                self.offline.ids[-1][0],
-                detected[self.offline.ids[-1][1]],
-            ]
+            # Get the last box's id
+            final_box_id = detected[self.offline.ids[-1][1]]
+
+            # Add final box and cut first properly
+            path = self.offline.ids[1:-1] + [self.offline.ids[-1][0], final_box_id]
+
+            if self.reset_offline:
+                # Reset offline tracker
+                self.detections = [
+                    {"rect": boxes[final_box_id], "feature": features[final_box_id]}
+                ]
+
+                # Get only unevaluated frames' boxes
+                path = path[: -len(self.prev_boxes)]
 
             # Get offline tracking results
             self.prev_boxes = np.array(self.prev_boxes)
@@ -118,8 +130,11 @@ class AAA(Algorithm):
             # Update weight of experts
             self.learner.update(gradient_losses)
 
+            # Clean previous boxes
+            self.prev_boxes = []
+
             # Return last box of offline results
-            predict = offline_results[-1]
+            predict = boxes[final_box_id]
 
         # Otherwise
         else:

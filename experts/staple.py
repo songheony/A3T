@@ -3,14 +3,14 @@ import numpy as np
 from .expert import Expert
 
 sys.path.append("external/pyCFTrackers")
-from cftracker.eco import ECO as Tracker
-from lib.eco.config import otb_deep_config
+from cftracker.staple import Staple as Tracker
+from lib.eco.config import staple_config
 
 
-class ECO(Expert):
+class Staple(Expert):
     def __init__(self):
-        super(ECO, self).__init__("ECO")
-        self.tracker = Tracker(config=otb_deep_config.OTBDeepConfig())
+        super(Staple, self).__init__("Staple")
+        self.tracker = Tracker(config=staple_config.StapleConfig())
 
     def init(self, image, box):
         image = np.array(image)

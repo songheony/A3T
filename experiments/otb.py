@@ -179,7 +179,9 @@ class ExperimentOTB(object):
 
         return succ_curve, prec_curve
 
-    def plot_curves(self, tracker_names):
+    def plot_curves(
+        self, tracker_names, succ_key="success_score", prec_key="precision_score"
+    ):
         # assume tracker_names[0] is your tracker
         report_dir = os.path.join(self.report_dir, tracker_names[0])
         assert os.path.exists(report_dir), (
@@ -204,7 +206,7 @@ class ExperimentOTB(object):
 
         # sort trackers by success score
         tracker_names = list(performance.keys())
-        succ = [t[key]["success_score"] for t in performance.values()]
+        succ = [t[key][succ_key] for t in performance.values()]
         inds = np.argsort(succ)[::-1]
         tracker_names = [tracker_names[i] for i in inds]
 
@@ -220,9 +222,7 @@ class ExperimentOTB(object):
                 markers[i % len(markers)],
             )
             lines.append(line)
-            legends.append(
-                "%s: [%.3f]" % (name, performance[name][key]["success_score"])
-            )
+            legends.append("%s: [%.3f]" % (name, performance[name][key][succ_key]))
         matplotlib.rcParams.update({"font.size": 7.4})
         legend = ax.legend(lines, legends, loc="center left", bbox_to_anchor=(1, 0.5))
 
@@ -244,7 +244,7 @@ class ExperimentOTB(object):
 
         # sort trackers by precision score
         tracker_names = list(performance.keys())
-        prec = [t[key]["precision_score"] for t in performance.values()]
+        prec = [t[key][prec_key] for t in performance.values()]
         inds = np.argsort(prec)[::-1]
         tracker_names = [tracker_names[i] for i in inds]
 
@@ -260,9 +260,7 @@ class ExperimentOTB(object):
                 markers[i % len(markers)],
             )
             lines.append(line)
-            legends.append(
-                "%s: [%.3f]" % (name, performance[name][key]["precision_score"])
-            )
+            legends.append("%s: [%.3f]" % (name, performance[name][key][prec_key]))
         matplotlib.rcParams.update({"font.size": 7.4})
         legend = ax.legend(lines, legends, loc="center left", bbox_to_anchor=(1, 0.5))
 

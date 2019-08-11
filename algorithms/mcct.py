@@ -87,10 +87,7 @@ class MCCT(Algorithm):
             self.experts[i].rect_positions.append(boxes[i])
             self.experts[i].centers.append(center)
 
-            cx, cy = (
-                self.experts[i].pos[0],
-                self.experts[i].pos[1],
-            )
+            cx, cy = (self.experts[i].pos[0], self.experts[i].pos[1])
 
             pre_center = self.experts[i].centers[self.frame_idx - 1]
             smooth = np.sqrt((cx - pre_center[0]) ** 2 + (cy - pre_center[1]) ** 2)
@@ -141,18 +138,27 @@ class MCCT(Algorithm):
     def robustness_eva(self, experts, num, frame_idx, period, weight, expert_num):
         overlap_score = np.zeros((period, expert_num))
         for i in range(expert_num):
-            bboxes1 = np.array(experts[i].rect_positions)[frame_idx - period + 1:frame_idx + 1]
-            bboxes2 = np.array(experts[num].rect_positions)[frame_idx - period + 1:frame_idx + 1]
+            bboxes1 = np.array(experts[i].rect_positions)[
+                frame_idx - period + 1 : frame_idx + 1
+            ]
+            bboxes2 = np.array(experts[num].rect_positions)[
+                frame_idx - period + 1 : frame_idx + 1
+            ]
             overlaps = cal_ious(bboxes1, bboxes2)
             overlap_score[:, i] = np.exp(-(1 - overlaps) ** 2 / 2)
         avg_overlap = np.sum(overlap_score, axis=1) / expert_num
         expert_avg_overlap = np.sum(overlap_score, axis=0) / period
-        var_overlap = np.sqrt(np.sum((overlap_score - expert_avg_overlap[np.newaxis, :]) ** 2, axis=1) / expert_num)
+        var_overlap = np.sqrt(
+            np.sum((overlap_score - expert_avg_overlap[np.newaxis, :]) ** 2, axis=1)
+            / expert_num
+        )
         norm_factor = 1 / np.sum(np.array(weight))
         weight_avg_overlap = norm_factor * (weight.dot(avg_overlap))
         weight_var_overlap = norm_factor * (weight.dot(var_overlap))
         pair_score = weight_avg_overlap / (weight_var_overlap + 0.008)
-        smooth_score = experts[num].smooth_scores[frame_idx - period + 1:frame_idx + 1]
+        smooth_score = experts[num].smooth_scores[
+            frame_idx - period + 1 : frame_idx + 1
+        ]
         self_score = norm_factor * np.sum(np.array(smooth_score) * weight)
         eta = 0.1
         reliability = eta * pair_score + (1 - eta) * self_score

@@ -1,11 +1,15 @@
+import sys
 import numpy as np
 import yaml
 import torch
 from .expert import Expert
-from external.py_MDNet.modules.model import MDNet, BCELoss, set_optimizer
-from external.py_MDNet.modules.sample_generator import SampleGenerator
-from external.py_MDNet.tracking.bbreg import BBRegressor
-from external.py_MDNet.tracking.run_tracker import forward_samples, train
+
+sys.path.append("external/py_MDNet")
+sys.path.append("external/py_MDNet/tracking")
+from modules.model import MDNet, BCELoss, set_optimizer
+from modules.sample_generator import SampleGenerator
+from tracking.bbreg import BBRegressor
+from tracking.run_tracker import forward_samples, train
 
 
 class MDnet(Expert):
