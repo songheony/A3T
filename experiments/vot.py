@@ -28,7 +28,7 @@ class ExperimentVOT(ExperimentOTB):
         self.dataset = VOT(
             root_dir,
             version,
-            anno_type="default",
+            anno_type="rect",
             download=True,
             return_meta=True,
             list_file=None,
@@ -47,3 +47,28 @@ class ExperimentVOT(ExperimentOTB):
             "motion_change",
             "empty",
         ]
+
+    def run(self, tracker, visualize=False):
+        print(
+            "Running tracker %s on %s..." % (tracker.name, type(self.dataset).__name__)
+        )
+
+        # loop over the complete dataset
+        for s, (img_files, anno, _) in enumerate(self.dataset):
+            seq_name = self.dataset.seq_names[s]
+            print("--Sequence %d/%d: %s" % (s + 1, len(self.dataset), seq_name))
+
+            # skip if results exist
+            record_file = os.path.join(
+                self.result_dir, tracker.name, "%s.txt" % seq_name
+            )
+            if os.path.exists(record_file):
+                print("  Found results, skipping", seq_name)
+                continue
+
+            # tracking loop
+            boxes, times = tracker.track(img_files, anno[0, :], visualize=visualize)
+            assert len(boxes) == len(anno)
+
+            # record results
+            self._record(record_file, boxes, times)

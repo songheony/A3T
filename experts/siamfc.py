@@ -1,8 +1,8 @@
 import sys
 from .expert import Expert
 
-sys.path.append("external/siamfc_pytorch")
-from siamfc.siamfc import TrackerSiamFC
+sys.path.append("external/siamfc")
+from siamfc import TrackerSiamFC
 
 
 class SiamFC(Expert):
@@ -10,7 +10,7 @@ class SiamFC(Expert):
         super(SiamFC, self).__init__("SiamFC")
         # TODO: edit this path
         self.net_file = (
-            "/home/heonsong/Desktop/AAA/AAA-journal/external/siamfc_pytorch/model.pth"
+            "/home/heonsong/Desktop/AAA/AAA-journal/external/siamfc/model.pth"
         )
 
     def init(self, image, box):

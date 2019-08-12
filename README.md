@@ -14,7 +14,7 @@
 * BACF[<https://github.com/wwdguu/pyCFTrackers>]
 * CSRDCF[<https://github.com/wwdguu/pyCFTrackers>]
 * SAMF[<https://github.com/wwdguu/pyCFTrackers>]
-* STAPLE[<https://github.com/wwdguu/pyCFTrackers>]
+* Staple[<https://github.com/wwdguu/pyCFTrackers>]
 * STRCF[<https://github.com/wwdguu/pyCFTrackers>]
 
 [*] Since original code of DaSiamRPN is for Python2, I should modify the code a little bit to be compatible with Python3.

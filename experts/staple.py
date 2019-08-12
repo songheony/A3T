@@ -4,7 +4,7 @@ from .expert import Expert
 
 sys.path.append("external/pyCFTrackers")
 from cftracker.staple import Staple as Tracker
-from lib.eco.config import staple_config
+from cftracker.config import staple_config
 
 
 class Staple(Expert):
