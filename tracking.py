@@ -88,17 +88,17 @@ def run_tracker(tracker, dataset, sequence=None, debug=0, threads=0):
 
 
 if __name__ == "__main__":
-    from experts.atom import ATOM
+    # from experts.atom import ATOM
 
-    tracker = ATOM()
+    # tracker = ATOM()
 
     # from experts.dasiamrpn import DaSiamRPN
 
     # tracker = DaSiamRPN()
 
-    # from experts.eco import ECO
+    from experts.eco import ECO
 
-    # tracker = ECO()
+    tracker = ECO()
 
     # from experts.mdnet import MDnet
 

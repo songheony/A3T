@@ -2,6 +2,7 @@ import sys
 import numpy as np
 import torch
 import scipy.special as sc
+from PIL import Image
 from .algorithm import Algorithm
 from .utils import Extractor, MinCostFlowTracker, calc_overlap, cosine_similarity
 
@@ -71,7 +72,9 @@ class AAA(Algorithm):
         # Online learner
         self.learner = WAADelayed()
 
-    def init(self, image, box):
+    def initialize(self, image, box):
+        image = Image.fromarray(image)
+
         # Previous boxes of experts
         self.prev_boxes = []
 
@@ -84,7 +87,9 @@ class AAA(Algorithm):
         # Init online learner
         self.learner.init(self.n_experts)
 
-    def update(self, image, boxes):
+    def track(self, image, boxes):
+        image = Image.fromarray(image)
+
         # Save box of experts
         self.prev_boxes.append(boxes)
 

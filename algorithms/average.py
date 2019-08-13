@@ -6,8 +6,8 @@ class Average(Algorithm):
     def __init__(self):
         super(Average, self).__init__("Average")
 
-    def init(self, image, box):
+    def initialize(self, image, box):
         pass
 
-    def update(self, image, boxes):
+    def track(self, image, boxes):
         return np.mean(boxes, axis=0), None

@@ -1,4 +1,5 @@
 import torch
+from PIL import Image
 from .algorithm import Algorithm
 from .utils import Extractor, cosine_similarity
 
@@ -12,10 +13,13 @@ class Max(Algorithm):
         device = torch.device("cuda:0" if use_cuda else "cpu")
         self.extractor = Extractor(device)
 
-    def init(self, image, box):
-        pass
+    def initialize(self, image, box):
+        image = Image.fromarray(image)
+        self.target_feature = self.extractor.extract(image, [box])[0]
 
-    def update(self, image, boxes):
+    def track(self, image, boxes):
+        image = Image.fromarray(image)
+
         # Extract features from boxes
         features = self.extractor.extract(image, boxes)
 
