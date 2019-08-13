@@ -25,7 +25,7 @@ class TADT(Expert):
         super(TADT, self).__init__("TADT")
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    def init(self, image, box):
+    def initialize(self, image, box):
         # ---------------trackers parameters initialization--------------------------
         self.config = cfg
         self.rescale = 1
@@ -36,7 +36,7 @@ class TADT(Expert):
         self.siamese_model = SiameseNet().to(self.device)
         self.toc = 0
 
-        img = np.array(image)
+        img = image
         self.target_location = box
         origin_target_size = np.sqrt(self.target_location[2] * self.target_location[3])
         origin_image_size = img.shape[0:2][::-1]  # [width,height]
@@ -98,8 +98,8 @@ class TADT(Expert):
         )
         # self.exemplar_features = fuse_feature(patch_features)
 
-    def update(self, image):
-        img = np.array(image)
+    def track(self, image):
+        img = image
         image = cv2.resize(
             img,
             tuple((np.ceil(np.array(img.shape[0:2][::-1]) * self.rescale)).astype(int)),

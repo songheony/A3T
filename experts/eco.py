@@ -1,21 +1,20 @@
 import sys
-import numpy as np
+import cv2
 from .expert import Expert
 
-sys.path.append("external/pyCFTrackers")
-from cftracker.eco import ECO as Tracker
-from lib.eco.config import otb_deep_config
+sys.path.append("external/pyECO")
+from eco import ECOTracker
 
 
 class ECO(Expert):
     def __init__(self):
         super(ECO, self).__init__("ECO")
-        self.tracker = Tracker(config=otb_deep_config.OTBDeepConfig())
 
-    def init(self, image, box):
-        image = np.array(image)
+    def initialize(self, image, box):
+        self.tracker = ECOTracker(True)
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         self.tracker.init(image, box)
 
-    def update(self, image):
-        image = np.array(image)
-        return self.tracker.update(image)
+    def track(self, image):
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        return self.tracker.update(image, True, False)

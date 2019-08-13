@@ -3,7 +3,7 @@
 ## Experts
 
 * ATOM[<https://github.com/visionml/pytracking>]
-* ECO[<https://github.com/StrangerZhang/pyECO>,<https://github.com/wwdguu/pyCFTrackers>]
+* ECO[<https://github.com/StrangerZhang/pyECO>]
 * TADT[<https://github.com/ZikunZhou/TADT-python>]
 * Vital[<https://github.com/abnerwang/py-Vital.git>]
 * MDNet[<https://github.com/hyeonseobnam/py-MDNet.git>]

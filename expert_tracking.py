@@ -16,10 +16,10 @@ datasets = [otb, vot, tcolor128, nfs, uav123, lasot]
 
 # from experts.atom import ATOM
 # tracker = ATOM()
-from experts.dasiamrpn import DaSiamRPN
-tracker = DaSiamRPN()
-# from experts.eco import ECO
-# tracker = ECO()
+# from experts.dasiamrpn import DaSiamRPN
+# tracker = DaSiamRPN()
+from experts.eco import ECO
+tracker = ECO()
 # from experts.mdnet import MDnet
 # tracker = MDnet()
 # from experts.siamdw import SiamDW
@@ -43,5 +43,5 @@ tracker = DaSiamRPN()
 
 for dataset in datasets:
     dataset.run(tracker)
-
-# otb.report(["ATOM", "DaSiamRPN", "ECO", "MDNet", "SiamDW", "SiamFC", "SiamRPN", "TADT", "Vital", "BACF", "CSRDCF", "Staple", "STRCF"])
+    # dataset.report(["ATOM", "DaSiamRPN", "ECO", "MDNet", "SiamDW", "SiamFC", "SiamRPN", "TADT", "Vital", "BACF", "CSRDCF", "Staple", "STRCF"])
+    break

@@ -1,4 +1,5 @@
 import sys
+from PIL import Image
 from .expert import Expert
 
 sys.path.append("external/siamfc")
@@ -13,9 +14,11 @@ class SiamFC(Expert):
             "/home/heonsong/Desktop/AAA/AAA-journal/external/siamfc/model.pth"
         )
 
-    def init(self, image, box):
+    def initialize(self, image, box):
+        image = Image.fromarray(image)
         self.tracker = TrackerSiamFC(net_path=self.net_file)
         self.tracker.init(image, box)
 
-    def update(self, image):
+    def track(self, image):
+        image = Image.fromarray(image)
         return self.tracker.update(image)

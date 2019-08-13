@@ -1,4 +1,5 @@
 import sys
+from PIL import Image
 import numpy as np
 import yaml
 import torch
@@ -22,7 +23,8 @@ class MDnet(Expert):
             )
         )
 
-    def init(self, image, box):
+    def initialize(self, image, box):
+        image = Image.fromarray(image)
         # Init model
         # TODO: edit this path
         self.model = MDNet(
@@ -121,8 +123,9 @@ class MDnet(Expert):
 
         self.before_target = box
 
-    def update(self, image):
+    def track(self, image):
         self.frame += 1
+        image = Image.fromarray(image)
 
         # Estimate target bbox
         samples = self.sample_generator(self.before_target, self.opts["n_samples"])

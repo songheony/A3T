@@ -1,4 +1,5 @@
 import sys
+from PIL import Image
 import numpy as np
 import yaml
 import torch
@@ -26,8 +27,9 @@ class Vital(Expert):
             )
         )
 
-    def init(self, image, box):
+    def initialize(self, image, box):
         self.frame = 0
+        image = Image.fromarray(image)
 
         # Init bbox
         self.target_bbox = np.array(box)
@@ -129,8 +131,9 @@ class Vital(Expert):
         self.pos_feats_all = [pos_feats]
         self.neg_feats_all = [neg_feats]
 
-    def update(self, image):
+    def track(self, image):
         self.frame += 1
+        image = Image.fromarray(image)
 
         # Estimate target bbox
         samples = self.sample_generator(self.target_bbox, self.opts["n_samples"])

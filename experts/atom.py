@@ -1,4 +1,3 @@
-import numpy as np
 import sys
 from .expert import Expert
 
@@ -12,10 +11,8 @@ class ATOM(Expert):
         super(ATOM, self).__init__("ATOM")
         self.tracker = Tracker(default.parameters())
 
-    def init(self, image, box):
-        image = np.array(image)
+    def initialize(self, image, box):
         self.tracker.initialize(image, box)
 
-    def update(self, image):
-        image = np.array(image)
+    def track(self, image):
         return self.tracker.track(image)

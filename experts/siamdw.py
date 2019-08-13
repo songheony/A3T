@@ -28,14 +28,14 @@ class SiamDW(Expert):
         self.net.eval()
         self.net = self.net.cuda()
 
-    def init(self, image, box):
-        image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+    def initialize(self, image, box):
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         center = np.array([box[0] + (box[2] - 1) / 2, box[1] + (box[3] - 1) / 2])
         size = np.array([box[2], box[3]])
         self.state = self.tracker.init(image, center, size, self.net)
 
-    def update(self, image):
-        image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+    def track(self, image):
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         self.state = self.tracker.track(self.state, image)
         center = self.state["target_pos"]
         size = self.state["target_sz"]
