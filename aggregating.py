@@ -1,6 +1,7 @@
 import numpy as np
 import multiprocessing
 import os
+import pickle
 from itertools import product
 from datasets.otbdataset import OTBDataset
 from datasets.votdataset import VOTDataset
@@ -10,23 +11,24 @@ from datasets.nfsdataset import NFSDataset
 from datasets.lasotdataset import LaSOTDataset
 
 
-def run_sequence(seq, tracker, debug=False):
+def run_sequence(seq, algorithm, trackers, debug=False):
     """Runs a tracker on a sequence."""
 
-    base_results_path = "{}/{}".format(tracker.results_dir, seq.name)
+    base_results_path = "{}/{}".format(algorithm.results_dir, seq.name)
     results_path = "{}.txt".format(base_results_path)
     times_path = "{}_time.txt".format(base_results_path)
+    offline_path = "{}_offline.pkl".format(base_results_path)
 
     if os.path.isfile(results_path) and not debug:
         return
 
-    print("Tracker: {},  Sequence: {}".format(tracker.name, seq.name))
+    print("Tracker: {},  Sequence: {}".format(algorithm.name, seq.name))
 
     if debug:
-        tracked_bb, exec_times = tracker.run(seq)
+        tracked_bb, offline_bb, exec_times = algorithm.run(seq, trackers)
     else:
         try:
-            tracked_bb, exec_times = tracker.run(seq)
+            tracked_bb, offline_bb, exec_times = algorithm.run(seq, trackers)
         except Exception as e:
             print(e)
             return
@@ -38,9 +40,11 @@ def run_sequence(seq, tracker, debug=False):
     if not debug:
         np.savetxt(results_path, tracked_bb, delimiter="\t", fmt="%d")
         np.savetxt(times_path, exec_times, delimiter="\t", fmt="%f")
+        with open(offline_path, "wb") as fp:
+            pickle.dump(offline_bb, fp)
 
 
-def run_dataset(dataset, trackers, debug=False, threads=0):
+def run_dataset(dataset, algorithms, trackers, debug=False, threads=0):
     """Runs a list of trackers on a dataset.
     args:
         dataset: List of Sequence instances, forming a dataset.
@@ -55,19 +59,19 @@ def run_dataset(dataset, trackers, debug=False, threads=0):
 
     if mode == "sequential":
         for seq in dataset:
-            for tracker_info in trackers:
-                run_sequence(seq, tracker_info, debug=debug)
+            for algorithm_info in algorithms:
+                run_sequence(seq, algorithm_info, trackers, debug=debug)
     elif mode == "parallel":
         param_list = [
-            (seq, tracker_info, debug)
-            for seq, tracker_info in product(dataset, trackers)
+            (seq, algorithm_info, trackers, debug)
+            for seq, algorithm_info in product(dataset, algorithms)
         ]
         with multiprocessing.Pool(processes=threads) as pool:
             pool.starmap(run_sequence, param_list)
     print("Done")
 
 
-def run_tracker(tracker, dataset, sequence=None, debug=0, threads=0):
+def run_tracker(algorithm, trackers, dataset, sequence=None, debug=0, threads=0):
     """Run tracker on sequence or dataset.
     args:
         tracker_name: Name of tracking method.
@@ -82,67 +86,44 @@ def run_tracker(tracker, dataset, sequence=None, debug=0, threads=0):
     if sequence is not None:
         dataset = [dataset[sequence]]
 
-    trackers = [tracker]
+    algorithms = [algorithm]
 
-    run_dataset(dataset, trackers, debug, threads)
+    run_dataset(dataset, algorithms, trackers, debug, threads)
 
 
 if __name__ == "__main__":
-    # from experts.atom import ATOM
+    trackers = [
+        "ATOM",
+        "BACF",
+        "CSRDCF",
+        "DaSiamRPN",
+        "ECO",
+        "MDNet",
+        "SAMF",
+        "SiamDW",
+        "SiamFC",
+        "SiamRPN",
+        "Staple",
+        "STRCF",
+        "TADT",
+        "Vital",
+    ]
 
-    # tracker = ATOM()
+    from algorithms.aaa import AAA
 
-    # from experts.bacf import BACF
+    algorithm = AAA(len(trackers))
 
-    # tracker = BACF()
+    # from algorithms.max import Max
 
-    # from experts.csrdcf import CSRDCF
+    # algorithm = Max(len(trackers))
 
-    # tracker = CSRDCF()
+    # from algorithms.average import Average
 
-    # from experts.dasiamrpn import DaSiamRPN
+    # algorithm = Average(len(trackers))
 
-    # tracker = DaSiamRPN()
+    # from algorithms.mcct import MCCT
 
-    from experts.eco import ECO
-
-    tracker = ECO()
-
-    # from experts.mdnet import MDnet
-
-    # tracker = MDnet()
-
-    # from experts.samf import SAMF
-
-    # tracker = SAMF()
-
-    # from experts.siamdw import SiamDW
-
-    # tracker = SiamDW()
-
-    # from experts.siamfc import SiamFC
-
-    # tracker = SiamFC()
-
-    # from experts.siamrpn import SiamRPN
-
-    # tracker = SiamRPN()
-
-    # from experts.staple import Staple
-
-    # tracker = Staple()
-
-    # from experts.strcf import STRCF
-
-    # tracker = STRCF()
-
-    # from experts.tadt import TADT
-
-    # tracker = TADT()
-
-    # from experts.vital import Vital
-
-    # tracker = Vital()
+    # algorithm = MCCT(len(trackers))
 
     dataset_name = "otb"
 
@@ -161,4 +142,4 @@ if __name__ == "__main__":
     else:
         raise ValueError("Unknown dataset name")
 
-    run_tracker(tracker, dataset)
+    run_tracker(algorithm, trackers, dataset)

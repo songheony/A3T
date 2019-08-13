@@ -3,19 +3,19 @@
 ## Experts
 
 * ATOM[<https://github.com/visionml/pytracking>]
-* ECO[<https://github.com/StrangerZhang/pyECO>]
-* TADT[<https://github.com/ZikunZhou/TADT-python>]
-* Vital[<https://github.com/abnerwang/py-Vital.git>]
-* MDNet[<https://github.com/hyeonseobnam/py-MDNet.git>]
+* BACF[<https://github.com/wwdguu/pyCFTrackers>]
+* CSRDCF[<https://github.com/wwdguu/pyCFTrackers>]
 * DaSiamRPN[<https://github.com/foolwood/DaSiamRPN>,<https://github.com/songheony/DaSiamRPN>][*]
+* ECO[<https://github.com/StrangerZhang/pyECO>]
+* MDNet[<https://github.com/hyeonseobnam/py-MDNet.git>]
+* SAMF[<https://github.com/wwdguu/pyCFTrackers>]
 * SiamDW[<https://github.com/researchmm/SiamDW>]
 * SiamFC[<https://github.com/huanglianghua/siamfc-pytorch>]
 * SiamRPN[<https://github.com/huanglianghua/siamrpn-pytorch>]
-* BACF[<https://github.com/wwdguu/pyCFTrackers>]
-* CSRDCF[<https://github.com/wwdguu/pyCFTrackers>]
-* SAMF[<https://github.com/wwdguu/pyCFTrackers>]
 * Staple[<https://github.com/wwdguu/pyCFTrackers>]
 * STRCF[<https://github.com/wwdguu/pyCFTrackers>]
+* TADT[<https://github.com/ZikunZhou/TADT-python>]
+* Vital[<https://github.com/abnerwang/py-Vital.git>]
 
 [*] Since original code of DaSiamRPN is for Python2, I should modify the code a little bit to be compatible with Python3.
 
