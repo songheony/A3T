@@ -14,7 +14,7 @@ class Expert(object):
     def __init__(self, name):
         self.name = name
         env = env_settings()
-        self.results_dir = '{}/{}'.format(env.results_path, self.name)
+        self.results_dir = "{}/{}".format(env.results_path, self.name)
         if not os.path.exists(self.results_dir):
             os.makedirs(self.results_dir)
 
@@ -35,7 +35,7 @@ class Expert(object):
         times = []
         start_time = time.time()
         self.initialize(image, np.array(sequence.init_state))
-        init_time = getattr(self, 'time', time.time() - start_time)
+        init_time = getattr(self, "time", time.time() - start_time)
         times.append(init_time)
 
         # Track

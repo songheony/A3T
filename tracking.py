@@ -89,30 +89,55 @@ def run_tracker(tracker, dataset, sequence=None, debug=0, threads=0):
 
 if __name__ == "__main__":
     from experts.atom import ATOM
+
     tracker = ATOM()
+
     # from experts.dasiamrpn import DaSiamRPN
+
     # tracker = DaSiamRPN()
+
     # from experts.eco import ECO
+
     # tracker = ECO()
+
     # from experts.mdnet import MDnet
+
     # tracker = MDnet()
+
     # from experts.siamdw import SiamDW
+
     # tracker = SiamDW()
+
     # from experts.siamfc import SiamFC
+
     # tracker = SiamFC()
+
     # from experts.siamrpn import SiamRPN
+
     # tracker = SiamRPN()
+
     # from experts.tadt import TADT
+
     # tracker = TADT()
+
     # from experts.vital import Vital
+
     # tracker = Vital()
+
     # from experts.bacf import BACF
+
     # tracker = BACF()
+
     # from experts.csrdcf import CSRDCF
+
     # tracker = CSRDCF()
+
     # from experts.staple import Staple
+
     # tracker = Staple()
+
     # from experts.strcf import STRCF
+
     # tracker = STRCF()
 
     dataset_name = "otb"
@@ -133,9 +158,3 @@ if __name__ == "__main__":
         raise ValueError("Unknown dataset name")
 
     run_tracker(tracker, dataset)
-
-    # from evaluations.ope_benchmark import OPEBenchmark
-    # benchmark = OPEBenchmark(dataset)
-    # success = benchmark.eval_success(["DaSiamRPN"])
-    # precision = benchmark.eval_precision(["DaSiamRPN"])
-    # benchmark.show_result(success, precision)

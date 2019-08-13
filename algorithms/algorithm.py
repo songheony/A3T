@@ -10,7 +10,9 @@ class Algorithm(object):
     def __init__(self, name):
         self.name = name
         env = env_settings()
-        self.results_dir = '{}/{}/{}'.format(env.results_path, self.name, self.parameter_name)
+        self.results_dir = "{}/{}/{}".format(
+            env.results_path, self.name, self.parameter_name
+        )
         if not os.path.exists(self.results_dir):
             os.makedirs(self.results_dir)
 
@@ -31,7 +33,7 @@ class Algorithm(object):
         times = []
         start_time = time.time()
         self.initialize(image, sequence.init_state)
-        init_time = getattr(self, 'time', time.time() - start_time)
+        init_time = getattr(self, "time", time.time() - start_time)
         times.append(init_time)
 
         # Track
