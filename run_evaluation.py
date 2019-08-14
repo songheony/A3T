@@ -1,13 +1,30 @@
-from evaluations.ope_benchmark import OPEBenchmark
 from datasets.otbdataset import OTBDataset
 from datasets.votdataset import VOTDataset
 from datasets.tpldataset import TPLDataset
 from datasets.uavdataset import UAVDataset
 from datasets.nfsdataset import NFSDataset
 from datasets.lasotdataset import LaSOTDataset
+from evaluations.ope_benchmark import OPEBenchmark
 
 
 if __name__ == "__main__":
+    trackers = [
+        "ATOM",
+        # "BACF",
+        # "CSRDCF",
+        "DaSiamRPN",
+        "ECO",
+        # "MDNet",
+        # "SAMF",
+        # "SiamDW",
+        # "SiamFC",
+        # "SiamRPN",
+        # "Staple",
+        # "STRCF",
+        # "TADT",
+        # "Vital",
+    ]
+
     dataset_name = "otb"
 
     if dataset_name == "otb":
@@ -26,6 +43,6 @@ if __name__ == "__main__":
         raise ValueError("Unknown dataset name")
 
     benchmark = OPEBenchmark(dataset)
-    success = benchmark.eval_success(["DaSiamRPN"])
-    precision = benchmark.eval_precision(["DaSiamRPN"])
+    success = benchmark.eval_success(trackers)
+    precision = benchmark.eval_precision(trackers)
     benchmark.show_result(success, precision)

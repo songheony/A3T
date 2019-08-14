@@ -1,4 +1,5 @@
 import sys
+import cv2
 from .expert import Expert
 
 sys.path.append("external/pyCFTrackers")
@@ -12,7 +13,9 @@ class CSRDCF(Expert):
         self.tracker = Tracker(config=csrdcf_config.CSRDCFConfig())
 
     def initialize(self, image, box):
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         self.tracker.init(image, box)
 
     def track(self, image):
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         return self.tracker.update(image)
