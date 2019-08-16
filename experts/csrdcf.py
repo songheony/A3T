@@ -18,4 +18,5 @@ class CSRDCF(Expert):
 
     def track(self, image):
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-        return self.tracker.update(image)
+        bbox = self.tracker.update(image)
+        return bbox

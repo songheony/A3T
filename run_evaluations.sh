@@ -1,2 +1,2 @@
-trackers=("ATOM" "BACF" "CSRDCF" "DaSiamRPN" "ECO" "ECO_new" "MDNet" "SAMF" "SiamDW" "SiamFC" "SiamRPN" "Staple" "STRCF" "TADT" "Vital")
+trackers=("ATOM" "CSRDCF" "DaSiamRPN" "ECO" "MDNet" "SAMF" "SiamDW" "SiamFC" "SiamRPN" "SiamRPN++" "Staple" "STRCF" "TADT" "Vital")
 python ./run_evaluation.py -e "${trackers[@]}" -d OTB

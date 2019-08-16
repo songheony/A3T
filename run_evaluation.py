@@ -8,17 +8,17 @@ from evaluations.ope_benchmark import OPEBenchmark
 
 
 def main(trackers, dataset_name):
-    if dataset_name == "otb":
+    if dataset_name == "OTB":
         dataset = OTBDataset()
-    elif dataset_name == "nfs":
+    elif dataset_name == "NFS":
         dataset = NFSDataset()
-    elif dataset_name == "uav":
+    elif dataset_name == "UAV":
         dataset = UAVDataset()
-    elif dataset_name == "tpl":
+    elif dataset_name == "TPL":
         dataset = TPLDataset()
-    elif dataset_name == "vot":
+    elif dataset_name == "VOT":
         dataset = VOTDataset()
-    elif dataset_name == "lasot":
+    elif dataset_name == "LaSOT":
         dataset = LaSOTDataset()
     else:
         raise ValueError("Unknown dataset name")
@@ -40,16 +40,15 @@ if __name__ == "__main__":
     if len(args.experts) == 0:
         trackers = [
             "ATOM",
-            "BACF",
             "CSRDCF",
             "DaSiamRPN",
             "ECO",
-            "ECO_new",
             "MDNet",
             "SAMF",
             "SiamDW",
             "SiamFC",
             "SiamRPN",
+            "SiamRPN++",
             "Staple",
             "STRCF",
             "TADT",
@@ -58,4 +57,4 @@ if __name__ == "__main__":
     else:
         trackers = args.experts
 
-    main(trackers, args.dataset_name)
+    main(trackers, args.dataset)

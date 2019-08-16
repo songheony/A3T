@@ -141,16 +141,15 @@ if __name__ == "__main__":
     if len(args.experts) == 0:
         trackers = [
             "ATOM",
-            "BACF",
             "CSRDCF",
             "DaSiamRPN",
             "ECO",
-            "ECO_new",
             "MDNet",
             "SAMF",
             "SiamDW",
             "SiamFC",
             "SiamRPN",
+            "SiamRPN++",
             "Staple",
             "STRCF",
             "TADT",

@@ -92,10 +92,6 @@ def main(tracker_name, dataset_name):
         from experts.atom import ATOM
 
         tracker = ATOM()
-    elif tracker_name == "BACF":
-        from experts.bacf import BACF
-
-        tracker = BACF()
     elif tracker_name == "CSRDCF":
         from experts.csrdcf import CSRDCF
 
@@ -108,10 +104,6 @@ def main(tracker_name, dataset_name):
         from experts.eco import ECO
 
         tracker = ECO()
-    elif tracker_name == "ECO_new":
-        from experts.eco_new import ECO_new
-
-        tracker = ECO_new()
     elif tracker_name == "MDNet":
         from experts.mdnet import MDnet
 
@@ -132,6 +124,10 @@ def main(tracker_name, dataset_name):
         from experts.siamrpn import SiamRPN
 
         tracker = SiamRPN()
+    elif tracker_name == "SiamRPN++":
+        from experts.siamrpnpp import SiamRPNPP
+
+        tracker = SiamRPNPP()
     elif tracker_name == "Staple":
         from experts.staple import Staple
 
