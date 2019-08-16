@@ -4,7 +4,6 @@ from .expert import Expert
 
 sys.path.append("external/pyECO")
 from eco import ECOTracker
-from eco.config.otb_deep_config import OTBDeepConfig
 
 
 class ECO(Expert):
@@ -13,10 +12,10 @@ class ECO(Expert):
 
     def initialize(self, image, box):
         if np.all(image[:, :, 0] == image[:, :, 1]):
-            self.tracker = ECOTracker(is_color=False, config=OTBDeepConfig())
+            self.tracker = ECOTracker(is_color=False)
             image = image[:, :, :1]
         else:
-            self.tracker = ECOTracker(is_color=True, config=OTBDeepConfig())
+            self.tracker = ECOTracker(is_color=True)
         self.tracker.init(image, box)
 
     def track(self, image):
