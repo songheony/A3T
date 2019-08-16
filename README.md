@@ -2,23 +2,23 @@
 
 ## Experts
 
-* ATOM[<https://github.com/visionml/pytracking>]
-* BACF[<https://github.com/wwdguu/pyCFTrackers>]
-* CSRDCF[<https://github.com/wwdguu/pyCFTrackers>]
-* DaSiamRPN[<https://github.com/foolwood/DaSiamRPN>,<https://github.com/songheony/DaSiamRPN>][*]
-* ECO[<https://github.com/StrangerZhang/pyECO>]
+* [ATOM](https://arxiv.org/abs/1811.07628)[<https://github.com/visionml/pytracking>]
+* [BACF](https://arxiv.org/abs/1703.04590)[<https://github.com/wwdguu/pyCFTrackers>]
+* [CSRDCF](https://arxiv.org/abs/1611.08461)[<https://github.com/wwdguu/pyCFTrackers>]
+* [DaSiamRPN](https://arxiv.org/abs/1808.06048)[<https://github.com/foolwood/DaSiamRPN>,<https://github.com/songheony/DaSiamRPN>][*]
+* [ECO](https://arxiv.org/abs/1611.09224)[<https://github.com/StrangerZhang/pyECO>]
 * ECO_new[<https://github.com/visionml/pytracking>]
-* MDNet[<https://github.com/hyeonseobnam/py-MDNet.git>][**]
-* SAMF[<https://github.com/wwdguu/pyCFTrackers>]
-* SiamDW[<https://github.com/researchmm/SiamDW>]
-* SiamFC[<https://github.com/huanglianghua/siamfc-pytorch>]
-* SiamRPN[<https://github.com/huanglianghua/siamrpn-pytorch>]
-* Staple[<https://github.com/wwdguu/pyCFTrackers>]
-* STRCF[<https://github.com/wwdguu/pyCFTrackers>]
-* TADT[<https://github.com/ZikunZhou/TADT-python>]
-* Vital[<https://github.com/abnerwang/py-Vital.git>]
+* [MDNet](https://arxiv.org/abs/1510.07945)[<https://github.com/hyeonseobnam/py-MDNet.git>][**]
+* [SAMF](https://link.springer.com/chapter/10.1007/978-3-319-16181-5_18)[<https://github.com/wwdguu/pyCFTrackers>]
+* [SiamDW](https://arxiv.org/abs/1901.01660)[<https://github.com/researchmm/SiamDW>]
+* [SiamFC](https://arxiv.org/abs/1606.09549)[<https://github.com/huanglianghua/siamfc-pytorch>]
+* [SiamRPN](http://openaccess.thecvf.com/content_cvpr_2018/papers/Li_High_Performance_Visual_CVPR_2018_paper.pdf)[<https://github.com/huanglianghua/siamrpn-pytorch>]
+* [Staple](https://arxiv.org/abs/1512.01355)[<https://github.com/wwdguu/pyCFTrackers>]
+* [STRCF](https://arxiv.org/abs/1803.08679)[<https://github.com/wwdguu/pyCFTrackers>]
+* [TADT](https://arxiv.org/abs/1904.01772)[<https://github.com/ZikunZhou/TADT-python>]
+* [Vital](https://arxiv.org/abs/1804.04273)[<https://github.com/abnerwang/py-Vital.git>]
 
-[*] Since original code of DaSiamRPN is for Python2, I had to modify the code a little bit to be compatible with Python3.  
+[*] Since the original code of DaSiamRPN is for Python2, We had to modify the code a little bit to be compatible with Python3.  
 [**] The version of scipy should be under 1.1.0 because MDNet need to use imresize function.
 
 ## Datasets
@@ -27,10 +27,10 @@
 * NFS[<http://ci2cv.net/nfs/index.html>]
 * UAV123[<https://uav123.org/>]
 * TColor128[<http://www.dabi.temple.edu/~hbling/data/TColor-128/TColor-128.html>]
-* VOT2018[<http://www.votchallenge.net/>][***]
+* VOT2018[<http://www.votchallenge.net/>][*]
 * LaSOT[<https://cis.temple.edu/lasot/download.html>]
 
-[***] VOT2018 is evaluated in unsupervised experiment as same as other datasets.
+[*] VOT2018 is evaluated in unsupervised experiment as same as other datasets.
 
 ## Frameworks
 
@@ -63,17 +63,18 @@ bash run_evaluations.sh
 
 3. Run the experts.
 
-4. Run algorithms what you want. [****]
+4. Run algorithms what you want. [*]
 
 5. Evaluate the trackers.
 
-[****] The code is supposed to run algorithms after running experts for test. However, it is not difficult to modify the code to do both simultaneously.
+[*] The code is supposed to run algorithms after running experts for test. However, it is not difficult to modify the code to do both simultaneously.
 
 ## Author
 
 👤 **Heon Song**
 
 * Github: [@songheony](https://github.com/songheony)
+* Contact: songheony@gmail.com
 
 ## Show your support
 
