@@ -1,5 +1,10 @@
 # Welcome to Adaptive Aggregation of Arbitrary Online Trackers with a Regret Bound 👋
 
+## Framework
+
+* pytracking[<https://github.com/visionml/pytracking>] for tracking datasets.
+* pysot-toolkit[<https://github.com/StrangerZhang/pysot-toolkit>] for evaluating trackers.
+
 ## Experts
 
 * ATOM[<https://github.com/visionml/pytracking>]
@@ -7,6 +12,7 @@
 * CSRDCF[<https://github.com/wwdguu/pyCFTrackers>]
 * DaSiamRPN[<https://github.com/foolwood/DaSiamRPN>,<https://github.com/songheony/DaSiamRPN>][*]
 * ECO[<https://github.com/StrangerZhang/pyECO>]
+* ECO_new[<https://github.com/visionml/pytracking>]
 * MDNet[<https://github.com/hyeonseobnam/py-MDNet.git>]
 * SAMF[<https://github.com/wwdguu/pyCFTrackers>]
 * SiamDW[<https://github.com/researchmm/SiamDW>]
@@ -17,7 +23,7 @@
 * TADT[<https://github.com/ZikunZhou/TADT-python>]
 * Vital[<https://github.com/abnerwang/py-Vital.git>]
 
-[*] Since original code of DaSiamRPN is for Python2, I should modify the code a little bit to be compatible with Python3.
+[*] Since original code of DaSiamRPN is for Python2, I had to modify the code a little bit to be compatible with Python3.
 
 ## Requirements
 
