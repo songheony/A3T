@@ -35,4 +35,5 @@ class Max(Algorithm):
             score = cosine_similarity(self.target_feature, feature)
             if score > max_score:
                 max_id = i
+                max_score = score
         return max_id
