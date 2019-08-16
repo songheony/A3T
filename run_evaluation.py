@@ -33,11 +33,11 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--experts", default="None", type=str, help="experts")
+    parser.add_argument("-e", "--experts", default=[], nargs="+", help="experts")
     parser.add_argument("-d", "--dataset", default="OTB", type=str, help="dataset")
     args = parser.parse_args()
 
-    if args.experts == "None":
+    if len(args.experts) == 0:
         trackers = [
             "ATOM",
             "BACF",
