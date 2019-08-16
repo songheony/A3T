@@ -23,12 +23,12 @@
 
 ## Datasets
 
-* OTB2015[<http://cvlab.hanyang.ac.kr/tracker_benchmark/index.html>]
-* NFS[<http://ci2cv.net/nfs/index.html>]
-* UAV123[<https://uav123.org/>]
-* TColor128[<http://www.dabi.temple.edu/~hbling/data/TColor-128/TColor-128.html>]
-* VOT2018[<http://www.votchallenge.net/>][*]
-* LaSOT[<https://cis.temple.edu/lasot/download.html>]
+* [OTB2015](https://ieeexplore.ieee.org/document/7001050)[<http://cvlab.hanyang.ac.kr/tracker_benchmark/index.html>]
+* [NFS](https://arxiv.org/abs/1703.05884)[<http://ci2cv.net/nfs/index.html>]
+* [UAV123](https://ivul.kaust.edu.sa/Pages/pub-benchmark-simulator-uav.aspx)[<https://uav123.org/>]
+* [TColor128](https://ieeexplore.ieee.org/document/7277070)[<http://www.dabi.temple.edu/~hbling/data/TColor-128/TColor-128.html>]
+* [VOT2018](https://link.springer.com/chapter/10.1007/978-3-030-11009-3_1)[<http://www.votchallenge.net/>][*]
+* [LaSOT](https://arxiv.org/abs/1809.07845)[<https://cis.temple.edu/lasot/download.html>]
 
 [*] VOT2018 is evaluated in unsupervised experiment as same as other datasets.
 
