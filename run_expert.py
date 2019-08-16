@@ -31,12 +31,12 @@ def run_sequence(seq, tracker, debug=False):
             print(e)
             return
 
-    tracked_bb = np.array(tracked_bb).astype(int)
+    tracked_bb = np.array(tracked_bb).astype(float)
     exec_times = np.array(exec_times).astype(float)
 
     print("FPS: {}".format(len(exec_times) / exec_times.sum()))
     if not debug:
-        np.savetxt(results_path, tracked_bb, delimiter="\t", fmt="%d")
+        np.savetxt(results_path, tracked_bb, delimiter="\t", fmt="%f")
         np.savetxt(times_path, exec_times, delimiter="\t", fmt="%f")
 
 
@@ -87,78 +87,94 @@ def run_tracker(tracker, dataset, sequence=None, debug=0, threads=0):
     run_dataset(dataset, trackers, debug, threads)
 
 
-if __name__ == "__main__":
-    # from experts.atom import ATOM
+def main(tracker_name, dataset_name):
+    if tracker_name == "ATOM":
+        from experts.atom import ATOM
 
-    # tracker = ATOM()
+        tracker = ATOM()
+    elif tracker_name == "BACF":
+        from experts.bacf import BACF
 
-    # from experts.bacf import BACF
+        tracker = BACF()
+    elif tracker_name == "CSRDCF":
+        from experts.csrdcf import CSRDCF
 
-    # tracker = BACF()
+        tracker = CSRDCF()
+    elif tracker_name == "DaSiamRPN":
+        from experts.dasiamrpn import DaSiamRPN
 
-    # from experts.csrdcf import CSRDCF
+        tracker = DaSiamRPN()
+    elif tracker_name == "ECO":
+        from experts.eco import ECO
 
-    # tracker = CSRDCF()
+        tracker = ECO()
+    elif tracker_name == "ECO_new":
+        from experts.eco_new import ECO_new
 
-    # from experts.dasiamrpn import DaSiamRPN
+        tracker = ECO_new()
+    elif tracker_name == "MDNet":
+        from experts.mdnet import MDnet
 
-    # tracker = DaSiamRPN()
+        tracker = MDnet()
+    elif tracker_name == "SAMF":
+        from experts.samf import SAMF
 
-    from experts.eco import ECO
+        tracker = SAMF()
+    elif tracker_name == "SiamDW":
+        from experts.siamdw import SiamDW
 
-    tracker = ECO()
+        tracker = SiamDW()
+    elif tracker_name == "SiamFC":
+        from experts.siamfc import SiamFC
 
-    # from experts.mdnet import MDnet
+        tracker = SiamFC()
+    elif tracker_name == "SiamRPN":
+        from experts.siamrpn import SiamRPN
 
-    # tracker = MDnet()
+        tracker = SiamRPN()
+    elif tracker_name == "Staple":
+        from experts.staple import Staple
 
-    # from experts.samf import SAMF
+        tracker = Staple()
+    elif tracker_name == "STRCF":
+        from experts.strcf import STRCF
 
-    # tracker = SAMF()
+        tracker = STRCF()
+    elif tracker_name == "TADT":
+        from experts.tadt import TADT
 
-    # from experts.siamdw import SiamDW
+        tracker = TADT()
+    elif tracker_name == "Vital":
+        from experts.vital import Vital
 
-    # tracker = SiamDW()
+        tracker = Vital()
+    else:
+        raise ValueError("Unknown expert name")
 
-    # from experts.siamfc import SiamFC
-
-    # tracker = SiamFC()  
-
-    # from experts.siamrpn import SiamRPN
-
-    # tracker = SiamRPN()
-
-    # from experts.staple import Staple
-
-    # tracker = Staple()
-
-    # from experts.strcf import STRCF
-
-    # tracker = STRCF()
-
-    # from experts.tadt import TADT
-
-    # tracker = TADT()
-
-    # from experts.vital import Vital
-
-    # tracker = Vital()
-
-    dataset_name = "otb"
-
-    if dataset_name == "otb":
+    if dataset_name == "OTB":
         dataset = OTBDataset()
-    elif dataset_name == "nfs":
+    elif dataset_name == "NFS":
         dataset = NFSDataset()
-    elif dataset_name == "uav":
+    elif dataset_name == "UAV":
         dataset = UAVDataset()
-    elif dataset_name == "tpl":
+    elif dataset_name == "TPL":
         dataset = TPLDataset()
-    elif dataset_name == "vot":
+    elif dataset_name == "VOT":
         dataset = VOTDataset()
-    elif dataset_name == "lasot":
+    elif dataset_name == "LaSOT":
         dataset = LaSOTDataset()
     else:
         raise ValueError("Unknown dataset name")
 
     run_tracker(tracker, dataset)
+
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-e", "--expert", default="ECO", type=str, help="expert")
+    parser.add_argument("-d", "--dataset", default="OTB", type=str, help="dataset")
+    args = parser.parse_args()
+
+    main(args.expert, args.dataset)

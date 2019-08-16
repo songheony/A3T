@@ -46,7 +46,7 @@ class Vital(Expert):
         self.criterion_g = torch.nn.MSELoss(reduction="mean")
         self.model.set_learnable_params(self.opts["ft_layers"])
         self.model_g.set_learnable_params(self.opts["ft_layers"])
-        init_optimizer = set_optimizer(
+        self.init_optimizer = set_optimizer(
             self.model, self.opts["lr_init"], self.opts["lr_mult"]
         )
         self.update_optimizer = set_optimizer(
@@ -54,11 +54,11 @@ class Vital(Expert):
         )
 
         # Draw pos/neg samples
-        pos_examples = SampleGenerator(
+        self.pos_examples = SampleGenerator(
             "gaussian", image.size, self.opts["trans_pos"], self.opts["scale_pos"]
         )(self.target_bbox, self.opts["n_pos_init"], self.opts["overlap_pos_init"])
 
-        neg_examples = np.concatenate(
+        self.neg_examples = np.concatenate(
             [
                 SampleGenerator(
                     "uniform",
@@ -77,39 +77,39 @@ class Vital(Expert):
                 ),
             ]
         )
-        neg_examples = np.random.permutation(neg_examples)
+        self.neg_examples = np.random.permutation(self.neg_examples)
 
         # Extract pos/neg features
-        pos_feats = forward_samples(self.model, image, pos_examples)
-        neg_feats = forward_samples(self.model, image, neg_examples)
+        self.pos_feats = forward_samples(self.model, image, self.pos_examples)
+        self.neg_feats = forward_samples(self.model, image, self.neg_examples)
 
         # Initial training
         train(
             self.model,
             None,
             self.criterion,
-            init_optimizer,
-            pos_feats,
-            neg_feats,
+            self.init_optimizer,
+            self.pos_feats,
+            self.neg_feats,
             self.opts["maxiter_init"],
         )
-        del init_optimizer, neg_feats
+        del self.init_optimizer, self.neg_feats
         torch.cuda.empty_cache()
-        g_pretrain(self.model, self.model_g, self.criterion_g, pos_feats)
+        g_pretrain(self.model, self.model_g, self.criterion_g, self.pos_feats)
         torch.cuda.empty_cache()
 
         # Train bbox regressor
-        bbreg_examples = SampleGenerator(
+        self.bbreg_examples = SampleGenerator(
             "uniform",
             image.size,
             self.opts["trans_bbreg"],
             self.opts["scale_bbreg"],
             self.opts["aspect_bbreg"],
         )(self.target_bbox, self.opts["n_bbreg"], self.opts["overlap_bbreg"])
-        bbreg_feats = forward_samples(self.model, image, bbreg_examples)
+        self.bbreg_feats = forward_samples(self.model, image, self.bbreg_examples)
         self.bbreg = BBRegressor(image.size)
-        self.bbreg.train(bbreg_feats, bbreg_examples, self.target_bbox)
-        del bbreg_feats
+        self.bbreg.train(self.bbreg_feats, self.bbreg_examples, self.target_bbox)
+        del self.bbreg_feats
         torch.cuda.empty_cache()
 
         # Init sample generators for update
@@ -124,97 +124,101 @@ class Vital(Expert):
         )
 
         # Init pos/neg features for update
-        neg_examples = self.neg_generator(
+        self.neg_examples = self.neg_generator(
             self.target_bbox, self.opts["n_neg_update"], self.opts["overlap_neg_init"]
         )
-        neg_feats = forward_samples(self.model, image, neg_examples)
-        self.pos_feats_all = [pos_feats]
-        self.neg_feats_all = [neg_feats]
+        self.neg_feats = forward_samples(self.model, image, self.neg_examples)
+        self.pos_feats_all = [self.pos_feats]
+        self.neg_feats_all = [self.neg_feats]
 
     def track(self, image):
         self.frame += 1
         image = Image.fromarray(image)
 
         # Estimate target bbox
-        samples = self.sample_generator(self.target_bbox, self.opts["n_samples"])
-        sample_scores = forward_samples(self.model, image, samples, out_layer="fc6")
+        self.samples = self.sample_generator(self.target_bbox, self.opts["n_samples"])
+        self.sample_scores = forward_samples(
+            self.model, image, self.samples, out_layer="fc6"
+        )
 
-        top_scores, top_idx = sample_scores[:, 1].topk(5)
-        top_idx = top_idx.cpu()
-        target_score = top_scores.mean()
-        self.target_bbox = samples[top_idx]
-        if top_idx.shape[0] > 1:
+        self.top_scores, self.top_idx = self.sample_scores[:, 1].topk(5)
+        self.top_idx = self.top_idx.cpu()
+        self.target_score = self.top_scores.mean()
+        self.target_bbox = self.samples[self.top_idx]
+        if self.top_idx.shape[0] > 1:
             self.target_bbox = self.target_bbox.mean(axis=0)
-        success = target_score > 0
+        self.success = self.target_score > 0
 
         # Expand search area at failure
-        if success:
+        if self.success:
             self.sample_generator.set_trans(self.opts["trans"])
         else:
             self.sample_generator.expand_trans(self.opts["trans_limit"])
 
         # Bbox regression
-        if success:
-            bbreg_samples = samples[top_idx]
-            if top_idx.shape[0] == 1:
-                bbreg_samples = bbreg_samples[None, :]
-            bbreg_feats = forward_samples(self.model, image, bbreg_samples)
-            bbreg_samples = self.bbreg.predict(bbreg_feats, bbreg_samples)
-            bbreg_bbox = bbreg_samples.mean(axis=0)
+        if self.success:
+            self.bbreg_samples = self.samples[self.top_idx]
+            if self.top_idx.shape[0] == 1:
+                self.bbreg_samples = self.bbreg_samples[None, :]
+            self.bbreg_feats = forward_samples(self.model, image, self.bbreg_samples)
+            self.bbreg_samples = self.bbreg.predict(
+                self.bbreg_feats, self.bbreg_samples
+            )
+            self.bbreg_bbox = self.bbreg_samples.mean(axis=0)
         else:
-            bbreg_bbox = self.target_bbox
+            self.bbreg_bbox = self.target_bbox
 
         # Data collect
-        if success:
-            pos_examples = self.pos_generator(
+        if self.success:
+            self.pos_examples = self.pos_generator(
                 self.target_bbox,
                 self.opts["n_pos_update"],
                 self.opts["overlap_pos_update"],
             )
-            pos_feats = forward_samples(self.model, image, pos_examples)
-            self.pos_feats_all.append(pos_feats)
+            self.pos_feats = forward_samples(self.model, image, self.pos_examples)
+            self.pos_feats_all.append(self.pos_feats)
             if len(self.pos_feats_all) > self.opts["n_frames_long"]:
                 del self.pos_feats_all[0]
 
-            neg_examples = self.neg_generator(
+            self.neg_examples = self.neg_generator(
                 self.target_bbox,
                 self.opts["n_neg_update"],
                 self.opts["overlap_neg_update"],
             )
-            neg_feats = forward_samples(self.model, image, neg_examples)
-            self.neg_feats_all.append(neg_feats)
+            self.neg_feats = forward_samples(self.model, image, self.neg_examples)
+            self.neg_feats_all.append(self.neg_feats)
             if len(self.neg_feats_all) > self.opts["n_frames_short"]:
                 del self.neg_feats_all[0]
 
         # Short term update
-        if not success:
-            nframes = min(self.opts["n_frames_short"], len(self.pos_feats_all))
-            pos_data = torch.cat(self.pos_feats_all[-nframes:], 0)
-            neg_data = torch.cat(self.neg_feats_all, 0)
+        if not self.success:
+            self.nframes = min(self.opts["n_frames_short"], len(self.pos_feats_all))
+            self.pos_data = torch.cat(self.pos_feats_all[-self.nframes :], 0)
+            self.neg_data = torch.cat(self.neg_feats_all, 0)
             train(
                 self.model,
                 None,
                 self.criterion,
                 self.update_optimizer,
-                pos_data,
-                neg_data,
+                self.pos_data,
+                self.neg_data,
                 self.opts["maxiter_update"],
             )
 
         # Long term update
         elif self.frame % self.opts["long_interval"] == 0:
-            pos_data = torch.cat(self.pos_feats_all, 0)
-            neg_data = torch.cat(self.neg_feats_all, 0)
+            self.pos_data = torch.cat(self.pos_feats_all, 0)
+            self.neg_data = torch.cat(self.neg_feats_all, 0)
             train(
                 self.model,
                 self.model_g,
                 self.criterion,
                 self.update_optimizer,
-                pos_data,
-                neg_data,
+                self.pos_data,
+                self.neg_data,
                 self.opts["maxiter_update"],
             )
 
         torch.cuda.empty_cache()
 
-        return bbreg_bbox
+        return self.bbreg_bbox

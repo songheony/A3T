@@ -47,7 +47,7 @@ class OPEBenchmark:
                 results_dir = "{}/{}".format(env_settings().results_path, tracker_name)
                 base_results_path = "{}/{}".format(results_dir, seq.name)
                 results_path = "{}.txt".format(base_results_path)
-                tracker_traj = np.loadtxt(results_path, delimiter="\t", dtype=int)
+                tracker_traj = np.loadtxt(results_path, delimiter="\t")
                 n_frame = len(gt_traj)
                 success_ret_[seq.name] = success_overlap(gt_traj, tracker_traj, n_frame)
             success_ret[tracker_name] = success_ret_
@@ -69,7 +69,7 @@ class OPEBenchmark:
                 results_dir = "{}/{}".format(env_settings().results_path, tracker_name)
                 base_results_path = "{}/{}".format(results_dir, seq.name)
                 results_path = "{}.txt".format(base_results_path)
-                tracker_traj = np.loadtxt(results_path, delimiter="\t", dtype=int)
+                tracker_traj = np.loadtxt(results_path, delimiter="\t")
                 n_frame = len(gt_traj)
                 gt_center = self.convert_bb_to_center(gt_traj)
                 tracker_center = self.convert_bb_to_center(tracker_traj)
@@ -96,7 +96,7 @@ class OPEBenchmark:
                 results_dir = "{}/{}".format(env_settings().results_path, tracker_name)
                 base_results_path = "{}/{}".format(results_dir, seq.name)
                 results_path = "{}.txt".format(base_results_path)
-                tracker_traj = np.loadtxt(results_path, delimiter="\t", dtype=int)
+                tracker_traj = np.loadtxt(results_path, delimiter="\t")
                 n_frame = len(gt_traj)
                 gt_center_norm = self.convert_bb_to_norm_center(
                     gt_traj, gt_traj[:, 2:4]
