@@ -45,6 +45,30 @@ conda install pytorch torchvision cudatoolkit=[CUDA_VERSION] -c pytorch
 pip install ortools opencv-python opencv-contrib-python
 ```
 
+## How to run
+
+```sh
+git clone https://github.com/songheony/AAA-journal
+mkdir AAA-journal/external
+cd AAA-journal/external
+git clone [EXPERT_GIT]
+bash run_experts.sh
+bash run_algorithms.sh
+bash run_evaluations.sh
+```
+
+1. Clone this repository and make external directory.
+
+2. Clone experts who you want to hire.
+
+3. Run the experts.
+
+4. Run algorithms what you want. [****]
+
+5. Evaluate the trackers.
+
+[****] The code is supposed to run algorithms after running experts for test. However, it is not difficult to modify the code to do both simultaneously.
+
 ## Author
 
 👤 **Heon Song**

@@ -91,55 +91,72 @@ def run_tracker(algorithm, trackers, dataset, sequence=None, debug=0, threads=0)
     run_dataset(dataset, algorithms, trackers, debug, threads)
 
 
-if __name__ == "__main__":
-    trackers = [
-        "ATOM",
-        "BACF",
-        "CSRDCF",
-        "DaSiamRPN",
-        "ECO",
-        "MDNet",
-        "SAMF",
-        "SiamDW",
-        "SiamFC",
-        "SiamRPN",
-        "Staple",
-        "STRCF",
-        "TADT",
-        "Vital",
-    ]
+def main(algorithm_name, trackers, dataset_name):
+    if algorithm_name == "Ours":
+        from algorithms.aaa import AAA
 
-    from algorithms.aaa import AAA
+        algorithm = AAA(len(trackers))
+    elif algorithm_name == "Max":
+        from algorithms.max import Max
 
-    algorithm = AAA(len(trackers))
+        algorithm = Max(len(trackers))
+    elif algorithm_name == "Average":
+        from algorithms.average import Average
 
-    # from algorithms.max import Max
+        algorithm = Average(len(trackers))
+    elif algorithm_name == "MCCT":
+        from algorithms.mcct import MCCT
 
-    # algorithm = Max(len(trackers))
+        algorithm = MCCT(len(trackers))
+    else:
+        raise ValueError("Unknown algorithm name")
 
-    # from algorithms.average import Average
-
-    # algorithm = Average(len(trackers))
-
-    # from algorithms.mcct import MCCT
-
-    # algorithm = MCCT(len(trackers))
-
-    dataset_name = "otb"
-
-    if dataset_name == "otb":
+    if dataset_name == "OTB":
         dataset = OTBDataset()
-    elif dataset_name == "nfs":
+    elif dataset_name == "NFS":
         dataset = NFSDataset()
-    elif dataset_name == "uav":
+    elif dataset_name == "UAV":
         dataset = UAVDataset()
-    elif dataset_name == "tpl":
+    elif dataset_name == "TPL":
         dataset = TPLDataset()
-    elif dataset_name == "vot":
+    elif dataset_name == "VOT":
         dataset = VOTDataset()
-    elif dataset_name == "lasot":
+    elif dataset_name == "LaSOT":
         dataset = LaSOTDataset()
     else:
         raise ValueError("Unknown dataset name")
 
     run_tracker(algorithm, trackers, dataset)
+
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-a", "--algorithm", default="Ours", type=str, help="algorithm")
+    parser.add_argument("-e", "--experts", default=[], nargs="+", help="experts")
+    parser.add_argument("-d", "--dataset", default="OTB", type=str, help="dataset")
+    args = parser.parse_args()
+
+    if len(args.experts) == 0:
+        trackers = [
+            "ATOM",
+            "BACF",
+            "CSRDCF",
+            "DaSiamRPN",
+            "ECO",
+            "ECO_new",
+            "MDNet",
+            "SAMF",
+            "SiamDW",
+            "SiamFC",
+            "SiamRPN",
+            "Staple",
+            "STRCF",
+            "TADT",
+            "Vital",
+        ]
+    else:
+        trackers = args.experts
+
+    main(args.algorithm, trackers, args.dataset)
