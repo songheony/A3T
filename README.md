@@ -4,9 +4,9 @@
 
 * [ATOM](https://arxiv.org/abs/1811.07628)[<https://github.com/visionml/pytracking>]
 * [CSRDCF](https://arxiv.org/abs/1611.08461)[<https://github.com/wwdguu/pyCFTrackers>]
-* [DaSiamRPN](https://arxiv.org/abs/1808.06048)[<https://github.com/foolwood/DaSiamRPN>,<https://github.com/songheony/DaSiamRPN>][*]
-* [ECO](https://arxiv.org/abs/1611.09224)[<https://github.com/visionml/pytracking>][**]
-* [MDNet](https://arxiv.org/abs/1510.07945)[<https://github.com/hyeonseobnam/py-MDNet.git>][***]
+* [DaSiamRPN](https://arxiv.org/abs/1808.06048)[<https://github.com/foolwood/DaSiamRPN>,<https://github.com/songheony/DaSiamRPN>]^[1]^
+* [ECO](https://arxiv.org/abs/1611.09224)[<https://github.com/visionml/pytracking>]^[2]^
+* [MDNet](https://arxiv.org/abs/1510.07945)[<https://github.com/hyeonseobnam/py-MDNet.git>]^[3]^
 * [SAMF](https://link.springer.com/chapter/10.1007/978-3-319-16181-5_18)[<https://github.com/wwdguu/pyCFTrackers>]
 * [SiamDW](https://arxiv.org/abs/1901.01660)[<https://github.com/researchmm/SiamDW>]
 * [SiamFC](https://arxiv.org/abs/1606.09549)[<https://github.com/huanglianghua/siamfc-pytorch>]
@@ -17,9 +17,9 @@
 * [TADT](https://arxiv.org/abs/1904.01772)[<https://github.com/ZikunZhou/TADT-python>]
 * [Vital](https://arxiv.org/abs/1804.04273)[<https://github.com/abnerwang/py-Vital.git>]
 
-[*] Since the original code of DaSiamRPN is for Python2, We had to modify the code a little bit to be compatible with Python3.  
-[**] The author's new ECO is used. You still can use previous ECO with ECO_prev.  
-[***] The version of scipy should be under 1.1.0 because MDNet need to use imresize function.
+[1] Since the original code of DaSiamRPN is for Python2, We had to modify the code a little bit to be compatible with Python3.  
+[2] The author's new ECO is used. You still can use previous ECO with ECO_prev.  
+[3] The version of scipy should be under 1.1.0 because MDNet need to use imresize function.
 
 ## Datasets
 
@@ -27,10 +27,10 @@
 * [NFS](https://arxiv.org/abs/1703.05884)[<http://ci2cv.net/nfs/index.html>]
 * [UAV123](https://ivul.kaust.edu.sa/Pages/pub-benchmark-simulator-uav.aspx)[<https://uav123.org/>]
 * [TColor128](https://ieeexplore.ieee.org/document/7277070)[<http://www.dabi.temple.edu/~hbling/data/TColor-128/TColor-128.html>]
-* [VOT2018](https://link.springer.com/chapter/10.1007/978-3-030-11009-3_1)[<http://www.votchallenge.net/>][*]
+* [VOT2018](https://link.springer.com/chapter/10.1007/978-3-030-11009-3_1)[<http://www.votchallenge.net/>]^[4]^
 * [LaSOT](https://arxiv.org/abs/1809.07845)[<https://cis.temple.edu/lasot/download.html>]
 
-[*] VOT2018 is evaluated in unsupervised experiment as same as other datasets.
+[4] VOT2018 is evaluated in unsupervised experiment as same as other datasets.
 
 ## Frameworks
 
@@ -63,11 +63,11 @@ bash run_evaluations.sh
 
 3. Run the experts.
 
-4. Run algorithms what you want. [*]
+4. Run algorithms what you want.^[5]^
 
 5. Evaluate the trackers.
 
-[*] The code is supposed to run algorithms after running experts for test. However, it is not difficult to modify the code to do both simultaneously.
+[5] The code is supposed to run algorithms after running experts for test. However, it is not difficult to modify the code to do both simultaneously.
 
 ## Author
 
