@@ -18,7 +18,7 @@
 * TADT[<https://github.com/ZikunZhou/TADT-python>]
 * Vital[<https://github.com/abnerwang/py-Vital.git>]
 
-[*] Since original code of DaSiamRPN is for Python2, I had to modify the code a little bit to be compatible with Python3.
+[*] Since original code of DaSiamRPN is for Python2, I had to modify the code a little bit to be compatible with Python3.  
 [**] The version of scipy should be under 1.1.0 because MDNet need to use imresize function.
 
 ## Datasets
