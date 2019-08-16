@@ -4,9 +4,9 @@
 
 * [ATOM](https://arxiv.org/abs/1811.07628)[<https://github.com/visionml/pytracking>]
 * [CSRDCF](https://arxiv.org/abs/1611.08461)[<https://github.com/wwdguu/pyCFTrackers>]
-* [DaSiamRPN](https://arxiv.org/abs/1808.06048)[<https://github.com/foolwood/DaSiamRPN>,<https://github.com/songheony/DaSiamRPN>]^[1]^
-* [ECO](https://arxiv.org/abs/1611.09224)[<https://github.com/visionml/pytracking>]^[2]^
-* [MDNet](https://arxiv.org/abs/1510.07945)[<https://github.com/hyeonseobnam/py-MDNet.git>]^[3]^
+* [DaSiamRPN](https://arxiv.org/abs/1808.06048)[<https://github.com/foolwood/DaSiamRPN>,<https://github.com/songheony/DaSiamRPN>]<sup>[1]</sup>
+* [ECO](https://arxiv.org/abs/1611.09224)[<https://github.com/visionml/pytracking>]<sup>[2]</sup>
+* [MDNet](https://arxiv.org/abs/1510.07945)[<https://github.com/hyeonseobnam/py-MDNet.git>]<sup>[3]</sup>
 * [SAMF](https://link.springer.com/chapter/10.1007/978-3-319-16181-5_18)[<https://github.com/wwdguu/pyCFTrackers>]
 * [SiamDW](https://arxiv.org/abs/1901.01660)[<https://github.com/researchmm/SiamDW>]
 * [SiamFC](https://arxiv.org/abs/1606.09549)[<https://github.com/huanglianghua/siamfc-pytorch>]
@@ -27,7 +27,7 @@
 * [NFS](https://arxiv.org/abs/1703.05884)[<http://ci2cv.net/nfs/index.html>]
 * [UAV123](https://ivul.kaust.edu.sa/Pages/pub-benchmark-simulator-uav.aspx)[<https://uav123.org/>]
 * [TColor128](https://ieeexplore.ieee.org/document/7277070)[<http://www.dabi.temple.edu/~hbling/data/TColor-128/TColor-128.html>]
-* [VOT2018](https://link.springer.com/chapter/10.1007/978-3-030-11009-3_1)[<http://www.votchallenge.net/>]^[4]^
+* [VOT2018](https://link.springer.com/chapter/10.1007/978-3-030-11009-3_1)[<http://www.votchallenge.net/>]<sup>[4]</sup>
 * [LaSOT](https://arxiv.org/abs/1809.07845)[<https://cis.temple.edu/lasot/download.html>]
 
 [4] VOT2018 is evaluated in unsupervised experiment as same as other datasets.
@@ -63,7 +63,7 @@ bash run_evaluations.sh
 
 3. Run the experts.
 
-4. Run algorithms what you want.^[5]^
+4. Run algorithms what you want.<sup>[5]</sup>
 
 5. Evaluate the trackers.
 
