@@ -12,8 +12,9 @@ from pysot.tracker.tracker_builder import build_tracker
 class SiamRPNPP(Expert):
     def __init__(self):
         super(SiamRPNPP, self).__init__("SiamRPN++")
-        config = "experiments/siamrpn_r50_l234_dwxcorr_otb/config.yaml"
-        snapshot = "experiments/siamrpn_r50_l234_dwxcorr_otb/model.pth"
+        # TODO: edit this path
+        config = "/home/heonsong/Desktop/AAA/AAA-journal/external/pysot/experiments/siamrpn_r50_l234_dwxcorr_otb/config.yaml"
+        snapshot = "/home/heonsong/Desktop/AAA/AAA-journal/external/pysot/experiments/siamrpn_r50_l234_dwxcorr_otb/model.pth"
 
         # load config
         cfg.merge_from_file(config)
@@ -38,5 +39,5 @@ class SiamRPNPP(Expert):
 
     def track(self, image):
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-        bbox = self.tracker.track(self.image)
+        bbox = self.tracker.track(image)['bbox']
         return bbox
