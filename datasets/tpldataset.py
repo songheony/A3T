@@ -135,12 +135,12 @@ class TPLDatasetClass(BaseDataset):
             },
             {
                 "name": "tpl_Yo_yos_ce3",
-                "path": "Yo_yos_ce3/img",
+                "path": "Yo-yos_ce3/img",
                 "startFrame": 1,
                 "endFrame": 201,
                 "nz": 4,
                 "ext": "jpg",
-                "anno_path": "Yo_yos_ce3/Yo-yos_ce3_gt.txt",
+                "anno_path": "Yo-yos_ce3/Yo-yos_ce3_gt.txt",
             },
             {
                 "name": "tpl_Board",
@@ -171,12 +171,12 @@ class TPLDatasetClass(BaseDataset):
             },
             {
                 "name": "tpl_Yo_yos_ce1",
-                "path": "Yo_yos_ce1/img",
+                "path": "Yo-yos_ce1/img",
                 "startFrame": 1,
                 "endFrame": 235,
                 "nz": 4,
                 "ext": "jpg",
-                "anno_path": "Yo_yos_ce1/Yo-yos_ce1_gt.txt",
+                "anno_path": "Yo-yos_ce1/Yo-yos_ce1_gt.txt",
             },
             {
                 "name": "tpl_Soccer",
@@ -558,12 +558,12 @@ class TPLDatasetClass(BaseDataset):
             },
             {
                 "name": "tpl_Yo_yos_ce2",
-                "path": "Yo_yos_ce2/img",
+                "path": "Yo-yos_ce2/img",
                 "startFrame": 1,
                 "endFrame": 454,
                 "nz": 4,
                 "ext": "jpg",
-                "anno_path": "Yo_yos_ce2/Yo-yos_ce2_gt.txt",
+                "anno_path": "Yo-yos_ce2/Yo-yos_ce2_gt.txt",
             },
             {
                 "name": "tpl_Ironman",
