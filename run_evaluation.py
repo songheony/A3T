@@ -44,7 +44,6 @@ if __name__ == "__main__":
             "DaSiamRPN",
             "ECO",
             "MDNet",
-            "SAMF",
             "SiamDW",
             "SiamFC",
             "SiamRPN",

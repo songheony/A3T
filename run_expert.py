@@ -108,10 +108,6 @@ def main(tracker_name, dataset_name):
         from experts.mdnet import MDnet
 
         tracker = MDnet()
-    elif tracker_name == "SAMF":
-        from experts.samf import SAMF
-
-        tracker = SAMF()
     elif tracker_name == "SiamDW":
         from experts.siamdw import SiamDW
 
