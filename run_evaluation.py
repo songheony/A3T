@@ -40,10 +40,8 @@ if __name__ == "__main__":
     if len(args.experts) == 0:
         trackers = [
             "ATOM",
-            "CSRDCF",
             "DaSiamRPN",
             "ECO",
-            "MDNet",
             "SiamDW",
             "SiamFC",
             "SiamRPN",
@@ -51,7 +49,6 @@ if __name__ == "__main__":
             "Staple",
             "STRCF",
             "TADT",
-            "Vital",
         ]
     else:
         trackers = args.experts
