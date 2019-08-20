@@ -33,7 +33,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--experts", default=[], nargs="+", help="experts")
+    parser.add_argument("-t", "--trackers", default=[], nargs="+", help="trackers")
     parser.add_argument("-d", "--dataset", default="OTB", type=str, help="dataset")
     args = parser.parse_args()
 
@@ -49,6 +49,11 @@ if __name__ == "__main__":
             "Staple",
             "STRCF",
             "TADT",
+            "Average",
+            "Max",
+            "MCCT",
+            "AAA_similar",
+            "AAA_overlap",
         ]
     else:
         trackers = args.experts

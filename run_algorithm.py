@@ -33,12 +33,12 @@ def run_sequence(seq, algorithm, trackers, debug=False):
             print(e)
             return
 
-    tracked_bb = np.array(tracked_bb).astype(int)
+    tracked_bb = np.array(tracked_bb).astype(float)
     exec_times = np.array(exec_times).astype(float)
 
     print("FPS: {}".format(len(exec_times) / exec_times.sum()))
     if not debug:
-        np.savetxt(results_path, tracked_bb, delimiter="\t", fmt="%d")
+        np.savetxt(results_path, tracked_bb, delimiter="\t", fmt="%f")
         np.savetxt(times_path, exec_times, delimiter="\t", fmt="%f")
         with open(offline_path, "wb") as fp:
             pickle.dump(offline_bb, fp)
@@ -92,18 +92,22 @@ def run_tracker(algorithm, trackers, dataset, sequence=None, debug=0, threads=0)
 
 
 def main(algorithm_name, trackers, dataset_name):
-    if algorithm_name == "Ours":
-        from algorithms.aaa import AAA
+    if algorithm_name == "AAA_similar":
+        from algorithms.aaa_similar import AAA_similar
 
-        algorithm = AAA(len(trackers))
+        algorithm = AAA_similar(len(trackers), threshold=0.8, check_dist=True, check_feature=True, check_target=True)
+    elif algorithm_name == "AAA_overlap":
+        from algorithms.aaa_overlap import AAA_overlap
+
+        algorithm = AAA_overlap(len(trackers), threshold=0.5, check_dist=False)
     elif algorithm_name == "Max":
         from algorithms.max import Max
 
-        algorithm = Max(len(trackers))
+        algorithm = Max()
     elif algorithm_name == "Average":
         from algorithms.average import Average
 
-        algorithm = Average(len(trackers))
+        algorithm = Average()
     elif algorithm_name == "MCCT":
         from algorithms.mcct import MCCT
 
@@ -133,7 +137,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--algorithm", default="Ours", type=str, help="algorithm")
+    parser.add_argument("-a", "--algorithm", default="AAA_similar", type=str, help="algorithm")
     parser.add_argument("-e", "--experts", default=[], nargs="+", help="experts")
     parser.add_argument("-d", "--dataset", default="OTB", type=str, help="dataset")
     args = parser.parse_args()
