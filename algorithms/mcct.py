@@ -1,8 +1,11 @@
+import sys
 import numpy as np
 from .algorithm import Algorithm
-from external.pyCFTrackers.cftracker.scale_estimator import LPScaleEstimator
-from external.pyCFTrackers.cftracker.mccth_staple import cal_ious
-from external.pyCFTrackers.cftracker.config.mccth_staple_config import MCCTHOTBConfig
+
+sys.path.append("external/pyCFTrackers")
+from cftracker.scale_estimator import LPScaleEstimator
+from cftracker.mccth_staple import cal_ious
+from cftracker.config.mccth_staple_config import MCCTHOTBConfig
 
 
 class Expert:
@@ -22,7 +25,7 @@ class MCCT(Algorithm):
 
         self.n_experts = n_experts
 
-    def init(self, image, box):
+    def initialize(self, image, box):
         config = MCCTHOTBConfig()
         self.scale_adaptation = config.scale_adaptation
 
@@ -74,23 +77,23 @@ class MCCT(Algorithm):
             self.experts[i].rob_scores.append(1)
             self.experts[i].smoothes.append(0)
             self.experts[i].smooth_scores.append(1)
-            self.experts[i].centers.append([self._center[0], self._center[1]])
+            self.experts[i].centers.append((self._center[0], self._center[1]))
 
-    def update(self, image, boxes):
+    def track(self, image, boxes):
         self.frame_idx += 1
         current_frame = image
 
         for i in range(self.expert_num):
             x, y, w, h = tuple(boxes[i])
-            center = [x + w / 2, y + h / 2]
+            center = (x + w / 2, y + h / 2)
             self.experts[i].pos = center
             self.experts[i].rect_positions.append(boxes[i])
             self.experts[i].centers.append(center)
 
-            cx, cy = (self.experts[i].pos[0], self.experts[i].pos[1])
-
             pre_center = self.experts[i].centers[self.frame_idx - 1]
-            smooth = np.sqrt((cx - pre_center[0]) ** 2 + (cy - pre_center[1]) ** 2)
+            smooth = np.sqrt(
+                (center[0] - pre_center[0]) ** 2 + (center[1] - pre_center[1]) ** 2
+            )
             self.experts[i].smoothes.append(smooth)
             self.experts[i].smooth_scores.append(
                 np.exp(-smooth ** 2 / (2 * self.avg_dim ** 2))
@@ -128,12 +131,15 @@ class MCCT(Algorithm):
                 round(self.base_target_sz[1] * self.scale_factor),
             )
 
-        return [
-            self._center[0] - self.target_sz[0] / 2,
-            self._center[1] - self.target_sz[1] / 2,
-            self.target_sz[0],
-            self.target_sz[1],
-        ]
+        return (
+            [
+                self._center[0] - self.target_sz[0] / 2,
+                self._center[1] - self.target_sz[1] / 2,
+                self.target_sz[0],
+                self.target_sz[1],
+            ],
+            None,
+        )
 
     def robustness_eva(self, experts, num, frame_idx, period, weight, expert_num):
         overlap_score = np.zeros((period, expert_num))
