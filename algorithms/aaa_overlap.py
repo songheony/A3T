@@ -6,15 +6,9 @@ from .aaa import ShortestPathTracker, WAADelayed
 
 
 class AAA_overlap(Algorithm):
-    def __init__(
-        self,
-        n_experts,
-        threshold,
-        check_dist=False,
-    ):
+    def __init__(self, n_experts, threshold, check_dist=False):
         super(AAA_overlap, self).__init__(
-            "AAA_overlap_%0.2f_%s"
-            % (threshold, check_dist)
+            "AAA_overlap_%0.2f_%s" % (threshold, check_dist)
         )
 
         # Threshold for detecting anchor frame
@@ -71,8 +65,7 @@ class AAA_overlap(Algorithm):
         if anchor:
             # Add only boxes whose score is over than threshold to offline tracker
             self.offline.track(
-                [{"rect": boxes[i], "feature": None} for i in detected],
-                is_last=True,
+                [{"rect": boxes[i], "feature": None} for i in detected], is_last=True
             )
 
             # Caluclate optimal path
@@ -86,9 +79,7 @@ class AAA_overlap(Algorithm):
 
             if self.reset_offline:
                 # Reset offline tracker
-                self.offline.initialize(
-                    {"rect": boxes[final_box_id], "feature": None}
-                )
+                self.offline.initialize({"rect": boxes[final_box_id], "feature": None})
             else:
                 # Get only unevaluated frames' boxes
                 path = path[-len(self.prev_boxes) :]
@@ -114,12 +105,7 @@ class AAA_overlap(Algorithm):
         # Otherwise
         else:
             # Add all boxes to offline tracker
-            self.offline.track(
-                [
-                    {"rect": box, "feature": None}
-                    for box in boxes
-                ]
-            )
+            self.offline.track([{"rect": box, "feature": None} for box in boxes])
 
             # No offline result here
             offline_results = None
