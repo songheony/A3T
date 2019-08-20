@@ -5,7 +5,7 @@ from .utils import Extractor, cosine_similarity
 
 
 class Max(Algorithm):
-    def __init__(self, n_experts):
+    def __init__(self):
         super(Max, self).__init__("Max")
 
         # Feature extractor

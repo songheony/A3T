@@ -1,8 +1,11 @@
 import time
 import os
+import sys
 import numpy as np
 import cv2
-from external.pytracking.evaluation.environment import env_settings
+
+sys.path.append("external/pytracking")
+from pytracking.evaluation.environment import env_settings
 
 
 class Algorithm(object):
@@ -34,7 +37,7 @@ class Algorithm(object):
             results_dir = "{}/{}".format(env_settings().results_path, tracker_name)
             base_results_path = "{}/{}".format(results_dir, sequence.name)
             results_path = "{}.txt".format(base_results_path)
-            tracker_traj = np.loadtxt(results_path, delimiter="\t", dtype=int)
+            tracker_traj = np.loadtxt(results_path, delimiter="\t", dtype=float)
             boxes[n] = tracker_traj
 
         times = []
@@ -50,7 +53,7 @@ class Algorithm(object):
             image = self._read_image(frame)
 
             start_time = time.time()
-            state, offline = self.track(image, boxes[n])
+            state, offline = self.track(image, boxes[:, n, :])
             times.append(time.time() - start_time)
 
             tracked_bb.append(state)
@@ -61,7 +64,7 @@ class Algorithm(object):
     def _read_image(self, image_file: str):
         return cv2.cvtColor(cv2.imread(image_file), cv2.COLOR_BGR2RGB)
 
-    def run(self, seq):
+    def run(self, seq, trackers):
         """Run tracker on sequence.
         args:
             seq: Sequence to run the tracker on.
@@ -69,6 +72,6 @@ class Algorithm(object):
             debug: Set debug level (None means default value specified in the parameters).
         """
 
-        output_bb, offline_bb, execution_times = self.track_sequence(seq)
+        output_bb, offline_bb, execution_times = self.track_sequence(seq, trackers)
 
         return output_bb, offline_bb, execution_times
