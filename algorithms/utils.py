@@ -19,6 +19,19 @@ def calc_overlap(rect1, rect2):
     return iou
 
 
+def iou_score(boxes):
+    scores = []
+    for i, box1 in enumerate(boxes):
+        score = []
+        for j, box2 in enumerate(boxes):
+            if i == j:
+                continue
+            score.append(calc_overlap(box1, box2))
+        score = np.mean(score)
+        scores.append(score)
+    return scores
+
+
 def cosine_similarity(ft1, ft2):
     return np.dot(ft1, ft2) / (np.linalg.norm(ft1) * np.linalg.norm(ft2))
 
@@ -27,39 +40,5 @@ def calc_distance(rect1, rect2):
     center1 = rect1[:2] + rect1[2:] / 2
     center2 = rect2[:2] + rect2[2:] / 2
 
-    score = 1 / distance.euclidean(center1, center2)
-    return score if score < 1 else 1
-
-
-def calc_cost_link(
-    target,
-    info1,
-    info2,
-    check_dist=False,
-    check_feature=True,
-    check_target=False,
-    eps=1e-7,
-):
-    rect1 = info1["rect"]
-    feature1 = info1["feature"]
-    rect2 = info2["rect"]
-    feature2 = info2["feature"]
-    prob_iou = calc_overlap(rect1, rect2)
-
-    if check_dist:
-        prob_distance = calc_distance(rect1, rect2)
-    else:
-        prob_distance = 1
-
-    if check_feature:
-        prob_feature = cosine_similarity(feature1, feature2)
-    else:
-        prob_feature = 1
-
-    if check_target:
-        prob_target = cosine_similarity(target["feature"], feature2)
-    else:
-        prob_target = 1
-
-    prob_sim = prob_iou * prob_feature * prob_target * prob_distance
-    return -np.log(prob_sim + eps)
+    score = 1 / (distance.euclidean(center1, center2) + 1e-7)
+    return score if score < 1.0 else 1.0

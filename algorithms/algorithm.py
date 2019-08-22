@@ -49,17 +49,19 @@ class Algorithm(object):
         # Track
         tracked_bb = [sequence.init_state]
         offline_bb = []
+        weights = []
         for n, frame in enumerate(sequence.frames[1:]):
             image = self._read_image(frame)
 
             start_time = time.time()
-            state, offline = self.track(image, boxes[:, n, :])
+            state, offline, weight = self.track(image, boxes[:, n, :])
             times.append(time.time() - start_time)
 
             tracked_bb.append(state)
             offline_bb.append(offline)
+            weights.append(weight)
 
-        return tracked_bb, offline_bb, times
+        return tracked_bb, offline_bb, weights, times
 
     def _read_image(self, image_file: str):
         return cv2.cvtColor(cv2.imread(image_file), cv2.COLOR_BGR2RGB)
@@ -72,6 +74,8 @@ class Algorithm(object):
             debug: Set debug level (None means default value specified in the parameters).
         """
 
-        output_bb, offline_bb, execution_times = self.track_sequence(seq, trackers)
+        output_bb, offline_bb, weights, execution_times = self.track_sequence(
+            seq, trackers
+        )
 
-        return output_bb, offline_bb, execution_times
+        return output_bb, offline_bb, weights, execution_times

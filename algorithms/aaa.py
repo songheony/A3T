@@ -1,128 +1,191 @@
-import sys
-import igraph
-import numpy as np
 import torch
-from torchvision import models
-from torchvision import transforms
-import scipy.special as sc
+import numpy as np
+from PIL import Image
+from .utils import calc_overlap, iou_score
+from .algorithm import Algorithm
+from .aaa_util import FeatureExtractor, ShortestPathTracker, WAADelayed, AnchorDetector
 
 
-class WAADelayed:
-    def __init__(self):
-        pass
+class AAA(Algorithm):
+    def __init__(
+        self,
+        n_experts,
+        threshold=0.7,
+        only_max=True,
+        use_iou=True,
+        use_feature=True,
+        cost_iou=True,
+        cost_feature=True,
+        cost_score=True,
+    ):
+        super(AAA, self).__init__(
+            "AAA_%s_%s_%s_%s_%s_%s_%s"
+            % (
+                threshold,
+                only_max,
+                use_iou,
+                use_feature,
+                cost_iou,
+                cost_feature,
+                cost_score,
+            )
+        )
 
-    def init(self, n):
-        self.w = np.ones(n) / n
-        self.est_D = 1
-        self.real_D = 0
+        # Whether reset offline tracker
+        self.reset_offline = True
 
-    """
-    gradient_losses should be n * len(dt)
-    """
+        # The number of experts
+        self.n_experts = n_experts
 
-    def update(self, gradient_losses):
-        # check the number of element
-        assert gradient_losses.shape[0] == len(self.w)
+        # Anchor extractor
+        self.detector = AnchorDetector(
+            threshold,
+            only_max=True,
+            use_iou=True,
+            use_feature=True,
+            cost_iou=True,
+            cost_feature=True,
+            cost_score=True,
+        )
 
-        for i in range(1, gradient_losses.shape[1] + 1):
-            self.real_D += i
-            if self.est_D < self.real_D:
-                self.est_D *= 2
+        # Feature extractor
+        use_cuda = torch.cuda.is_available()
+        device = torch.device("cuda" if use_cuda else "cpu")
+        self.extractor = FeatureExtractor(device)
 
-        lr = np.sqrt(self.est_D * np.log(len(self.w)))
+        # Offline tracker
+        self.offline = ShortestPathTracker(self.detector.cost_function)
 
-        changes = lr * gradient_losses.sum(axis=1)
-        temp = np.log(self.w + sys.float_info.min) - changes
-        self.w = np.exp(temp - sc.logsumexp(temp))
+        # Online learner
+        self.learner = WAADelayed()
 
+    def initialize(self, image, box):
+        image = Image.fromarray(image)
 
-class ShortestPathTracker:
-    """
-        Object tracking based on data association via minimum cost flow algorithm
-        L. Zhang et al.,
-        "Global data association for multi-object tracking using network flows",
-        CVPR 2008
-    """
+        # Previous boxes of experts
+        self.prev_boxes = []
 
-    def __init__(self, cost_link):
-        self._cost_link = cost_link
+        # Extract target image
+        if self.detector.use_feature:
+            self.target_feature = self.extractor.extract(image, [box])[0]
+        else:
+            self.target_feature = None
 
-    def initialize(self, detection):
-        self.frame_id = -1
-        self.edges = []
-        if len(self.edges) == 0:
-            self.edges.append(("source", str((self.frame_id, 0)), 0))
-        self.prev_detections = [detection]
+        # Init detector with target feature
+        self.detector.init(self.target_feature)
 
-    def track(self, detections, f2i_factor=10000, is_last=False):
-        self.frame_id += 1
+        # Init offline tracker with target feature
+        self.offline.initialize(
+            {"rect": box, "feature": self.target_feature, "iou_score": 1}
+        )
 
-        prev_frame_id = self.frame_id - 1
-        for i, i_info in enumerate(self.prev_detections):
-            for j, j_info in enumerate(detections):
-                self.edges.append(
-                    (
-                        str((prev_frame_id, i)),
-                        str((self.frame_id, j)),
-                        int(self._cost_link(i_info, j_info) * f2i_factor),
-                    )
+        # Init online learner
+        self.learner.init(self.n_experts)
+
+    def track(self, image, boxes):
+        image = Image.fromarray(image)
+
+        # Save box of experts
+        self.prev_boxes.append(boxes)
+
+        # Extract scores from boxes
+        if self.detector.use_iou:
+            iou_scores = iou_score(boxes)
+        else:
+            iou_scores = [0] * self.n_experts
+
+        # Extract features from boxes
+        if self.detector.use_feature or self.detector.cost_feature:
+            features = self.extractor.extract(image, boxes)
+        else:
+            features = [None] * self.n_experts
+
+        # Detect if it is anchor frame
+        detected = self.detector.detect(iou_scores, features)
+        anchor = len(detected) > 0
+
+        # If it is anchor frame,
+        if anchor:
+            # Add only boxes whose score is over than threshold to offline tracker
+            self.offline.track(
+                [
+                    {
+                        "rect": boxes[i],
+                        "feature": features[i],
+                        "iou_score": iou_scores[i],
+                    }
+                    for i in detected
+                ],
+                is_last=True,
+            )
+
+            # Caluclate optimal path
+            path = self.offline.run()
+
+            # Get the last box's id
+            final_box_id = detected[path[-1][1]]
+
+            # Add final box and cut first box properly
+            path = path[1:-1] + [(path[-1][0], final_box_id)]
+
+            if self.reset_offline:
+                # Reset offline tracker
+                self.offline.initialize(
+                    {
+                        "rect": boxes[final_box_id],
+                        "feature": features[final_box_id],
+                        "iou_score": 1,
+                    }
                 )
-        if is_last:
-            for i in range(len(detections)):
-                self.last_edges = self.edges[:]
-                self.last_edges.append((str((self.frame_id, i)), "sink", 0))
-        self.prev_detections = detections
+            else:
+                # Get only unevaluated frames' boxes
+                path = path[-len(self.prev_boxes) :]
 
-    def run(self):
-        g = igraph.Graph.TupleList(self.last_edges, weights=True, directed=True)
-        path = g.get_shortest_paths(
-            "source", to="sink", weights="weight", mode=igraph.OUT, output="vpath"
-        )
-        ids = []
-        for i in path[0][1:-1]:
-            ids.append(tuple(int(s) for s in g.vs[i]["name"].strip("()").split(",")))
-        return ids
+            # Get offline tracking results
+            self.prev_boxes = np.array(self.prev_boxes)
+            offline_results = np.array(
+                [self.prev_boxes[(frame, ind[1])] for frame, ind in enumerate(path)]
+            )
 
+            # Calc losses of experts
+            gradient_losses = self._calc_expert_losses(offline_results)
 
-class Extractor:
-    def __init__(self, device):
-        self.model = models.resnet18(pretrained=True).to(device)
-        self.model.eval()
-        self.extractor = self.model._modules.get("avgpool")
-        self.transform = transforms.Compose(
-            [
-                transforms.Scale((224, 224)),
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
-                ),
-            ]
-        )
+            # Update weight of experts
+            self.learner.update(gradient_losses)
 
-    def extract(self, image, bboxes):
-        features = []
-        croped_images = []
-        for bbox in bboxes:
-            max_x = min(image.size[0], bbox[0] + bbox[2])
-            max_y = min(image.size[1], bbox[1] + bbox[3])
-            min_x = max(0, bbox[0])
-            min_y = max(0, bbox[1])
-            croped_image = self.transform(image.crop((min_x, min_y, max_x, max_y)))
-            croped_images.append(croped_image)
-        croped_images = torch.stack(croped_images)
-        features = self._get_vector(croped_images)
-        features = features.data.cpu().numpy()
-        return features
+            # Clean previous boxes
+            self.prev_boxes = []
 
-    def _get_vector(self, x):
-        x = x.cuda()
-        embedding = torch.zeros((x.shape[0], 512))
+            # Return last box of offline results
+            predict = boxes[final_box_id]
 
-        def copy_data(m, i, o):
-            embedding.copy_(o.data.view(x.shape[0], -1).data)
+        # Otherwise
+        else:
+            # Add all boxes to offline tracker
+            self.offline.track(
+                [
+                    {"rect": box, "feature": feature, "iou_score": score}
+                    for box, feature, score in zip(boxes, features, iou_scores)
+                ]
+            )
 
-        h = self.extractor.register_forward_hook(copy_data)
-        self.model(x)
-        h.remove()
+            # No offline result here
+            offline_results = None
 
-        return embedding
+            # Return box with aggrogating experts' box
+            predict = np.dot(self.learner.w, boxes)
+
+        return predict, offline_results, self.learner.w
+
+    def _calc_expert_losses(self, offline_results):
+        """
+        offline_results = #frames X 4
+        """
+
+        expert_gradient_losses = np.zeros((self.n_experts, len(offline_results)))
+
+        for i in range(self.n_experts):
+            expert_results = self.prev_boxes[:, i, :]
+            expert_gradient_losses[i] = calc_overlap(expert_results, offline_results)
+
+        return expert_gradient_losses

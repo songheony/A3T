@@ -43,7 +43,7 @@
 ```sh
 conda create -n [ENV_NAME] python=[PYTHON_VERSION>=3.6]
 conda install pytorch torchvision cudatoolkit=[CUDA_VERSION] -c pytorch
-pip install ortools opencv-python opencv-contrib-python
+pip install python-igraph opencv-python opencv-contrib-python
 ```
 
 ## How to run
@@ -53,9 +53,9 @@ git clone https://github.com/songheony/AAA-journal
 mkdir AAA-journal/external
 cd AAA-journal/external
 git clone [EXPERT_GIT]
+conda activate [ENV_NAME]
 bash run_experts.sh
-bash run_algorithms.sh
-bash run_evaluations.sh
+python run_algorithm.py
 ```
 
 1. Clone this repository and make external directory.

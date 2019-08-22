@@ -7,7 +7,7 @@ from datasets.lasotdataset import LaSOTDataset
 from evaluations.ope_benchmark import OPEBenchmark
 
 
-def main(trackers, dataset_name):
+def main(trackers, algorithms, dataset_name):
     if dataset_name == "OTB":
         dataset = OTBDataset()
     elif dataset_name == "NFS":
@@ -28,34 +28,37 @@ def main(trackers, dataset_name):
     precision = benchmark.eval_precision(trackers)
     benchmark.show_result(success, precision)
 
+    success_anchor, anchor_ratio = benchmark.eval_success_anchor(algorithms)
+    precision_anchor = benchmark.eval_precision_anchor(algorithms)
+    benchmark.show_result_anchor(
+        success_anchor, precision_anchor, anchor_ratio=anchor_ratio
+    )
+
 
 if __name__ == "__main__":
-    import argparse
+    trackers = [
+        "ATOM",
+        "DaSiamRPN",
+        "ECO",
+        "SiamDW",
+        "SiamFC",
+        "SiamRPN",
+        "SiamRPN++",
+        "Staple",
+        "STRCF",
+        "TADT",
+        "Average",
+        "MCCT",
+    ]
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-t", "--trackers", default=[], nargs="+", help="trackers")
-    parser.add_argument("-d", "--dataset", default="OTB", type=str, help="dataset")
-    args = parser.parse_args()
+    thresholds = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
-    if len(args.experts) == 0:
-        trackers = [
-            "ATOM",
-            "DaSiamRPN",
-            "ECO",
-            "SiamDW",
-            "SiamFC",
-            "SiamRPN",
-            "SiamRPN++",
-            "Staple",
-            "STRCF",
-            "TADT",
-            "Average",
-            "Max",
-            "MCCT",
-            "AAA_similar",
-            "AAA_overlap",
-        ]
-    else:
-        trackers = args.experts
+    baselines = (
+        ["Overlap_%s" % threshold for threshold in thresholds]
+        + ["Similar_%s" % threshold for threshold in thresholds]
+        + ["Both_%s" % threshold for threshold in thresholds]
+    )
 
-    main(trackers, args.dataset)
+    dataset = "OTB"
+
+    main(trackers, baselines, dataset)
