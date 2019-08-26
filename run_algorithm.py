@@ -11,7 +11,7 @@ from datasets.nfsdataset import NFSDataset
 from datasets.lasotdataset import LaSOTDataset
 
 
-def run_sequence(seq, algorithm, trackers, debug=False):
+def run_sequence(seq, algorithm, experts, debug=False):
     """Runs a tracker on a sequence."""
 
     base_results_path = "{}/{}".format(algorithm.results_dir, seq.name)
@@ -20,16 +20,16 @@ def run_sequence(seq, algorithm, trackers, debug=False):
     weights_path = "{}_weight.txt".format(base_results_path)
     offline_path = "{}_offline.pkl".format(base_results_path)
 
-    if os.path.isfile(results_path) and not debug:
+    if os.path.isfile(results_path):
         return
 
     print("Tracker: {},  Sequence: {}".format(algorithm.name, seq.name))
 
     if debug:
-        tracked_bb, offline_bb, weights, exec_times = algorithm.run(seq, trackers)
+        tracked_bb, offline_bb, weights, exec_times = algorithm.run(seq, experts)
     else:
         try:
-            tracked_bb, offline_bb, weights, exec_times = algorithm.run(seq, trackers)
+            tracked_bb, offline_bb, weights, exec_times = algorithm.run(seq, experts)
         except Exception as e:
             print(e)
             return
@@ -51,11 +51,11 @@ def run_sequence(seq, algorithm, trackers, debug=False):
             pickle.dump(offline_bb, fp)
 
 
-def run_dataset(dataset, algorithms, trackers, debug=False, threads=0):
-    """Runs a list of trackers on a dataset.
+def run_dataset(dataset, algorithms, experts, debug=False, threads=0):
+    """Runs a list of experts on a dataset.
     args:
         dataset: List of Sequence instances, forming a dataset.
-        trackers: List of Tracker instances.
+        experts: List of Tracker instances.
         debug: Debug level.
         threads: Number of threads to use (default 0).
     """
@@ -67,10 +67,10 @@ def run_dataset(dataset, algorithms, trackers, debug=False, threads=0):
     if mode == "sequential":
         for seq in dataset:
             for algorithm_info in algorithms:
-                run_sequence(seq, algorithm_info, trackers, debug=debug)
+                run_sequence(seq, algorithm_info, experts, debug=debug)
     elif mode == "parallel":
         param_list = [
-            (seq, algorithm_info, trackers, debug)
+            (seq, algorithm_info, experts, debug)
             for seq, algorithm_info in product(dataset, algorithms)
         ]
         with multiprocessing.Pool(processes=threads) as pool:
@@ -78,7 +78,7 @@ def run_dataset(dataset, algorithms, trackers, debug=False, threads=0):
     print("Done")
 
 
-def run_tracker(algorithm, trackers, dataset, sequence=None, debug=0, threads=0):
+def run_tracker(algorithm, experts, dataset, sequence=None, debug=0, threads=0):
     """Run tracker on sequence or dataset.
     args:
         tracker_name: Name of tracking method.
@@ -95,11 +95,11 @@ def run_tracker(algorithm, trackers, dataset, sequence=None, debug=0, threads=0)
 
     algorithms = [algorithm]
 
-    run_dataset(dataset, algorithms, trackers, debug, threads)
+    run_dataset(dataset, algorithms, experts, debug, threads)
 
 
-def main(algorithm_name, trackers, dataset_name, **kargs):
-    n_experts = len(trackers)
+def main(algorithm_name, experts, dataset_name, **kargs):
+    n_experts = len(experts)
     if algorithm_name == "AAA":
         from algorithms.aaa import AAA
 
@@ -160,15 +160,28 @@ def main(algorithm_name, trackers, dataset_name, **kargs):
     else:
         raise ValueError("Unknown dataset name")
 
-    run_tracker(algorithm, trackers, dataset, debug=0)
+    run_tracker(algorithm, experts, dataset, debug=0)
 
 
 if __name__ == "__main__":
     import argparse
 
+    experts = [
+        "ATOM",
+        "DaSiamRPN",
+        "ECO",
+        "SiamDW",
+        "SiamFC",
+        "SiamRPN",
+        "SiamRPN++",
+        "Staple",
+        "STRCF",
+        "TADT",
+    ]
+
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--algorithm", default="Both", type=str)
-    parser.add_argument("-e", "--experts", default=[], nargs="+")
+    parser.add_argument("-e", "--experts", default=experts, nargs="+")
     parser.add_argument("-d", "--dataset", default="OTB", type=str)
     parser.add_argument("-t", "--threshold", default=0.0, type=float)
     parser.add_argument("-m", "--only_max", action="store_true")
@@ -179,31 +192,24 @@ if __name__ == "__main__":
     parser.add_argument("-z", "--cost_score", action="store_true")
     args = parser.parse_args()
 
-    if len(args.experts) == 0:
-        trackers = [
-            "ATOM",
-            "DaSiamRPN",
-            "ECO",
-            "SiamDW",
-            "SiamFC",
-            "SiamRPN",
-            "SiamRPN++",
-            "Staple",
-            "STRCF",
-            "TADT",
-        ]
-    else:
-        trackers = args.experts
+    only_max = True
+    use_iou = True
+    use_feature = True
+    cost_iou = True
+    cost_feature = True
+    cost_score = True
+    thresholds = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
-    main(
-        args.algorithm,
-        trackers,
-        args.dataset,
-        threshold=args.threshold,
-        only_max=args.only_max,
-        use_iou=args.use_iou,
-        use_feature=args.use_feature,
-        cost_iou=args.cost_iou,
-        cost_feature=args.cost_feature,
-        cost_score=args.cost_score,
-    )
+    for threshold in thresholds:
+        main(
+            args.algorithm,
+            args.experts,
+            args.dataset,
+            threshold=threshold,
+            only_max=only_max,
+            use_iou=use_iou,
+            use_feature=use_feature,
+            cost_iou=cost_iou,
+            cost_feature=cost_feature,
+            cost_score=cost_score,
+        )

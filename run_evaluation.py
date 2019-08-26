@@ -24,9 +24,9 @@ def main(trackers, algorithms, dataset_name):
         raise ValueError("Unknown dataset name")
 
     benchmark = OPEBenchmark(dataset)
-    success = benchmark.eval_success(trackers)
-    precision = benchmark.eval_precision(trackers)
-    benchmark.show_result(success, precision)
+    # success = benchmark.eval_success(trackers)
+    # precision = benchmark.eval_precision(trackers)
+    # benchmark.show_result(success, precision)
 
     success_anchor, anchor_ratio = benchmark.eval_success_anchor(algorithms)
     precision_anchor = benchmark.eval_precision_anchor(algorithms)
@@ -51,12 +51,14 @@ if __name__ == "__main__":
         "MCCT",
     ]
 
-    thresholds = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    trackers += ["AAA_%s_True_True_True_True_True_True" % x for x in [0.2, 0.3]]
+
+    thresholds = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9][::-1]
 
     baselines = (
         ["Overlap_%s" % threshold for threshold in thresholds]
-        + ["Similar_%s" % threshold for threshold in thresholds]
-        + ["Both_%s" % threshold for threshold in thresholds]
+        # + ["Both_%s" % threshold for threshold in thresholds]
+        # + ["Similar_%s" % threshold for threshold in thresholds]
     )
 
     dataset = "OTB"

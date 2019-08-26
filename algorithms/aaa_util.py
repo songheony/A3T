@@ -5,7 +5,55 @@ import torch
 from torchvision import models
 from torchvision import transforms
 import scipy.special as sc
-from .utils import calc_overlap, cosine_similarity
+
+
+iou_factor = 1
+feature_factor = 1
+
+
+def calc_overlap(rect1, rect2):
+    if rect1.ndim == 1:
+        rect1 = rect1[None, :]
+    if rect2.ndim == 1:
+        rect2 = rect2[None, :]
+
+    left = np.maximum(rect1[:, 0], rect2[:, 0])
+    left_min = np.minimum(rect1[:, 0], rect2[:, 0])
+    right = np.minimum(rect1[:, 0] + rect1[:, 2], rect2[:, 0] + rect2[:, 2])
+    right_max = np.maximum(rect1[:, 0] + rect1[:, 2], rect2[:, 0] + rect2[:, 2])
+    top = np.maximum(rect1[:, 1], rect2[:, 1])
+    top_min = np.minimum(rect1[:, 1], rect2[:, 1])
+    bottom = np.minimum(rect1[:, 1] + rect1[:, 3], rect2[:, 1] + rect2[:, 3])
+    bottom_max = np.maximum(rect1[:, 1] + rect1[:, 3], rect2[:, 1] + rect2[:, 3])
+
+    intersect = np.maximum(0, right - left) * np.maximum(0, bottom - top)
+    union = rect1[:, 2] * rect1[:, 3] + rect2[:, 2] * rect2[:, 3] - intersect
+    iou = np.clip(intersect / union, 0, 1)
+    closure = np.maximum(0, right_max - left_min) * np.maximum(0, bottom_max - top_min)
+    g_iou = iou - (closure - union) / closure
+    g_iou = (1 + g_iou) / 2
+    return g_iou
+
+
+def calc_iou_score(boxes):
+    scores = []
+    for i, box1 in enumerate(boxes):
+        score = []
+        for j, box2 in enumerate(boxes):
+            if i == j:
+                continue
+            score.append(calc_overlap(box1, box2))
+        score = np.mean(score)
+        scores.append(score)
+    return scores
+
+
+def calc_similarity(ft1, ft2):
+    dot_product = np.dot(ft1, ft2)
+    norm_ft1 = np.linalg.norm(ft1)
+    norm_ft2 = np.linalg.norm(ft2)
+    sim = dot_product / (norm_ft1 * norm_ft2)
+    return (1 + sim) / 2
 
 
 class AnchorDetector:
@@ -47,16 +95,18 @@ class AnchorDetector:
         if self.only_max:
             max_id = -1
             max_score = 0
-
             for i, (iou_score, feature) in enumerate(zip(iou_scores, features)):
                 if not self.use_iou:
                     iou_score = 1.0
                 if self.use_feature:
-                    feature_score = cosine_similarity(self.target_feature, feature)
+                    feature_score = calc_similarity(self.target_feature, feature)
                 else:
                     feature_score = 1.0
 
-                score = iou_score * feature_score
+                score = np.exp(
+                    np.log(iou_score + 1e-7) * iou_factor
+                    + np.log(feature_score + 1e-7) * feature_factor
+                )
                 if score > max_score and score >= self.threshold:
                     max_id = i
                     max_score = score
@@ -70,11 +120,14 @@ class AnchorDetector:
                 if not self.use_iou:
                     iou_score = 1.0
                 if self.use_feature:
-                    feature_score = cosine_similarity(self.target_feature, feature)
+                    feature_score = calc_similarity(self.target_feature, feature)
                 else:
                     feature_score = 1.0
 
-                score = iou_score * feature_score
+                score = np.exp(
+                    np.log(iou_score + 1e-7) * iou_factor
+                    + np.log(feature_score + 1e-7) * feature_factor
+                )
                 if score >= self.threshold:
                     detected.append(i)
         return detected
@@ -92,7 +145,7 @@ class AnchorDetector:
             prob_iou = 1.0
 
         if self.cost_feature:
-            prob_feature = cosine_similarity(feature1, feature2)
+            prob_feature = calc_similarity(feature1, feature2)
         else:
             prob_feature = 1.0
 
@@ -100,7 +153,7 @@ class AnchorDetector:
             if not self.use_iou:
                 iou_score = 1.0
             if self.use_feature:
-                feature_score = cosine_similarity(self.target_feature, feature2)
+                feature_score = calc_similarity(self.target_feature, feature2)
             else:
                 feature_score = 1.0
 
@@ -108,8 +161,11 @@ class AnchorDetector:
         else:
             prob_score = 1.0
 
-        prob = prob_iou * prob_feature * prob_score
-        cost = -np.log(prob + 1e-7)
+        cost = (
+            -np.log(prob_iou + 1e-7) * iou_factor
+            - np.log(prob_feature + 1e-7) * feature_factor
+            - np.log(prob_score + 1e-7) * feature_factor
+        )
         return cost
 
 
@@ -160,9 +216,8 @@ class ShortestPathTracker:
             self.edges.append(("source", str((self.frame_id, 0)), 0))
         self.prev_detections = [detection]
 
-    def track(self, detections, f2i_factor=10000, is_last=False):
+    def track(self, detections, f2i_factor=10000):
         self.frame_id += 1
-
         prev_frame_id = self.frame_id - 1
         for i, i_info in enumerate(self.prev_detections):
             for j, j_info in enumerate(detections):
@@ -173,14 +228,13 @@ class ShortestPathTracker:
                         int(self._cost_link(i_info, j_info) * f2i_factor),
                     )
                 )
-        if is_last:
-            for i in range(len(detections)):
-                self.last_edges = self.edges[:]
-                self.last_edges.append((str((self.frame_id, i)), "sink", 0))
         self.prev_detections = detections
 
     def run(self):
-        g = igraph.Graph.TupleList(self.last_edges, weights=True, directed=True)
+        last_edges = self.edges[:]
+        for i in range(len(self.prev_detections)):
+            last_edges.append((str((self.frame_id, i)), "sink", 0))
+        g = igraph.Graph.TupleList(last_edges, weights=True, directed=True)
         path = g.get_shortest_paths(
             "source", to="sink", weights="weight", mode=igraph.OUT, output="vpath"
         )

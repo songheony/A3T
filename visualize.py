@@ -161,6 +161,42 @@ def draw_score(datasets, trackers, success_rets):
     plt.close()
 
 
+def draw_ratio(datasets, trackers, success_rets, anchor_frames):
+    sns.set_palette(sns.color_palette("hls", len(success_rets.keys()) + 1))
+
+    fig, ax = plt.subplots(nrows=1, ncols=1)
+    fig.add_subplot(111, frameon=False)
+
+    # draw AUC score
+    aucs = {}
+    for tracker_name in trackers:
+        values = []
+        for dataset in datasets:
+            value = [v for k, v in success_rets[dataset][tracker_name].items()]
+            values.append(np.mean(value))
+        aucs[tracker_name] = values
+    for idx, tracker_name in enumerate(trackers):
+        value = aucs[tracker_name]
+        ax.bar(
+            ind + (idx - (len(trackers) - 1) / 2.0) * width,
+            value,
+            width,
+            label=tracker_name,
+        )
+    ax.legend(labelspacing=0.2)
+    ax.set_xticks(ind)
+    ax.set_xticklabels(datasets)
+
+    # hide tick and tick label of the big axes
+    plt.axis('off')
+    plt.grid(False)
+    plt.xlabel("Dataset")
+    plt.ylabel("AUC")
+
+    plt.savefig("score.pdf", bbox_inches="tight")
+    plt.close()
+
+
 def main(trackers):
     otb = OTBDataset()
     nfs = NFSDataset()

@@ -11,6 +11,23 @@ from pytracking.evaluation.environment import env_settings
 from utils import success_overlap, success_error
 
 
+def calc_overlap(rect1, rect2):
+    if rect1.ndim == 1:
+        rect1 = rect1[None, :]
+    if rect2.ndim == 1:
+        rect2 = rect2[None, :]
+
+    left = np.maximum(rect1[:, 0], rect2[:, 0])
+    right = np.minimum(rect1[:, 0] + rect1[:, 2], rect2[:, 0] + rect2[:, 2])
+    top = np.maximum(rect1[:, 1], rect2[:, 1])
+    bottom = np.minimum(rect1[:, 1] + rect1[:, 3], rect2[:, 1] + rect2[:, 3])
+
+    intersect = np.maximum(0, right - left) * np.maximum(0, bottom - top)
+    union = rect1[:, 2] * rect1[:, 3] + rect2[:, 2] * rect2[:, 3] - intersect
+    iou = np.clip(intersect / union, 0, 1)
+    return iou
+
+
 class OPEBenchmark:
     """
     Args:
@@ -32,7 +49,7 @@ class OPEBenchmark:
     def convert_bb_to_norm_center(self, bboxes, gt_wh):
         return self.convert_bb_to_center(bboxes) / (gt_wh + 1e-16)
 
-    def eval_success(self, eval_trackers):
+    def eval_success(self, eval_trackers, show_anchor=False):
         """
         Args:
             eval_trackers: list of tracker
@@ -41,8 +58,10 @@ class OPEBenchmark:
         """
 
         success_ret = {}
+        anchor_frame = {}
         for tracker_name in eval_trackers:
             success_ret_ = {}
+            anchor_frame_ = {}
             for seq in self.dataset:
                 gt_traj = np.array(seq.ground_truth_rect)
                 results_dir = "{}/{}".format(env_settings().results_path, tracker_name)
@@ -51,8 +70,21 @@ class OPEBenchmark:
                 tracker_traj = np.loadtxt(results_path, delimiter="\t")
                 n_frame = len(gt_traj)
                 success_ret_[seq.name] = success_overlap(gt_traj, tracker_traj, n_frame)
+                if show_anchor:
+                    offline_path = "{}_offline.pkl".format(base_results_path)
+                    with open(offline_path, "rb") as fp:
+                        offline_bb = pickle.load(fp)
+                    offline_bb.insert(0, [gt_traj[0]])
+                    valid_idx = [x is not None for x in offline_bb]
+                    anchor_frame_[seq.name] = valid_idx
+                else:
+                    anchor_frame_[seq.name] = None
             success_ret[tracker_name] = success_ret_
-        return success_ret
+            anchor_frame[tracker_name] = anchor_frame_
+        if show_anchor:
+            return success_ret, anchor_frame
+        else:
+            return success_ret
 
     def eval_success_anchor(self, eval_algorithms):
         """
@@ -218,9 +250,7 @@ class OPEBenchmark:
 
         if (
             show_video_level
-            and len(success_ret) < 10
             and precision_ret is not None
-            and len(precision_ret) < 10
         ):
             print("\n\n")
             header1 = "|{:^21}|".format("Tracker name")
@@ -270,9 +300,7 @@ class OPEBenchmark:
         for tracker_name in success_ret.keys():
             auc = np.mean(list(success_ret[tracker_name].values()))
             tracker_auc[tracker_name] = auc
-        tracker_auc_ = sorted(tracker_auc.items(), key=lambda x: x[1], reverse=True)[
-            :20
-        ]
+        tracker_auc_ = sorted(tracker_auc.items(), key=lambda x: x[1], reverse=True)
         tracker_names = [x[0] for x in tracker_auc_]
 
         tracker_name_len = max((max([len(x) for x in success_ret.keys()]) + 2), 12)
@@ -301,9 +329,7 @@ class OPEBenchmark:
 
         if (
             show_video_level
-            and len(success_ret) < 10
             and precision_ret is not None
-            and len(precision_ret) < 10
         ):
             print("\n\n")
             header1 = "|{:^21}|".format("Tracker name")
@@ -311,7 +337,7 @@ class OPEBenchmark:
             for tracker_name in success_ret.keys():
                 # col_len = max(20, len(tracker_name))
                 header1 += ("{:^21}|").format(tracker_name)
-                header2 += "{:^9}|{:^11}|".format("success", "precision")
+                header2 += "{:^9}|{:^11}|{:^14}|".format("success", "precision")
             print("-" * len(header1))
             print(header1)
             print("-" * len(header1))

@@ -1,9 +1,15 @@
 import torch
 import numpy as np
 from PIL import Image
-from .utils import calc_overlap, iou_score
 from .algorithm import Algorithm
-from .aaa_util import FeatureExtractor, ShortestPathTracker, WAADelayed, AnchorDetector
+from .aaa_util import (
+    FeatureExtractor,
+    ShortestPathTracker,
+    WAADelayed,
+    AnchorDetector,
+    calc_overlap,
+    calc_iou_score,
+)
 
 
 class AAA(Algorithm):
@@ -40,12 +46,12 @@ class AAA(Algorithm):
         # Anchor extractor
         self.detector = AnchorDetector(
             threshold,
-            only_max=True,
-            use_iou=True,
-            use_feature=True,
-            cost_iou=True,
-            cost_feature=True,
-            cost_score=True,
+            only_max=only_max,
+            use_iou=use_iou,
+            use_feature=use_feature,
+            cost_iou=cost_iou,
+            cost_feature=cost_feature,
+            cost_score=cost_score,
         )
 
         # Feature extractor
@@ -66,7 +72,7 @@ class AAA(Algorithm):
         self.prev_boxes = []
 
         # Extract target image
-        if self.detector.use_feature:
+        if self.detector.use_feature or self.detector.cost_feature:
             self.target_feature = self.extractor.extract(image, [box])[0]
         else:
             self.target_feature = None
@@ -90,7 +96,7 @@ class AAA(Algorithm):
 
         # Extract scores from boxes
         if self.detector.use_iou:
-            iou_scores = iou_score(boxes)
+            iou_scores = calc_iou_score(boxes)
         else:
             iou_scores = [0] * self.n_experts
 
@@ -115,8 +121,7 @@ class AAA(Algorithm):
                         "iou_score": iou_scores[i],
                     }
                     for i in detected
-                ],
-                is_last=True,
+                ]
             )
 
             # Caluclate optimal path
@@ -186,6 +191,8 @@ class AAA(Algorithm):
 
         for i in range(self.n_experts):
             expert_results = self.prev_boxes[:, i, :]
-            expert_gradient_losses[i] = calc_overlap(expert_results, offline_results)
+            expert_gradient_losses[i] = 1 - calc_overlap(
+                expert_results, offline_results
+            )
 
         return expert_gradient_losses

@@ -2,18 +2,12 @@ import torch
 import numpy as np
 from PIL import Image
 from .algorithm import Algorithm
-from .utils import iou_score
-from .aaa import FeatureExtractor, AnchorDetector
+from .aaa_util import FeatureExtractor, AnchorDetector, calc_iou_score
 
 
 class Baseline(Algorithm):
     def __init__(
-        self,
-        n_experts,
-        name="Baseline",
-        threshold=0.0,
-        use_iou=True,
-        use_feature=True,
+        self, n_experts, name="Baseline", threshold=0.0, use_iou=True, use_feature=True
     ):
         super(Baseline, self).__init__(name)
 
@@ -51,7 +45,7 @@ class Baseline(Algorithm):
 
         # Extract scores from boxes
         if self.detector.use_iou:
-            iou_scores = iou_score(boxes)
+            iou_scores = calc_iou_score(boxes)
         else:
             iou_scores = [0] * self.n_experts
 
