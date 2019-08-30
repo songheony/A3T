@@ -8,7 +8,7 @@ import scipy.special as sc
 
 
 iou_factor = 1
-feature_factor = 1
+feature_factor = 5
 
 
 def calc_overlap(rect1, rect2):
@@ -59,7 +59,8 @@ def calc_similarity(ft1, ft2):
 class AnchorDetector:
     def __init__(
         self,
-        threshold,
+        iou_threshold=0.0,
+        feature_threshold=0.0,
         only_max=True,
         use_iou=True,
         use_feature=True,
@@ -67,8 +68,11 @@ class AnchorDetector:
         cost_feature=True,
         cost_score=True,
     ):
-        # Threshold for detecting anchor frame
-        self.threshold = threshold
+        # IOU threshold for detecting anchor frame
+        self.iou_threshold = iou_threshold
+
+        # Feature threshold for detecting anchor frame
+        self.feature_threshold = feature_threshold
 
         # Whether detect only who has the highest score
         self.only_max = only_max
@@ -96,18 +100,24 @@ class AnchorDetector:
             max_id = -1
             max_score = 0
             for i, (iou_score, feature) in enumerate(zip(iou_scores, features)):
-                if not self.use_iou:
+                flag = False
+
+                if self.use_iou:
+                    iou_score = iou_score ** iou_factor
+                    flag = flag or (iou_score >= self.iou_threshold)
+                else:
                     iou_score = 1.0
+
                 if self.use_feature:
                     feature_score = calc_similarity(self.target_feature, feature)
+                    feature_score = feature_score ** feature_factor
+                    flag = flag or (feature_score >= self.feature_threshold)
                 else:
                     feature_score = 1.0
 
-                score = np.exp(
-                    np.log(iou_score + 1e-7) * iou_factor
-                    + np.log(feature_score + 1e-7) * feature_factor
-                )
-                if score > max_score and score >= self.threshold:
+                score = iou_score * feature_score
+
+                if score > max_score and flag:
                     max_id = i
                     max_score = score
             if max_id != -1:
@@ -117,18 +127,18 @@ class AnchorDetector:
         else:
             detected = []
             for i, (iou_score, feature) in enumerate(zip(iou_scores, features)):
-                if not self.use_iou:
-                    iou_score = 1.0
+                flag = False
+
+                if self.use_iou:
+                    iou_score = iou_score ** iou_factor
+                    flag = flag or (iou_score >= self.iou_threshold)
+
                 if self.use_feature:
                     feature_score = calc_similarity(self.target_feature, feature)
-                else:
-                    feature_score = 1.0
+                    feature_score = feature_score ** feature_factor
+                    flag = flag or (feature_score >= self.feature_threshold)
 
-                score = np.exp(
-                    np.log(iou_score + 1e-7) * iou_factor
-                    + np.log(feature_score + 1e-7) * feature_factor
-                )
-                if score >= self.threshold:
+                if flag:
                     detected.append(i)
         return detected
 
@@ -141,19 +151,24 @@ class AnchorDetector:
 
         if self.cost_iou:
             prob_iou = calc_overlap(rect1, rect2)[0]
+            prob_iou = iou_score ** iou_factor
         else:
             prob_iou = 1.0
 
         if self.cost_feature:
             prob_feature = calc_similarity(feature1, feature2)
+            prob_feature = prob_feature ** feature_factor
         else:
             prob_feature = 1.0
 
         if self.cost_score:
-            if not self.use_iou:
+            if self.use_iou:
+                iou_score = iou_score ** iou_factor
+            else:
                 iou_score = 1.0
             if self.use_feature:
                 feature_score = calc_similarity(self.target_feature, feature2)
+                feature_score = feature_score ** feature_factor
             else:
                 feature_score = 1.0
 
@@ -161,11 +176,7 @@ class AnchorDetector:
         else:
             prob_score = 1.0
 
-        cost = (
-            -np.log(prob_iou + 1e-7) * iou_factor
-            - np.log(prob_feature + 1e-7) * feature_factor
-            - np.log(prob_score + 1e-7) * feature_factor
-        )
+        cost = -np.log(prob_iou * prob_feature * prob_score + 1e-7)
         return cost
 
 

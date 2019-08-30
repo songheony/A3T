@@ -113,8 +113,9 @@ def main(algorithm_name, experts, dataset_name, **kargs):
 
         algorithm = Baseline(
             n_experts,
-            name="Both_%s" % kargs["threshold"],
-            threshold=kargs["threshold"],
+            name="Both_%s_%s" % (kargs["iou_threshold"], kargs["feature_threshold"]),
+            iou_threshold=kargs["iou_threshold"],
+            feature_threshold=kargs["feature_threshold"],
             use_iou=True,
             use_feature=True,
         )
@@ -127,8 +128,8 @@ def main(algorithm_name, experts, dataset_name, **kargs):
 
         algorithm = Baseline(
             n_experts,
-            name="Overlap_%s" % kargs["threshold"],
-            threshold=kargs["threshold"],
+            name="Overlap_%s" % kargs["iou_threshold"],
+            iou_threshold=kargs["iou_threshold"],
             use_iou=True,
             use_feature=False,
         )
@@ -137,8 +138,8 @@ def main(algorithm_name, experts, dataset_name, **kargs):
 
         algorithm = Baseline(
             n_experts,
-            name="Similar_%s" % kargs["threshold"],
-            threshold=kargs["threshold"],
+            name="Similar_%s" % kargs["feature_threshold"],
+            feature_threshold=kargs["feature_threshold"],
             use_iou=False,
             use_feature=True,
         )
@@ -180,10 +181,11 @@ if __name__ == "__main__":
     ]
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--algorithm", default="Both", type=str)
+    parser.add_argument("-a", "--algorithm", default="AAA", type=str)
     parser.add_argument("-e", "--experts", default=experts, nargs="+")
     parser.add_argument("-d", "--dataset", default="OTB", type=str)
-    parser.add_argument("-t", "--threshold", default=0.0, type=float)
+    parser.add_argument("-t", "--iou_threshold", default=0.0, type=float)
+    parser.add_argument("-r", "--feature_threshold", default=0.0, type=float)
     parser.add_argument("-m", "--only_max", action="store_true")
     parser.add_argument("-i", "--use_iou", action="store_true")
     parser.add_argument("-f", "--use_feature", action="store_true")
@@ -196,20 +198,20 @@ if __name__ == "__main__":
     use_iou = True
     use_feature = True
     cost_iou = True
-    cost_feature = True
+    cost_feature = False
     cost_score = True
-    thresholds = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-
-    for threshold in thresholds:
-        main(
-            args.algorithm,
-            args.experts,
-            args.dataset,
-            threshold=threshold,
-            only_max=only_max,
-            use_iou=use_iou,
-            use_feature=use_feature,
-            cost_iou=cost_iou,
-            cost_feature=cost_feature,
-            cost_score=cost_score,
-        )
+    iou_threshold = 0.8
+    feature_threshold = 0.7
+    main(
+        args.algorithm,
+        args.experts,
+        args.dataset,
+        iou_threshold=iou_threshold,
+        feature_threshold=feature_threshold,
+        only_max=only_max,
+        use_iou=use_iou,
+        use_feature=use_feature,
+        cost_iou=cost_iou,
+        cost_feature=cost_feature,
+        cost_score=cost_score,
+    )

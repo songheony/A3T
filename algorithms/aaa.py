@@ -16,7 +16,8 @@ class AAA(Algorithm):
     def __init__(
         self,
         n_experts,
-        threshold=0.7,
+        iou_threshold=0.0,
+        feature_threshold=0.0,
         only_max=True,
         use_iou=True,
         use_feature=True,
@@ -25,9 +26,10 @@ class AAA(Algorithm):
         cost_score=True,
     ):
         super(AAA, self).__init__(
-            "AAA_%s_%s_%s_%s_%s_%s_%s"
+            "AAA_%s_%s_%s_%s_%s_%s_%s_%s"
             % (
-                threshold,
+                iou_threshold,
+                feature_threshold,
                 only_max,
                 use_iou,
                 use_feature,
@@ -45,7 +47,8 @@ class AAA(Algorithm):
 
         # Anchor extractor
         self.detector = AnchorDetector(
-            threshold,
+            iou_threshold=iou_threshold,
+            feature_threshold=feature_threshold,
             only_max=only_max,
             use_iou=use_iou,
             use_feature=use_feature,

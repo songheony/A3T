@@ -1,5 +1,10 @@
+import sys
+import os
+import pickle
+from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 import seaborn as sns
 from datasets.otbdataset import OTBDataset
 from datasets.votdataset import VOTDataset
@@ -8,6 +13,10 @@ from datasets.uavdataset import UAVDataset
 from datasets.nfsdataset import NFSDataset
 from datasets.lasotdataset import LaSOTDataset
 from evaluations.ope_benchmark import OPEBenchmark
+
+sys.path.append("external/pytracking")
+
+from pytracking.evaluation.environment import env_settings
 
 sns.set()
 sns.set_style("whitegrid")
@@ -84,7 +93,7 @@ def draw_curve(dataset_name, trackers, success_ret, precision_ret):
     ax.set_aspect((xmax - xmin) / (ymax - ymin))
 
     # hide tick and tick label of the big axes
-    plt.axis('off')
+    plt.axis("off")
     plt.grid(False)
 
     plt.savefig("%s_curve.pdf" % dataset_name, bbox_inches="tight")
@@ -114,7 +123,7 @@ def draw_rank(dataset_name, trackers, success_ret, precision_ret):
     ax.set_xticklabels(["Best"] + list(range(2, len(trackers) + 1)))
 
     # hide tick and tick label of the big axes
-    plt.axis('off')
+    plt.axis("off")
     plt.grid(False)
     plt.xlabel("Rank")
     plt.ylabel("Frequency")
@@ -152,7 +161,7 @@ def draw_score(datasets, trackers, success_rets):
     ax.set_xticklabels(datasets)
 
     # hide tick and tick label of the big axes
-    plt.axis('off')
+    plt.axis("off")
     plt.grid(False)
     plt.xlabel("Dataset")
     plt.ylabel("AUC")
@@ -161,43 +170,185 @@ def draw_score(datasets, trackers, success_rets):
     plt.close()
 
 
-def draw_ratio(datasets, trackers, success_rets, anchor_frames):
-    sns.set_palette(sns.color_palette("hls", len(success_rets.keys()) + 1))
+def draw_ratio(datasets, algorithm, success_rets, anchor_ratios):
+    # sns.set_palette(sns.color_palette("hls", len(success_rets.keys()) + 1))
+    colors = sns.color_palette("hls", len(success_rets.keys()) + 1).as_hex()
 
     fig, ax = plt.subplots(nrows=1, ncols=1)
     fig.add_subplot(111, frameon=False)
 
-    # draw AUC score
-    aucs = {}
-    for tracker_name in trackers:
-        values = []
-        for dataset in datasets:
-            value = [v for k, v in success_rets[dataset][tracker_name].items()]
-            values.append(np.mean(value))
-        aucs[tracker_name] = values
-    for idx, tracker_name in enumerate(trackers):
-        value = aucs[tracker_name]
-        ax.bar(
-            ind + (idx - (len(trackers) - 1) / 2.0) * width,
-            value,
-            width,
-            label=tracker_name,
-        )
+    for i, dataset in enumerate(datasets):
+        auc = []
+        ratio = []
+        for seq in success_rets[dataset].keys():
+            auc.append(success_rets[dataset][seq])
+            ratio.append(anchor_ratios[dataset][seq])
+        ax.scatter(ratio, auc, c=colors[i], label=dataset)
     ax.legend(labelspacing=0.2)
-    ax.set_xticks(ind)
-    ax.set_xticklabels(datasets)
 
     # hide tick and tick label of the big axes
-    plt.axis('off')
+    plt.axis("off")
     plt.grid(False)
-    plt.xlabel("Dataset")
+    plt.xlabel("Anchor ratio")
     plt.ylabel("AUC")
 
-    plt.savefig("score.pdf", bbox_inches="tight")
+    plt.savefig("ratio.pdf", bbox_inches="tight")
     plt.close()
 
 
-def main(trackers):
+def draw_offline_tracking(dataset, algorithm):
+    for seq in dataset:
+        gt_traj = np.array(seq.ground_truth_rect)
+        results_dir = "{}/{}".format(env_settings().results_path, algorithm)
+        base_results_path = "{}/{}".format(results_dir, seq.name)
+        offline_path = "{}_offline.pkl".format(base_results_path)
+        with open(offline_path, "rb") as fp:
+            offline_bb = pickle.load(fp)
+
+        results = [gt_traj[0].tolist()]
+        for box in offline_bb:
+            if box is not None:
+                results += box.tolist()
+
+        save_dir = "{}/{}/offline/{}".format(
+            env_settings().results_path, algorithm, seq.name
+        )
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+
+        for frame in range(len(results)):
+            filename = os.path.basename(seq.frames[frame])
+            im = Image.open(seq.frames[frame]).convert("RGB")
+            box = results[frame]
+
+            fig, ax = plt.subplots(nrows=1, ncols=1)
+            fig.add_subplot(111, frameon=False)
+
+            ax.imshow(np.asarray(im), aspect="auto")
+
+            if frame > 1:
+                color = "w" if offline_bb[frame - 1] is None else "r"
+            else:
+                color = "w"
+
+            rect = patches.Rectangle(
+                (box[0], box[1]),
+                box[2],
+                box[3],
+                linewidth=2,
+                edgecolor=color,
+                facecolor="none",
+                alpha=1,
+            )
+            ax.add_patch(rect)
+            ax.annotate(
+                "Offline",
+                xy=(box[0], box[1]),
+                xycoords="data",
+                xytext=(-50, 10),
+                textcoords="offset points",
+                size=10,
+                color=color,
+                arrowprops=dict(arrowstyle="->", color=color),
+            )
+            ax.axis("off")
+
+            # hide tick and tick label of the big axes
+            plt.axis("off")
+            plt.grid(False)
+            plt.xlabel("Anchor ratio")
+            plt.ylabel("AUC")
+
+            plt.savefig(os.path.join(save_dir, filename), bbox_inches="tight")
+            plt.close()
+
+
+def draw_result(dataset, trackers):
+    colors = sns.color_palette("hls", len(trackers) + 1).as_hex()
+    for seq in dataset:
+        gt_traj = np.array(seq.ground_truth_rect)
+        tracker_trajs = []
+
+        for tracker in trackers:
+            results_dir = "{}/{}".format(env_settings().results_path, tracker)
+            base_results_path = "{}/{}".format(results_dir, seq.name)
+            results_path = "{}.txt".format(base_results_path)
+            tracker_traj = np.loadtxt(results_path, delimiter="\t")
+            tracker_trajs.append(tracker_traj)
+        tracker_trajs = np.array(tracker_trajs)
+
+        save_dir = "{}/{}/result/{}".format(
+            env_settings().results_path, trackers[0], seq.name
+        )
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+
+        for frame in range(len(gt_traj)):
+            filename = os.path.basename(seq.frames[frame])
+            im = Image.open(seq.frames[frame]).convert("RGB")
+
+            fig, ax = plt.subplots(nrows=1, ncols=1)
+            fig.add_subplot(111, frameon=False)
+
+            ax.imshow(np.asarray(im), aspect="auto")
+
+            for i in range(len(trackers)):
+                box = tracker_trajs[i, frame]
+                rect = patches.Rectangle(
+                    (box[0], box[1]),
+                    box[2],
+                    box[3],
+                    linewidth=2,
+                    edgecolor=colors[i],
+                    facecolor="none",
+                    alpha=1,
+                )
+                ax.add_patch(rect)
+                ax.annotate(
+                    "AAA" if trackers[i].startswith("AAA") else trackers[i],
+                    xy=(box[0], box[1]),
+                    xycoords="data",
+                    xytext=(-50, 10),
+                    textcoords="offset points",
+                    size=10,
+                    color=colors[i],
+                    arrowprops=dict(arrowstyle="->", color=colors[i]),
+                )
+
+            box = gt_traj[frame]
+            rect = patches.Rectangle(
+                (box[0], box[1]),
+                box[2],
+                box[3],
+                linewidth=2,
+                edgecolor="b",
+                facecolor="none",
+                alpha=1,
+            )
+            ax.add_patch(rect)
+            ax.annotate(
+                "Ground Truth",
+                xy=(box[0], box[1]),
+                xycoords="data",
+                xytext=(-50, 10),
+                textcoords="offset points",
+                size=10,
+                color="b",
+                arrowprops=dict(arrowstyle="->", color="b"),
+            )
+            ax.axis("off")
+
+            # hide tick and tick label of the big axes
+            plt.axis("off")
+            plt.grid(False)
+            plt.xlabel("Anchor ratio")
+            plt.ylabel("AUC")
+
+            plt.savefig(os.path.join(save_dir, filename), bbox_inches="tight")
+            plt.close()
+
+
+def main(experts, algorithm):
     otb = OTBDataset()
     nfs = NFSDataset()
     uav = UAVDataset()
@@ -211,7 +362,10 @@ def main(trackers):
     successes = {}
     precisions = {}
 
+    trackers = experts + [algorithm]
+
     for dataset, name in zip(datasets, datasets_name):
+        draw_offline_tracking(dataset, algorithm)
         benchmark = OPEBenchmark(dataset)
 
         success = benchmark.eval_success(trackers)
@@ -221,11 +375,12 @@ def main(trackers):
 
         draw_curve(name, trackers, success, precision)
         draw_rank(name, trackers, success, precision)
+
     draw_score(datasets_name, trackers, successes)
 
 
 if __name__ == "__main__":
-    trackers = [
+    experts = [
         "ATOM",
         "DaSiamRPN",
         "ECO",
@@ -238,4 +393,4 @@ if __name__ == "__main__":
         "TADT",
     ]
 
-    main(trackers)
+    main(experts, "AAA_0.8_0.0_True_True_False_True_False_True")
