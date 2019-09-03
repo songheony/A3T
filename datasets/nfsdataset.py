@@ -61,7 +61,7 @@ class NFSDatasetClass(BaseDataset):
 
         try:
             ground_truth_rect = np.loadtxt(str(anno_path), dtype=str)
-        except:
+        except Exception:
             ground_truth_rect = np.loadtxt(str(anno_path), delimiter=",", dtype=str)
 
         ground_truth_rect = ground_truth_rect[:, 1:5].astype(

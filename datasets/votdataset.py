@@ -38,7 +38,7 @@ class VOTDatasetClass(BaseDataset):
         anno_path = "{}/{}/groundtruth.txt".format(self.base_path, sequence_name)
         try:
             ground_truth_rect = np.loadtxt(str(anno_path), dtype=np.float64)
-        except:
+        except Exception:
             ground_truth_rect = np.loadtxt(
                 str(anno_path), delimiter=",", dtype=np.float64
             )
