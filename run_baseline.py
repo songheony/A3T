@@ -11,7 +11,7 @@ from datasets.nfsdataset import NFSDataset
 from datasets.lasotdataset import LaSOTDataset
 
 
-def run_sequence(seq, algorithm, experts, debug=False, input_gt=False):
+def run_sequence(seq, algorithm, experts, debug=False):
     """Runs a tracker on a sequence."""
 
     base_results_path = "{}/{}".format(algorithm.results_dir, seq.name)
@@ -27,12 +27,12 @@ def run_sequence(seq, algorithm, experts, debug=False, input_gt=False):
 
     if debug:
         tracked_bb, offline_bb, weights, exec_times = algorithm.run(
-            seq, experts, input_gt=input_gt
+            seq, experts, input_gt=False
         )
     else:
         try:
             tracked_bb, offline_bb, weights, exec_times = algorithm.run(
-                seq, experts, input_gt=input_gt
+                seq, experts, input_gt=False
             )
         except Exception as e:
             print(e)
@@ -44,7 +44,7 @@ def run_sequence(seq, algorithm, experts, debug=False, input_gt=False):
     print(
         "FPS: {} Anchor: {}".format(
             len(exec_times) / exec_times.sum(),
-            sum(x is not None for x in offline_bb) / len(offline_bb),
+            (sum(x is not None for x in offline_bb) + 1) / len(offline_bb),
         )
     )
     if not debug:
@@ -55,7 +55,7 @@ def run_sequence(seq, algorithm, experts, debug=False, input_gt=False):
             pickle.dump(offline_bb, fp)
 
 
-def run_dataset(dataset, algorithms, experts, debug=False, input_gt=False, threads=0):
+def run_dataset(dataset, algorithms, experts, debug=False, threads=0):
     """Runs a list of experts on a dataset.
     args:
         dataset: List of Sequence instances, forming a dataset.
@@ -72,7 +72,7 @@ def run_dataset(dataset, algorithms, experts, debug=False, input_gt=False, threa
         for seq in dataset:
             for algorithm_info in algorithms:
                 run_sequence(
-                    seq, algorithm_info, experts, debug=debug, input_gt=input_gt
+                    seq, algorithm_info, experts, debug=debug
                 )
     elif mode == "parallel":
         param_list = [
@@ -85,7 +85,7 @@ def run_dataset(dataset, algorithms, experts, debug=False, input_gt=False, threa
 
 
 def run_tracker(
-    algorithm, experts, dataset, sequence=None, debug=0, input_gt=False, threads=0
+    algorithm, experts, dataset, sequence=None, debug=0, threads=0
 ):
     """Run tracker on sequence or dataset.
     args:
@@ -103,30 +103,27 @@ def run_tracker(
 
     algorithms = [algorithm]
 
-    run_dataset(dataset, algorithms, experts, debug, input_gt, threads)
+    run_dataset(dataset, algorithms, experts, debug, threads)
 
 
 def main(algorithm_name, experts, dataset_name, **kargs):
     n_experts = len(experts)
-    input_gt = False
-    if algorithm_name == "AAA":
-        from algorithms.aaa import AAA
+    if algorithm_name == "Average":
+        from algorithms.average import Average
 
-        algorithm = AAA(n_experts, **kargs)
-    elif algorithm_name == "AAA_select":
-        from algorithms.aaa_select import AAA_select
+        algorithm = Average(n_experts)
+    elif algorithm_name == "MCCT":
+        from algorithms.mcct import MCCT
 
-        algorithm = AAA_select(n_experts, **kargs)
-    elif algorithm_name == "AAA_gt":
-        input_gt = True
-        from algorithms.aaa_gt import AAA_gt
+        algorithm = MCCT(n_experts)
+    elif algorithm_name == "Max":
+        from algorithms.baseline import Baseline
 
-        algorithm = AAA_gt(
+        algorithm = Baseline(
             n_experts,
-            iou_threshold=kargs["iou_threshold"],
-            feature_threshold=kargs["feature_threshold"],
-            use_iou=kargs["use_iou"],
-            use_feature=kargs["use_feature"],
+            name="Max",
+            use_iou=False,
+            use_feature=True,
         )
     else:
         raise ValueError("Unknown algorithm name")
@@ -146,7 +143,7 @@ def main(algorithm_name, experts, dataset_name, **kargs):
     else:
         raise ValueError("Unknown dataset name")
 
-    run_tracker(algorithm, experts, dataset, debug=0, input_gt=input_gt)
+    run_tracker(algorithm, experts, dataset, debug=0)
 
 
 if __name__ == "__main__":
@@ -166,29 +163,13 @@ if __name__ == "__main__":
     ]
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--algorithm", default="AAA", type=str)
+    parser.add_argument("-a", "--algorithm", default="MCCT", type=str)
     parser.add_argument("-e", "--experts", default=experts, nargs="+")
     parser.add_argument("-d", "--dataset", default="OTB", type=str)
-    parser.add_argument("-t", "--iou_threshold", default=0.0, type=float)
-    parser.add_argument("-r", "--feature_threshold", default=0.0, type=float)
-    parser.add_argument("-m", "--only_max", action="store_true")
-    parser.add_argument("-i", "--use_iou", action="store_true")
-    parser.add_argument("-f", "--use_feature", action="store_true")
-    parser.add_argument("-x", "--cost_iou", action="store_true")
-    parser.add_argument("-y", "--cost_feature", action="store_true")
-    parser.add_argument("-z", "--cost_score", action="store_true")
     args = parser.parse_args()
 
     main(
         args.algorithm,
         args.experts,
         args.dataset,
-        iou_threshold=args.iou_threshold,
-        feature_threshold=args.feature_threshold,
-        only_max=args.only_max,
-        use_iou=args.use_iou,
-        use_feature=args.use_feature,
-        cost_iou=args.cost_iou,
-        cost_feature=args.cost_feature,
-        cost_score=args.cost_score,
     )
