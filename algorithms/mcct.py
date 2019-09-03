@@ -139,6 +139,7 @@ class MCCT(Algorithm):
                 self.target_sz[1],
             ],
             None,
+            self.id_ensemble,
         )
 
     def robustness_eva(self, experts, num, frame_idx, period, weight, expert_num):

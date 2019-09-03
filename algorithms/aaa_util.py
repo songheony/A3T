@@ -151,7 +151,7 @@ class AnchorDetector:
 
         if self.cost_iou:
             prob_iou = calc_overlap(rect1, rect2)[0]
-            prob_iou = iou_score ** iou_factor
+            prob_iou = prob_iou ** iou_factor
         else:
             prob_iou = 1.0
 

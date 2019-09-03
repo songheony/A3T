@@ -39,5 +39,5 @@ class SiamRPNPP(Expert):
 
     def track(self, image):
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-        bbox = self.tracker.track(image)['bbox']
+        bbox = self.tracker.track(image)["bbox"]
         return bbox

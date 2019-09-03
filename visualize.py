@@ -208,7 +208,7 @@ def draw_offline_tracking(dataset, algorithm):
         results = [gt_traj[0].tolist()]
         for box in offline_bb:
             if box is not None:
-                results += box.tolist()
+                results += box
 
         save_dir = "{}/{}/offline/{}".format(
             env_settings().results_path, algorithm, seq.name

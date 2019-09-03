@@ -18,7 +18,7 @@ class Algorithm(object):
         if not os.path.exists(self.results_dir):
             os.makedirs(self.results_dir)
 
-    def initialize(self, image, state, class_info=None):
+    def initialize(self, image, state, gt=None):
         """Overload this function in your tracker. This should initialize the model."""
         raise NotImplementedError
 
@@ -26,7 +26,7 @@ class Algorithm(object):
         """Overload this function in your tracker. This should track in the frame and update the model."""
         raise NotImplementedError
 
-    def track_sequence(self, sequence, trackers):
+    def track_sequence(self, sequence, trackers, input_gt=False):
         """Run tracker on a sequence."""
 
         # Initialize
@@ -42,7 +42,12 @@ class Algorithm(object):
 
         times = []
         start_time = time.time()
-        self.initialize(image, np.array(sequence.init_state))
+        if input_gt:
+            self.initialize(
+                image, np.array(sequence.init_state), sequence.ground_truth_rect
+            )
+        else:
+            self.initialize(image, np.array(sequence.init_state))
         init_time = getattr(self, "time", time.time() - start_time)
         times.append(init_time)
 
@@ -54,7 +59,7 @@ class Algorithm(object):
             image = self._read_image(frame)
 
             start_time = time.time()
-            state, offline, weight = self.track(image, boxes[:, n, :])
+            state, offline, weight = self.track(image, boxes[:, n + 1, :])
             times.append(time.time() - start_time)
 
             tracked_bb.append(state)
@@ -66,7 +71,7 @@ class Algorithm(object):
     def _read_image(self, image_file: str):
         return cv2.cvtColor(cv2.imread(image_file), cv2.COLOR_BGR2RGB)
 
-    def run(self, seq, trackers):
+    def run(self, seq, trackers, input_gt=False):
         """Run tracker on sequence.
         args:
             seq: Sequence to run the tracker on.
@@ -75,7 +80,7 @@ class Algorithm(object):
         """
 
         output_bb, offline_bb, weights, execution_times = self.track_sequence(
-            seq, trackers
+            seq, trackers, input_gt
         )
 
         return output_bb, offline_bb, weights, execution_times

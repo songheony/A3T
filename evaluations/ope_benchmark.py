@@ -84,18 +84,61 @@ class OPEBenchmark:
             anchor_ratio_ = {}
             for seq in self.dataset:
                 gt_traj = np.array(seq.ground_truth_rect)
-                results_dir = "{}/{}".format(env_settings().results_path, algorithm_name)
+                results_dir = "{}/{}".format(
+                    env_settings().results_path, algorithm_name
+                )
                 base_results_path = "{}/{}".format(results_dir, seq.name)
                 offline_path = "{}_offline.pkl".format(base_results_path)
                 with open(offline_path, "rb") as fp:
                     offline_bb = pickle.load(fp)
                 offline_bb.insert(0, [gt_traj[0]])
                 valid_idx = [x is not None for x in offline_bb]
-                anchor_box = np.array([offline_bb[i][-1] for i in range(len(offline_bb)) if valid_idx[i]])
-                valid_gt = np.array([gt_traj[i] for i in range(len(gt_traj)) if valid_idx[i]])
+                anchor_box = np.array(
+                    [offline_bb[i][-1] for i in range(len(offline_bb)) if valid_idx[i]]
+                )
+                valid_gt = np.array(
+                    [gt_traj[i] for i in range(len(gt_traj)) if valid_idx[i]]
+                )
                 n_frame = sum(valid_idx)
                 success_ret_[seq.name] = success_overlap(valid_gt, anchor_box, n_frame)
                 anchor_ratio_[seq.name] = n_frame / len(gt_traj)
+            success_ret[algorithm_name] = success_ret_
+            anchor_ratio[algorithm_name] = anchor_ratio_
+        return success_ret, anchor_ratio
+
+    def eval_success_offline(self, eval_algorithms):
+        """
+        Args:
+            eval_trackers: list of tracker
+        Return:
+            res: dict of results
+        """
+
+        success_ret = {}
+        anchor_ratio = {}
+        for algorithm_name in eval_algorithms:
+            success_ret_ = {}
+            anchor_ratio_ = {}
+            for seq in self.dataset:
+                gt_traj = np.array(seq.ground_truth_rect)
+                results_dir = "{}/{}".format(
+                    env_settings().results_path, algorithm_name
+                )
+                base_results_path = "{}/{}".format(results_dir, seq.name)
+                offline_path = "{}_offline.pkl".format(base_results_path)
+                with open(offline_path, "rb") as fp:
+                    offline_bb = pickle.load(fp)
+                results = [gt_traj[0].tolist()]
+                for box in offline_bb:
+                    if box is not None:
+                        results += box.tolist()
+                results = np.array(results)
+                valid_gt = gt_traj[: len(results)]
+                n_frame = len(valid_gt)
+                success_ret_[seq.name] = success_overlap(valid_gt, results, n_frame)
+                anchor_ratio_[seq.name] = (
+                    sum([x is not None for x in offline_bb]) + 1
+                ) / len(gt_traj)
             success_ret[algorithm_name] = success_ret_
             anchor_ratio[algorithm_name] = anchor_ratio_
         return success_ret, anchor_ratio
@@ -140,18 +183,60 @@ class OPEBenchmark:
             precision_ret_ = {}
             for seq in self.dataset:
                 gt_traj = np.array(seq.ground_truth_rect)
-                results_dir = "{}/{}".format(env_settings().results_path, algorithm_name)
+                results_dir = "{}/{}".format(
+                    env_settings().results_path, algorithm_name
+                )
                 base_results_path = "{}/{}".format(results_dir, seq.name)
                 offline_path = "{}_offline.pkl".format(base_results_path)
                 with open(offline_path, "rb") as fp:
                     offline_bb = pickle.load(fp)
                 offline_bb.insert(0, [gt_traj[0]])
                 valid_idx = [x is not None for x in offline_bb]
-                anchor_box = np.array([offline_bb[i][-1] for i in range(len(offline_bb)) if valid_idx[i]])
-                valid_gt = np.array([gt_traj[i] for i in range(len(gt_traj)) if valid_idx[i]])
+                anchor_box = np.array(
+                    [offline_bb[i][-1] for i in range(len(offline_bb)) if valid_idx[i]]
+                )
+                valid_gt = np.array(
+                    [gt_traj[i] for i in range(len(gt_traj)) if valid_idx[i]]
+                )
                 gt_center = self.convert_bb_to_center(valid_gt)
                 tracker_center = self.convert_bb_to_center(anchor_box)
                 n_frame = sum(valid_idx)
+                thresholds = np.arange(0, 51, 1)
+                precision_ret_[seq.name] = success_error(
+                    gt_center, tracker_center, thresholds, n_frame
+                )
+            precision_ret[algorithm_name] = precision_ret_
+        return precision_ret
+
+    def eval_precision_offline(self, eval_algorithms):
+        """
+        Args:
+            eval_trackers: list of tracker
+        Return:
+            res: dict of results
+        """
+
+        precision_ret = {}
+        for algorithm_name in eval_algorithms:
+            precision_ret_ = {}
+            for seq in self.dataset:
+                gt_traj = np.array(seq.ground_truth_rect)
+                results_dir = "{}/{}".format(
+                    env_settings().results_path, algorithm_name
+                )
+                base_results_path = "{}/{}".format(results_dir, seq.name)
+                offline_path = "{}_offline.pkl".format(base_results_path)
+                with open(offline_path, "rb") as fp:
+                    offline_bb = pickle.load(fp)
+                results = [gt_traj[0].tolist()]
+                for box in offline_bb:
+                    if box is not None:
+                        results += box.tolist()
+                results = np.array(results)
+                valid_gt = gt_traj[: len(results)]
+                gt_center = self.convert_bb_to_center(valid_gt)
+                tracker_center = self.convert_bb_to_center(results)
+                n_frame = len(valid_gt)
                 thresholds = np.arange(0, 51, 1)
                 precision_ret_[seq.name] = success_error(
                     gt_center, tracker_center, thresholds, n_frame
@@ -231,10 +316,7 @@ class OPEBenchmark:
             print(formatter.format(tracker_name, success, precision))
         print("-" * len(header))
 
-        if (
-            show_video_level
-            and precision_ret is not None
-        ):
+        if show_video_level and precision_ret is not None:
             print("\n\n")
             header1 = "|{:^21}|".format("Tracker name")
             header2 = "|{:^21}|".format("Video name")
@@ -288,7 +370,7 @@ class OPEBenchmark:
 
         tracker_name_len = max((max([len(x) for x in success_ret.keys()]) + 2), 12)
         header = ("|{:^" + str(tracker_name_len) + "}|{:^9}|{:^11}|{:^14}|").format(
-            "Baseline", "Success", "Precision", "Anchor ratio"
+            "Tracker name", "Success", "Precision", "Anchor ratio"
         )
         formatter = "|{:^" + str(tracker_name_len) + "}|{:^9.3f}|{:^11.3f}|{:^14.3f}|"
         print("-" * len(header))
@@ -310,10 +392,7 @@ class OPEBenchmark:
             print(formatter.format(tracker_name, success, precision, anchor))
         print("-" * len(header))
 
-        if (
-            show_video_level
-            and precision_ret is not None
-        ):
+        if show_video_level and precision_ret is not None:
             print("\n\n")
             header1 = "|{:^21}|".format("Tracker name")
             header2 = "|{:^21}|".format("Video name")

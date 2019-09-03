@@ -62,11 +62,11 @@ class NFSDatasetClass(BaseDataset):
         try:
             ground_truth_rect = np.loadtxt(str(anno_path), dtype=str)
         except:
-            ground_truth_rect = np.loadtxt(
-                str(anno_path), delimiter=",", dtype=str
-            )
+            ground_truth_rect = np.loadtxt(str(anno_path), delimiter=",", dtype=str)
 
-        ground_truth_rect = ground_truth_rect[:, 1:5].astype(float)  # [left, top, right, bottom]
+        ground_truth_rect = ground_truth_rect[:, 1:5].astype(
+            float
+        )  # [left, top, right, bottom]
         ground_truth_rect[:, 2:] -= ground_truth_rect[
             :, :2
         ]  # [left, top, width, height]
