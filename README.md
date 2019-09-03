@@ -54,7 +54,7 @@ mkdir AAA-journal/external
 cd AAA-journal/external
 git clone [EXPERT_GIT]
 conda activate [ENV_NAME]
-bash run_experts.sh
+bash run.sh
 python run_algorithm.py
 ```
 
@@ -66,9 +66,9 @@ python run_algorithm.py
 
 4. Run algorithms what you want.<sup>[6]</sup>
 
-5. Evaluate the trackers.
+5. Evaluate the trackers and the baselines.
 
-[6] The code is supposed to run algorithms after running experts for test. However, it is not difficult to modify the code to do both simultaneously.
+[6] The code is supposed to run algorithms after running experts for test. However, it is easy to modify the code to do both simultaneously.
 
 ## Author
 

@@ -132,38 +132,16 @@ def main(algorithm_name, experts, dataset_name, **kargs):
         from algorithms.average import Average
 
         algorithm = Average(n_experts)
-    elif algorithm_name == "Both":
-        from algorithms.baseline import Baseline
-
-        algorithm = Baseline(
-            n_experts,
-            name="Both_%s_%s" % (kargs["iou_threshold"], kargs["feature_threshold"]),
-            iou_threshold=kargs["iou_threshold"],
-            feature_threshold=kargs["feature_threshold"],
-            use_iou=True,
-            use_feature=True,
-        )
     elif algorithm_name == "MCCT":
         from algorithms.mcct import MCCT
 
         algorithm = MCCT(n_experts)
-    elif algorithm_name == "Overlap":
+    elif algorithm_name == "Max":
         from algorithms.baseline import Baseline
 
         algorithm = Baseline(
             n_experts,
-            name="Overlap_%s" % kargs["iou_threshold"],
-            iou_threshold=kargs["iou_threshold"],
-            use_iou=True,
-            use_feature=False,
-        )
-    elif algorithm_name == "Similar":
-        from algorithms.baseline import Baseline
-
-        algorithm = Baseline(
-            n_experts,
-            name="Similar_%s" % kargs["feature_threshold"],
-            feature_threshold=kargs["feature_threshold"],
+            name="Max",
             use_iou=False,
             use_feature=True,
         )
@@ -205,7 +183,7 @@ if __name__ == "__main__":
     ]
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--algorithm", default="AAA_select", type=str)
+    parser.add_argument("-a", "--algorithm", default="AAA", type=str)
     parser.add_argument("-e", "--experts", default=experts, nargs="+")
     parser.add_argument("-d", "--dataset", default="OTB", type=str)
     parser.add_argument("-t", "--iou_threshold", default=0.0, type=float)

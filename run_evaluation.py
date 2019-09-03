@@ -24,14 +24,20 @@ def main(trackers, algorithms, dataset_name):
         raise ValueError("Unknown dataset name")
 
     benchmark = OPEBenchmark(dataset)
-    # success = benchmark.eval_success(trackers)
-    # precision = benchmark.eval_precision(trackers)
-    # benchmark.show_result(success, precision)
+    success = benchmark.eval_success(trackers)
+    precision = benchmark.eval_precision(trackers)
+    benchmark.show_result(success, precision, show_video_level=False)
 
     success_anchor, anchor_ratio = benchmark.eval_success_anchor(algorithms)
     precision_anchor = benchmark.eval_precision_anchor(algorithms)
     benchmark.show_result_anchor(
         success_anchor, precision_anchor, anchor_ratio=anchor_ratio
+    )
+
+    success_offline, anchor_ratio = benchmark.eval_success_offline(algorithms)
+    precision_offline = benchmark.eval_precision_offline(algorithms)
+    benchmark.show_result_anchor(
+        success_offline, precision_offline, anchor_ratio=anchor_ratio
     )
 
 
@@ -50,17 +56,9 @@ if __name__ == "__main__":
         "Average",
         "MCCT",
     ]
-
-    trackers += ["AAA_%s_True_True_True_True_True_True" % x for x in [0.2, 0.3]]
-
-    thresholds = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9][::-1]
-
-    baselines = (
-        ["Overlap_%s" % threshold for threshold in thresholds]
-        # + ["Both_%s" % threshold for threshold in thresholds]
-        # + ["Similar_%s" % threshold for threshold in thresholds]
-    )
+    algorithms = []
+    trackers += algorithms
 
     dataset = "OTB"
 
-    main(trackers, baselines, dataset)
+    main(trackers, algorithms, dataset)

@@ -9,8 +9,6 @@ class Baseline(Algorithm):
     def __init__(
         self,
         n_experts,
-        iou_threshold=0.0,
-        feature_threshold=0.0,
         name="Baseline",
         use_iou=True,
         use_feature=True,
@@ -21,8 +19,8 @@ class Baseline(Algorithm):
 
         # Anchor extractor
         self.detector = AnchorDetector(
-            iou_threshold=iou_threshold,
-            feature_threshold=feature_threshold,
+            iou_threshold=0.0,
+            feature_threshold=0.0,
             only_max=True,
             use_iou=use_iou,
             use_feature=use_feature,
