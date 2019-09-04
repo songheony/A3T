@@ -4,6 +4,7 @@ import numpy as np
 import torch
 from torchvision import models
 from torchvision import transforms
+import torch.nn as nn
 import scipy.special as sc
 
 
@@ -20,16 +21,22 @@ def calc_overlap(rect1, rect2):
     left = np.maximum(rect1[:, 0], rect2[:, 0])
     left_min = np.minimum(rect1[:, 0], rect2[:, 0])
     right = np.minimum(rect1[:, 0] + rect1[:, 2], rect2[:, 0] + rect2[:, 2])
-    right_max = np.maximum(rect1[:, 0] + rect1[:, 2], rect2[:, 0] + rect2[:, 2])
+    right_max = np.maximum(
+        rect1[:, 0] + rect1[:, 2], rect2[:, 0] + rect2[:, 2]
+    )
     top = np.maximum(rect1[:, 1], rect2[:, 1])
     top_min = np.minimum(rect1[:, 1], rect2[:, 1])
     bottom = np.minimum(rect1[:, 1] + rect1[:, 3], rect2[:, 1] + rect2[:, 3])
-    bottom_max = np.maximum(rect1[:, 1] + rect1[:, 3], rect2[:, 1] + rect2[:, 3])
+    bottom_max = np.maximum(
+        rect1[:, 1] + rect1[:, 3], rect2[:, 1] + rect2[:, 3]
+    )
 
     intersect = np.maximum(0, right - left) * np.maximum(0, bottom - top)
     union = rect1[:, 2] * rect1[:, 3] + rect2[:, 2] * rect2[:, 3] - intersect
     iou = np.clip(intersect / union, 0, 1)
-    closure = np.maximum(0, right_max - left_min) * np.maximum(0, bottom_max - top_min)
+    closure = np.maximum(0, right_max - left_min) * np.maximum(
+        0, bottom_max - top_min
+    )
     g_iou = iou - (closure - union) / closure
     g_iou = (1 + g_iou) / 2
     return g_iou
@@ -99,7 +106,9 @@ class AnchorDetector:
         if self.only_max:
             max_id = -1
             max_score = 0
-            for i, (iou_score, feature) in enumerate(zip(iou_scores, features)):
+            for i, (iou_score, feature) in enumerate(
+                zip(iou_scores, features)
+            ):
                 flag = False
 
                 if self.use_iou:
@@ -109,7 +118,9 @@ class AnchorDetector:
                     iou_score = 1.0
 
                 if self.use_feature:
-                    feature_score = calc_similarity(self.target_feature, feature)
+                    feature_score = calc_similarity(
+                        self.target_feature, feature
+                    )
                     feature_score = feature_score ** feature_factor
                     flag = flag or (feature_score >= self.feature_threshold)
                 else:
@@ -126,7 +137,9 @@ class AnchorDetector:
                 detected = []
         else:
             detected = []
-            for i, (iou_score, feature) in enumerate(zip(iou_scores, features)):
+            for i, (iou_score, feature) in enumerate(
+                zip(iou_scores, features)
+            ):
                 flag = False
 
                 if self.use_iou:
@@ -134,7 +147,9 @@ class AnchorDetector:
                     flag = flag or (iou_score >= self.iou_threshold)
 
                 if self.use_feature:
-                    feature_score = calc_similarity(self.target_feature, feature)
+                    feature_score = calc_similarity(
+                        self.target_feature, feature
+                    )
                     feature_score = feature_score ** feature_factor
                     flag = flag or (feature_score >= self.feature_threshold)
 
@@ -247,19 +262,28 @@ class ShortestPathTracker:
             last_edges.append((str((self.frame_id, i)), "sink", 0))
         g = igraph.Graph.TupleList(last_edges, weights=True, directed=True)
         path = g.get_shortest_paths(
-            "source", to="sink", weights="weight", mode=igraph.OUT, output="vpath"
+            "source",
+            to="sink",
+            weights="weight",
+            mode=igraph.OUT,
+            output="vpath",
         )
         ids = []
         for i in path[0][1:-1]:
-            ids.append(tuple(int(s) for s in g.vs[i]["name"].strip("()").split(",")))
+            ids.append(
+                tuple(int(s) for s in g.vs[i]["name"].strip("()").split(","))
+            )
         return ids
 
 
 class FeatureExtractor:
     def __init__(self, device):
-        self.model = models.resnet18(pretrained=True).to(device)
-        self.model.eval()
-        self.extractor = self.model._modules.get("avgpool")
+        self.device = device
+        model = models.resnet50(pretrained=True).to(self.device)
+        feature_map = list(model.children())
+        feature_map.pop()
+        self.extractor = nn.Sequential(*feature_map).to(self.device)
+        self.extractor.eval()
         self.transform = transforms.Compose(
             [
                 transforms.Scale((224, 224)),
@@ -278,7 +302,9 @@ class FeatureExtractor:
             max_y = min(image.size[1], bbox[1] + bbox[3])
             min_x = max(0, bbox[0])
             min_y = max(0, bbox[1])
-            croped_image = self.transform(image.crop((min_x, min_y, max_x, max_y)))
+            croped_image = self.transform(
+                image.crop((min_x, min_y, max_x, max_y))
+            )
             croped_images.append(croped_image)
         croped_images = torch.stack(croped_images)
         features = self._get_vector(croped_images)
@@ -286,14 +312,6 @@ class FeatureExtractor:
         return features
 
     def _get_vector(self, x):
-        x = x.cuda()
-        embedding = torch.zeros((x.shape[0], 512))
-
-        def copy_data(m, i, o):
-            embedding.copy_(o.data.view(x.shape[0], -1).data)
-
-        h = self.extractor.register_forward_hook(copy_data)
-        self.model(x)
-        h.remove()
-
+        x = x.to(self.device)
+        embedding = self.extractor(x).view(x.shape[0], -1).data
         return embedding

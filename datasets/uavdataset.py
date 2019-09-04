@@ -62,7 +62,9 @@ class UAVDatasetClass(BaseDataset):
                 str(anno_path), delimiter=",", dtype=np.float64
             )
 
-        return Sequence(sequence_info["name"], frames, ground_truth_rect[init_omit:, :])
+        return Sequence(
+            sequence_info["name"], frames, ground_truth_rect[init_omit:, :]
+        )
 
     def __len__(self):
         return len(self.sequence_info_list)

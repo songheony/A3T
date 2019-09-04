@@ -44,7 +44,7 @@ def run_sequence(seq, algorithm, experts, debug=False):
     print(
         "FPS: {} Anchor: {}".format(
             len(exec_times) / exec_times.sum(),
-            (sum(x is not None for x in offline_bb) + 1) / len(offline_bb),
+            (sum(x is not None for x in offline_bb) + 1) / len(tracked_bb),
         )
     )
     if not debug:
@@ -71,9 +71,7 @@ def run_dataset(dataset, algorithms, experts, debug=False, threads=0):
     if mode == "sequential":
         for seq in dataset:
             for algorithm_info in algorithms:
-                run_sequence(
-                    seq, algorithm_info, experts, debug=debug
-                )
+                run_sequence(seq, algorithm_info, experts, debug=debug)
     elif mode == "parallel":
         param_list = [
             (seq, algorithm_info, experts, debug)
@@ -120,10 +118,7 @@ def main(algorithm_name, experts, dataset_name, **kargs):
         from algorithms.baseline import Baseline
 
         algorithm = Baseline(
-            n_experts,
-            name="Max",
-            use_iou=False,
-            use_feature=True,
+            n_experts, name="Max", use_iou=False, use_feature=True
         )
     else:
         raise ValueError("Unknown algorithm name")
@@ -168,8 +163,4 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--dataset", default="OTB", type=str)
     args = parser.parse_args()
 
-    main(
-        args.algorithm,
-        args.experts,
-        args.dataset,
-    )
+    main(args.algorithm, args.experts, args.dataset)

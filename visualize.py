@@ -43,7 +43,10 @@ def draw_curve(dataset_name, trackers, success_ret, precision_ret):
     ax.legend()
     handles, labels = ax.get_legend_handles_labels()
     idx = np.argsort(
-        [np.mean(list(success_ret[tracker_name].values())) for tracker_name in trackers]
+        [
+            np.mean(list(success_ret[tracker_name].values()))
+            for tracker_name in trackers
+        ]
     )[::-1]
     handles, labels = [handles[i] for i in idx], [labels[i] for i in idx]
     ax.legend(handles, labels, loc="lower right", labelspacing=0.2)
@@ -116,7 +119,11 @@ def draw_rank(dataset_name, trackers, success_ret, precision_ret):
     for seq in range(ranks.shape[1]):
         temp = np.argsort(seq_performance[:, seq])[::-1]
         ranks[temp, seq] = np.arange(len(temp)) + 1
-    ax.hist(ranks.tolist(), label=trackers, bins=np.arange(1, len(trackers) + 2) - 0.5)
+    ax.hist(
+        ranks.tolist(),
+        label=trackers,
+        bins=np.arange(1, len(trackers) + 2) - 0.5,
+    )
 
     ax.legend(labelspacing=0.2)
     ax.set_xticks(range(1, len(trackers) + 1))

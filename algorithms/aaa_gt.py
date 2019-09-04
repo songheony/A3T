@@ -99,9 +99,9 @@ class AAA_gt(Algorithm):
         if anchor:
             # Get offline tracking results
             self.prev_boxes = np.array(self.prev_boxes)
-            offline_results = self.gt[self.anchor + 1 : self.frame].tolist() + [
-                boxes[detected[0]]
-            ]
+            offline_results = self.gt[
+                self.anchor + 1 : self.frame
+            ].tolist() + [boxes[detected[0]]]
             offline_results = np.array(offline_results)
             self.anchor = self.frame
 
@@ -132,7 +132,9 @@ class AAA_gt(Algorithm):
         offline_results = #frames X 4
         """
 
-        expert_gradient_losses = np.zeros((self.n_experts, len(offline_results)))
+        expert_gradient_losses = np.zeros(
+            (self.n_experts, len(offline_results))
+        )
 
         for i in range(self.n_experts):
             expert_results = self.prev_boxes[:, i, :]

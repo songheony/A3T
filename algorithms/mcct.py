@@ -61,7 +61,10 @@ class MCCT(Algorithm):
                 self.target_sz, config=self.scale_config
             )
             self.scale_estimator.init(
-                first_frame, self._center, self.base_target_sz, self.scale_factor
+                first_frame,
+                self._center,
+                self.base_target_sz,
+                self.scale_factor,
             )
 
         self.avg_dim = avg_dim
@@ -92,7 +95,8 @@ class MCCT(Algorithm):
 
             pre_center = self.experts[i].centers[self.frame_idx - 1]
             smooth = np.sqrt(
-                (center[0] - pre_center[0]) ** 2 + (center[1] - pre_center[1]) ** 2
+                (center[0] - pre_center[0]) ** 2
+                + (center[1] - pre_center[1]) ** 2
             )
             self.experts[i].smoothes.append(smooth)
             self.experts[i].smooth_scores.append(
@@ -112,8 +116,12 @@ class MCCT(Algorithm):
                     )
                 )
 
-                self.id_ensemble[i] = self.experts[i].rob_scores[self.frame_idx]
-            self.mean_score.append(np.sum(np.array(self.id_ensemble)) / self.expert_num)
+                self.id_ensemble[i] = self.experts[i].rob_scores[
+                    self.frame_idx
+                ]
+            self.mean_score.append(
+                np.sum(np.array(self.id_ensemble)) / self.expert_num
+            )
             idx = np.argmax(np.array(self.id_ensemble))
             self._center = self.experts[idx].pos
         else:
@@ -124,7 +132,10 @@ class MCCT(Algorithm):
 
         if self.scale_adaptation:
             self.scale_factor = self.scale_estimator.update(
-                current_frame, self._center, self.base_target_sz, self.scale_factor
+                current_frame,
+                self._center,
+                self.base_target_sz,
+                self.scale_factor,
             )
             self.target_sz = (
                 round(self.base_target_sz[0] * self.scale_factor),
@@ -142,7 +153,9 @@ class MCCT(Algorithm):
             self.id_ensemble,
         )
 
-    def robustness_eva(self, experts, num, frame_idx, period, weight, expert_num):
+    def robustness_eva(
+        self, experts, num, frame_idx, period, weight, expert_num
+    ):
         overlap_score = np.zeros((period, expert_num))
         for i in range(expert_num):
             bboxes1 = np.array(experts[i].rect_positions)[
@@ -156,7 +169,10 @@ class MCCT(Algorithm):
         avg_overlap = np.sum(overlap_score, axis=1) / expert_num
         expert_avg_overlap = np.sum(overlap_score, axis=0) / period
         var_overlap = np.sqrt(
-            np.sum((overlap_score - expert_avg_overlap[np.newaxis, :]) ** 2, axis=1)
+            np.sum(
+                (overlap_score - expert_avg_overlap[np.newaxis, :]) ** 2,
+                axis=1,
+            )
             / expert_num
         )
         norm_factor = 1 / np.sum(np.array(weight))

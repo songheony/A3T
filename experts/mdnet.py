@@ -48,7 +48,10 @@ class MDnet(Expert):
 
         # Draw pos/neg samples
         self.pos_examples = SampleGenerator(
-            "gaussian", image.size, self.opts["trans_pos"], self.opts["scale_pos"]
+            "gaussian",
+            image.size,
+            self.opts["trans_pos"],
+            self.opts["scale_pos"],
         )(box, self.opts["n_pos_init"], self.opts["overlap_pos_init"])
 
         self.neg_examples = np.concatenate(
@@ -96,7 +99,9 @@ class MDnet(Expert):
             self.opts["scale_bbreg"],
             self.opts["aspect_bbreg"],
         )(box, self.opts["n_bbreg"], self.opts["overlap_bbreg"])
-        self.bbreg_feats = forward_samples(self.model, image, self.bbreg_examples)
+        self.bbreg_feats = forward_samples(
+            self.model, image, self.bbreg_examples
+        )
         self.bbreg = BBRegressor(image.size)
         self.bbreg.train(self.bbreg_feats, self.bbreg_examples, box)
         del self.bbreg_feats
@@ -107,10 +112,16 @@ class MDnet(Expert):
             "gaussian", image.size, self.opts["trans"], self.opts["scale"]
         )
         self.pos_generator = SampleGenerator(
-            "gaussian", image.size, self.opts["trans_pos"], self.opts["scale_pos"]
+            "gaussian",
+            image.size,
+            self.opts["trans_pos"],
+            self.opts["scale_pos"],
         )
         self.neg_generator = SampleGenerator(
-            "uniform", image.size, self.opts["trans_neg"], self.opts["scale_neg"]
+            "uniform",
+            image.size,
+            self.opts["trans_neg"],
+            self.opts["scale_neg"],
         )
 
         # Init pos/neg features for update
@@ -128,7 +139,9 @@ class MDnet(Expert):
         image = Image.fromarray(image)
 
         # Estimate target bbox
-        self.samples = self.sample_generator(self.before_target, self.opts["n_samples"])
+        self.samples = self.sample_generator(
+            self.before_target, self.opts["n_samples"]
+        )
         self.sample_scores = forward_samples(
             self.model, image, self.samples, out_layer="fc6"
         )
@@ -152,7 +165,9 @@ class MDnet(Expert):
             self.bbreg_samples = self.samples[self.top_idx]
             if self.top_idx.shape[0] == 1:
                 self.bbreg_samples = self.bbreg_samples[None, :]
-            self.bbreg_feats = forward_samples(self.model, image, self.bbreg_samples)
+            self.bbreg_feats = forward_samples(
+                self.model, image, self.bbreg_samples
+            )
             self.bbreg_samples = self.bbreg.predict(
                 self.bbreg_feats, self.bbreg_samples
             )
@@ -167,7 +182,9 @@ class MDnet(Expert):
                 self.opts["n_pos_update"],
                 self.opts["overlap_pos_update"],
             )
-            self.pos_feats = forward_samples(self.model, image, self.pos_examples)
+            self.pos_feats = forward_samples(
+                self.model, image, self.pos_examples
+            )
             self.pos_feats_all.append(self.pos_feats)
             if len(self.pos_feats_all) > self.opts["n_frames_long"]:
                 del self.pos_feats_all[0]
@@ -177,14 +194,18 @@ class MDnet(Expert):
                 self.opts["n_neg_update"],
                 self.opts["overlap_neg_update"],
             )
-            self.neg_feats = forward_samples(self.model, image, self.neg_examples)
+            self.neg_feats = forward_samples(
+                self.model, image, self.neg_examples
+            )
             self.neg_feats_all.append(self.neg_feats)
             if len(self.neg_feats_all) > self.opts["n_frames_short"]:
                 del self.neg_feats_all[0]
 
         # Short term update
         if not self.success:
-            self.nframes = min(self.opts["n_frames_short"], len(self.pos_feats_all))
+            self.nframes = min(
+                self.opts["n_frames_short"], len(self.pos_feats_all)
+            )
             self.pos_data = torch.cat(self.pos_feats_all[-self.nframes :], 0)
             self.neg_data = torch.cat(self.neg_feats_all, 0)
             train(

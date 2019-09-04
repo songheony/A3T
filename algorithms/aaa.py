@@ -152,7 +152,10 @@ class AAA(Algorithm):
             # Get offline tracking results
             self.prev_boxes = np.array(self.prev_boxes)
             offline_results = np.array(
-                [self.prev_boxes[(frame, ind[1])] for frame, ind in enumerate(path)]
+                [
+                    self.prev_boxes[(frame, ind[1])]
+                    for frame, ind in enumerate(path)
+                ]
             )
 
             # Calc losses of experts
@@ -190,7 +193,9 @@ class AAA(Algorithm):
         offline_results = #frames X 4
         """
 
-        expert_gradient_losses = np.zeros((self.n_experts, len(offline_results)))
+        expert_gradient_losses = np.zeros(
+            (self.n_experts, len(offline_results))
+        )
 
         for i in range(self.n_experts):
             expert_results = self.prev_boxes[:, i, :]

@@ -44,7 +44,7 @@ def run_sequence(seq, algorithm, experts, debug=False, input_gt=False):
     print(
         "FPS: {} Anchor: {}".format(
             len(exec_times) / exec_times.sum(),
-            sum(x is not None for x in offline_bb) / len(offline_bb),
+            (sum(x is not None for x in offline_bb) + 1) / len(tracked_bb),
         )
     )
     if not debug:
@@ -55,7 +55,9 @@ def run_sequence(seq, algorithm, experts, debug=False, input_gt=False):
             pickle.dump(offline_bb, fp)
 
 
-def run_dataset(dataset, algorithms, experts, debug=False, input_gt=False, threads=0):
+def run_dataset(
+    dataset, algorithms, experts, debug=False, input_gt=False, threads=0
+):
     """Runs a list of experts on a dataset.
     args:
         dataset: List of Sequence instances, forming a dataset.
@@ -72,7 +74,11 @@ def run_dataset(dataset, algorithms, experts, debug=False, input_gt=False, threa
         for seq in dataset:
             for algorithm_info in algorithms:
                 run_sequence(
-                    seq, algorithm_info, experts, debug=debug, input_gt=input_gt
+                    seq,
+                    algorithm_info,
+                    experts,
+                    debug=debug,
+                    input_gt=input_gt,
                 )
     elif mode == "parallel":
         param_list = [
@@ -85,7 +91,13 @@ def run_dataset(dataset, algorithms, experts, debug=False, input_gt=False, threa
 
 
 def run_tracker(
-    algorithm, experts, dataset, sequence=None, debug=0, input_gt=False, threads=0
+    algorithm,
+    experts,
+    dataset,
+    sequence=None,
+    debug=0,
+    input_gt=False,
+    threads=0,
 ):
     """Run tracker on sequence or dataset.
     args:
@@ -166,17 +178,17 @@ if __name__ == "__main__":
     ]
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--algorithm", default="AAA", type=str)
+    parser.add_argument("-a", "--algorithm", default="AAA_select", type=str)
     parser.add_argument("-e", "--experts", default=experts, nargs="+")
     parser.add_argument("-d", "--dataset", default="OTB", type=str)
     parser.add_argument("-t", "--iou_threshold", default=0.0, type=float)
     parser.add_argument("-r", "--feature_threshold", default=0.0, type=float)
     parser.add_argument("-m", "--only_max", action="store_true")
     parser.add_argument("-i", "--use_iou", action="store_true")
-    parser.add_argument("-f", "--use_feature", action="store_true")
-    parser.add_argument("-x", "--cost_iou", action="store_true")
-    parser.add_argument("-y", "--cost_feature", action="store_true")
-    parser.add_argument("-z", "--cost_score", action="store_true")
+    parser.add_argument("-f", "--use_feature", action="store_false")
+    parser.add_argument("-x", "--cost_iou", action="store_false")
+    parser.add_argument("-y", "--cost_feature", action="store_false")
+    parser.add_argument("-z", "--cost_score", action="store_false")
     args = parser.parse_args()
 
     main(

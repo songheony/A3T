@@ -26,7 +26,9 @@ class SiamRPNPP(Expert):
 
         # load model
         self.model.load_state_dict(
-            torch.load(snapshot, map_location=lambda storage, loc: storage.cpu())
+            torch.load(
+                snapshot, map_location=lambda storage, loc: storage.cpu()
+            )
         )
         self.model.eval().to(device)
 

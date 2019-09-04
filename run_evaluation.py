@@ -28,16 +28,18 @@ def main(trackers, algorithms, dataset_name):
     precision = benchmark.eval_precision(trackers)
     benchmark.show_result(success, precision, show_video_level=False)
 
-    success_anchor, anchor_ratio = benchmark.eval_success_anchor(algorithms)
-    precision_anchor = benchmark.eval_precision_anchor(algorithms)
-    benchmark.show_result_anchor(
-        success_anchor, precision_anchor, anchor_ratio=anchor_ratio
+    success_offline, overlap_anchor, anchor_ratio = benchmark.eval_success_offline(
+        algorithms
     )
-
-    success_offline, anchor_ratio = benchmark.eval_success_offline(algorithms)
-    precision_offline = benchmark.eval_precision_offline(algorithms)
-    benchmark.show_result_anchor(
-        success_offline, precision_offline, anchor_ratio=anchor_ratio
+    precision_offline, dist_anchor, anchor_ratio = benchmark.eval_precision_offline(
+        algorithms
+    )
+    benchmark.show_result_offline(
+        success_offline,
+        overlap_anchor,
+        precision_offline,
+        dist_anchor,
+        anchor_ratio,
     )
 
 
@@ -54,9 +56,13 @@ if __name__ == "__main__":
         "STRCF",
         "TADT",
         "Average",
+        # "Max",
         "MCCT",
     ]
-    algorithms = []
+    algorithms = [
+        "AAA_select_0.0_%s_False_False_True_True_True_True" % threshold
+        for threshold in [0.75]
+    ]
     trackers += algorithms
 
     dataset = "OTB"
