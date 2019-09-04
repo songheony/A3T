@@ -57,9 +57,7 @@ class OTBDatasetClass(BaseDataset):
                     break
 
             if isinstance(ext, list):
-                raise Exception(
-                    "Sequence {} not found".format(sequence_info["name"])
-                )
+                raise Exception("Sequence {} not found".format(sequence_info["name"]))
 
         frames = [
             "{base_path}/{sequence_path}/{frame:0{nz}}.{ext}".format(
@@ -81,9 +79,7 @@ class OTBDatasetClass(BaseDataset):
                 str(anno_path), delimiter=",", dtype=np.float64
             )
 
-        return Sequence(
-            sequence_info["name"], frames, ground_truth_rect[init_omit:, :]
-        )
+        return Sequence(sequence_info["name"], frames, ground_truth_rect[init_omit:, :])
 
     def __len__(self):
         """Overload this function in your evaluation. This should return number of sequences in the evaluation """

@@ -47,16 +47,12 @@ class OPEBenchmark:
             anchor_frame_ = {}
             for seq in self.dataset:
                 gt_traj = np.array(seq.ground_truth_rect)
-                results_dir = "{}/{}".format(
-                    env_settings().results_path, tracker_name
-                )
+                results_dir = "{}/{}".format(env_settings().results_path, tracker_name)
                 base_results_path = "{}/{}".format(results_dir, seq.name)
                 results_path = "{}.txt".format(base_results_path)
                 tracker_traj = np.loadtxt(results_path, delimiter="\t")
                 n_frame = len(gt_traj)
-                success_ret_[seq.name] = success_overlap(
-                    gt_traj, tracker_traj, n_frame
-                )
+                success_ret_[seq.name] = success_overlap(gt_traj, tracker_traj, n_frame)
                 if show_anchor:
                     offline_path = "{}_offline.pkl".format(base_results_path)
                     with open(offline_path, "rb") as fp:
@@ -105,22 +101,24 @@ class OPEBenchmark:
                         results += box.tolist()
                 results = np.array(results)
                 offline_gt = gt_traj[: len(results)]
-                offline_ret_[seq.name] = success_overlap(
-                    offline_gt, results, len(results)
-                )
+                if len(results) > 0:
+                    offline_ret_[seq.name] = success_overlap(
+                        offline_gt, results, len(results)
+                    )
+                else:
+                    offline_ret_[seq.name] = np.array([0])
 
                 valid_idx = [x is not None for x in offline_bb]
                 anchor_box = np.array(
-                    [
-                        offline_bb[i][-1]
-                        for i in range(len(offline_bb))
-                        if valid_idx[i]
-                    ]
+                    [offline_bb[i][-1] for i in range(len(offline_bb)) if valid_idx[i]]
                 )
                 anchor_gt = np.array(
                     [gt_traj[i] for i in range(len(gt_traj)) if valid_idx[i]]
                 )
-                anchor_ret_[seq.name] = overlap_ratio(anchor_gt, anchor_box)
+                if len(anchor_box) > 0:
+                    anchor_ret_[seq.name] = overlap_ratio(anchor_gt, anchor_box)
+                else:
+                    anchor_ret_[seq.name] = np.array([0])
 
                 anchor_ratio_[seq.name] = sum(valid_idx) / len(gt_traj)
             offline_ret[algorithm_name] = offline_ret_
@@ -141,9 +139,7 @@ class OPEBenchmark:
             precision_ret_ = {}
             for seq in self.dataset:
                 gt_traj = np.array(seq.ground_truth_rect)
-                results_dir = "{}/{}".format(
-                    env_settings().results_path, tracker_name
-                )
+                results_dir = "{}/{}".format(env_settings().results_path, tracker_name)
                 base_results_path = "{}/{}".format(results_dir, seq.name)
                 results_path = "{}.txt".format(base_results_path)
                 tracker_traj = np.loadtxt(results_path, delimiter="\t")
@@ -190,32 +186,33 @@ class OPEBenchmark:
                     if box is not None:
                         results += box.tolist()
                 results = np.array(results)
-                results_center = self.convert_bb_to_center(results)
-                offline_gt = gt_traj[: len(results)]
-                offline_gt_center = self.convert_bb_to_center(offline_gt)
-                offline_ret_[seq.name] = success_error(
-                    offline_gt_center, results_center, thresholds, len(results)
-                )
+                if len(results) > 0:
+                    results_center = self.convert_bb_to_center(results)
+                    offline_gt = gt_traj[: len(results)]
+                    offline_gt_center = self.convert_bb_to_center(offline_gt)
+                    offline_ret_[seq.name] = success_error(
+                        offline_gt_center, results_center, thresholds, len(results)
+                    )
+                else:
+                    offline_ret_[seq.name] = np.array([0])
 
                 valid_idx = [x is not None for x in offline_bb]
                 anchor_box = np.array(
-                    [
-                        offline_bb[i][-1]
-                        for i in range(len(offline_bb))
-                        if valid_idx[i]
-                    ]
+                    [offline_bb[i][-1] for i in range(len(offline_bb)) if valid_idx[i]]
                 )
-                anchor_box_center = self.convert_bb_to_center(anchor_box)
-                anchor_gt = np.array(
-                    [gt_traj[i] for i in range(len(gt_traj)) if valid_idx[i]]
-                )
-                anchor_gt_center = self.convert_bb_to_center(anchor_gt)
-                anchor_ret_[seq.name] = np.sqrt(
-                    np.sum(
-                        np.power(anchor_gt_center - anchor_box_center, 2),
-                        axis=1,
+                if len(anchor_box) > 0:
+                    anchor_box_center = self.convert_bb_to_center(anchor_box)
+                    anchor_gt = np.array(
+                        [gt_traj[i] for i in range(len(gt_traj)) if valid_idx[i]]
                     )
-                )
+                    anchor_gt_center = self.convert_bb_to_center(anchor_gt)
+                    anchor_ret_[seq.name] = np.sqrt(
+                        np.sum(
+                            np.power(anchor_gt_center - anchor_box_center, 2), axis=1
+                        )
+                    )
+                else:
+                    anchor_ret_[seq.name] = np.array([0])
 
                 anchor_ratio_[seq.name] = sum(valid_idx) / len(gt_traj)
             offline_ret[algorithm_name] = offline_ret_
@@ -236,9 +233,7 @@ class OPEBenchmark:
             norm_precision_ret_ = {}
             for seq in self.dataset:
                 gt_traj = np.array(seq.ground_truth_rect)
-                results_dir = "{}/{}".format(
-                    env_settings().results_path, tracker_name
-                )
+                results_dir = "{}/{}".format(env_settings().results_path, tracker_name)
                 base_results_path = "{}/{}".format(results_dir, seq.name)
                 results_path = "{}.txt".format(base_results_path)
                 tracker_traj = np.loadtxt(results_path, delimiter="\t")
@@ -274,20 +269,16 @@ class OPEBenchmark:
 
         tracker_dp = {}
         for tracker_name in precision_ret.keys():
-            dp = np.mean(list(precision_ret[tracker_name].values()), axis=0)[
-                20
-            ]
+            dp = np.mean(list(precision_ret[tracker_name].values()), axis=0)[20]
             tracker_dp[tracker_name] = dp
 
         # sort tracker
-        tracker_auc_ = sorted(
-            tracker_auc.items(), key=lambda x: x[1], reverse=True
-        )[:20]
+        tracker_auc_ = sorted(tracker_auc.items(), key=lambda x: x[1], reverse=True)[
+            :20
+        ]
         tracker_names = [x[0] for x in tracker_auc_]
 
-        tracker_name_len = max(
-            (max([len(x) for x in success_ret.keys()]) + 2), 12
-        )
+        tracker_name_len = max((max([len(x) for x in success_ret.keys()]) + 2), 12)
         header = ("|{:^" + str(tracker_name_len) + "}|{:^9}|{:^11}|").format(
             "Tracker name", "Success", "Precision"
         )
@@ -354,9 +345,7 @@ class OPEBenchmark:
 
         tracker_dp = {}
         for tracker_name in precision_ret.keys():
-            dp = np.mean(list(precision_ret[tracker_name].values()), axis=0)[
-                20
-            ]
+            dp = np.mean(list(precision_ret[tracker_name].values()), axis=0)[20]
             tracker_dp[tracker_name] = dp
 
         tracker_dist = {}
@@ -373,26 +362,13 @@ class OPEBenchmark:
             tracker_ratio[tracker_name] = ratio
 
         # sort tracker
-        tracker_auc_ = sorted(
-            tracker_auc.items(), key=lambda x: x[1], reverse=True
-        )
+        tracker_auc_ = sorted(tracker_auc.items(), key=lambda x: x[1], reverse=True)
         tracker_names = [x[0] for x in tracker_auc_]
 
-        tracker_name_len = max(
-            (max([len(x) for x in success_ret.keys()]) + 2), 12
-        )
+        tracker_name_len = max((max([len(x) for x in success_ret.keys()]) + 2), 12)
         header = (
-            "|{:^"
-            + str(tracker_name_len)
-            + "}|{:^9}|{:^11}|{:^9}|{:^6}|{:^14}|"
-        ).format(
-            "Algorithm",
-            "Success",
-            "Precision",
-            "Overlap",
-            "Dist",
-            "Anchor ratio",
-        )
+            "|{:^" + str(tracker_name_len) + "}|{:^9}|{:^11}|{:^9}|{:^6}|{:^14}|"
+        ).format("Algorithm", "Success", "Precision", "Overlap", "Dist", "Anchor ratio")
         formatter = (
             "|{:^"
             + str(tracker_name_len)
@@ -408,8 +384,6 @@ class OPEBenchmark:
             dist = tracker_dist[tracker_name]
             ratio = tracker_ratio[tracker_name]
             print(
-                formatter.format(
-                    tracker_name, success, precision, overlap, dist, ratio
-                )
+                formatter.format(tracker_name, success, precision, overlap, dist, ratio)
             )
         print("-" * len(header))

@@ -10,7 +10,9 @@ class SiamRPN(Expert):
     def __init__(self):
         super(SiamRPN, self).__init__("SiamRPN")
         # TODO: edit this path
-        self.net_file = "/home/heonsong/Desktop/AAA/AAA-journal/external/siamrpn_pytorch/model.pth"
+        self.net_file = (
+            "/home/heonsong/Desktop/AAA/AAA-journal/external/siamrpn_pytorch/model.pth"
+        )
 
     def initialize(self, image, box):
         image = Image.fromarray(image)

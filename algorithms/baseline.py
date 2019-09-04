@@ -6,9 +6,7 @@ from .aaa_util import FeatureExtractor, AnchorDetector, calc_iou_score
 
 
 class Baseline(Algorithm):
-    def __init__(
-        self, n_experts, name="Baseline", use_iou=True, use_feature=True
-    ):
+    def __init__(self, n_experts, name="Baseline", use_iou=True, use_feature=True):
         super(Baseline, self).__init__(name)
 
         self.n_experts = n_experts

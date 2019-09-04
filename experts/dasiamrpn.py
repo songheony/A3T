@@ -13,7 +13,9 @@ from utils import cxy_wh_2_rect
 class DaSiamRPN(Expert):
     def __init__(self):
         super(DaSiamRPN, self).__init__(name="DaSiamRPN")
-        self.net_file = "/home/heonsong/Desktop/AAA/AAA-journal/external/DaSiamRPN/SiamRPNOTB.model"
+        self.net_file = (
+            "/home/heonsong/Desktop/AAA/AAA-journal/external/DaSiamRPN/SiamRPNOTB.model"
+        )
 
     def initialize(self, image, box):
         self.net = SiamRPNotb()

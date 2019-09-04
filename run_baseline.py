@@ -82,9 +82,7 @@ def run_dataset(dataset, algorithms, experts, debug=False, threads=0):
     print("Done")
 
 
-def run_tracker(
-    algorithm, experts, dataset, sequence=None, debug=0, threads=0
-):
+def run_tracker(algorithm, experts, dataset, sequence=None, debug=0, threads=0):
     """Run tracker on sequence or dataset.
     args:
         tracker_name: Name of tracking method.
@@ -117,9 +115,7 @@ def main(algorithm_name, experts, dataset_name, **kargs):
     elif algorithm_name == "Max":
         from algorithms.baseline import Baseline
 
-        algorithm = Baseline(
-            n_experts, name="Max", use_iou=False, use_feature=True
-        )
+        algorithm = Baseline(n_experts, name="Max", use_iou=False, use_feature=True)
     else:
         raise ValueError("Unknown algorithm name")
 

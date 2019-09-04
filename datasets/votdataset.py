@@ -27,9 +27,7 @@ class VOTDatasetClass(BaseDataset):
         self.sequence_list = self._get_sequence_list()
 
     def get_sequence_list(self):
-        return SequenceList(
-            [self._construct_sequence(s) for s in self.sequence_list]
-        )
+        return SequenceList([self._construct_sequence(s) for s in self.sequence_list])
 
     def _construct_sequence(self, sequence_name):
         sequence_path = sequence_name
@@ -37,9 +35,7 @@ class VOTDatasetClass(BaseDataset):
         ext = "jpg"
         start_frame = 1
 
-        anno_path = "{}/{}/groundtruth.txt".format(
-            self.base_path, sequence_name
-        )
+        anno_path = "{}/{}/groundtruth.txt".format(self.base_path, sequence_name)
         try:
             ground_truth_rect = np.loadtxt(str(anno_path), dtype=np.float64)
         except Exception:

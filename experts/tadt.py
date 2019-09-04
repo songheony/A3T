@@ -23,9 +23,7 @@ from taf import taf_model
 class TADT(Expert):
     def __init__(self):
         super(TADT, self).__init__("TADT")
-        self.device = torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu"
-        )
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def initialize(self, image, box):
         # ---------------trackers parameters initialization--------------------------
@@ -40,9 +38,7 @@ class TADT(Expert):
 
         img = image
         self.target_location = box
-        origin_target_size = np.sqrt(
-            self.target_location[2] * self.target_location[3]
-        )
+        origin_target_size = np.sqrt(self.target_location[2] * self.target_location[3])
         origin_image_size = img.shape[0:2][::-1]  # [width,height]
         if origin_target_size > self.config.MODEL.MAX_SIZE:
             self.rescale = self.config.MODEL.MAX_SIZE / origin_target_size
@@ -52,11 +48,7 @@ class TADT(Expert):
         # ----------------scale image cv2 numpy.adarray---------------
         image = cv2.resize(
             img,
-            tuple(
-                (np.ceil(np.array(origin_image_size) * self.rescale)).astype(
-                    int
-                )
-            ),
+            tuple((np.ceil(np.array(origin_image_size) * self.rescale)).astype(int)),
             interpolation=cv2.INTER_LINEAR,
         )
 
@@ -102,10 +94,7 @@ class TADT(Expert):
         )
         # -------------select the target-awares features---------------------------
         self.exemplar_features = features_selection(
-            patch_features,
-            self.feature_weights,
-            self.balance_weights,
-            mode="reduction",
+            patch_features, self.feature_weights, self.balance_weights, mode="reduction"
         )
         # self.exemplar_features = fuse_feature(patch_features)
 
@@ -113,11 +102,7 @@ class TADT(Expert):
         img = image
         image = cv2.resize(
             img,
-            tuple(
-                (
-                    np.ceil(np.array(img.shape[0:2][::-1]) * self.rescale)
-                ).astype(int)
-            ),
+            tuple((np.ceil(np.array(img.shape[0:2][::-1]) * self.rescale)).astype(int)),
             interpolation=cv2.INTER_LINEAR,
         )
         # -------------get multi-scale feature--------------------------------------
@@ -128,15 +113,10 @@ class TADT(Expert):
             self.input_size,
             visualize=False,
         )
-        feature_size = (
-            (torch.tensor(features[0].shape)).numpy().astype(int)[-2:]
-        )
+        feature_size = (torch.tensor(features[0].shape)).numpy().astype(int)[-2:]
         # selected_features = fuse_feature(features)
         selected_features = features_selection(
-            features,
-            self.feature_weights,
-            self.balance_weights,
-            mode="reduction",
+            features, self.feature_weights, self.balance_weights, mode="reduction"
         )
         selected_features_1 = resize_tensor(
             selected_features, tuple(feature_size + self.feature_pad)
@@ -161,14 +141,13 @@ class TADT(Expert):
             ),
         )
         scaled_features = torch.cat(
-            (selected_features_1, selected_features, selected_features_3),
-            dim=0,
+            (selected_features_1, selected_features, selected_features_3), dim=0
         )
 
         # -------------get response map-----------------------------------------------
-        response_map = self.siamese_model(
-            scaled_features, self.exemplar_features
-        ).to("cpu")
+        response_map = self.siamese_model(scaled_features, self.exemplar_features).to(
+            "cpu"
+        )
         scaled_response_map = torch.squeeze(
             resize_tensor(
                 response_map,
@@ -202,10 +181,7 @@ class TADT(Expert):
         )
         target_loc_center[0:2] = (
             target_loc_center[0:2]
-            + (
-                np.append(max_w, max_h)
-                - (self.srch_window_location[2:4] / 2 - 1)
-            )
+            + (np.append(max_w, max_h) - (self.srch_window_location[2:4] / 2 - 1))
             * self.config.MODEL.SCALES[scale_ind]
         )
         target_loc_center[2:4] = (
@@ -219,8 +195,7 @@ class TADT(Expert):
         # print('target_location in current frame:', target_location)
 
         self.srch_window_location[2:4] = round_python2(
-            self.srch_window_location[2:4]
-            * self.config.MODEL.SCALES[scale_ind]
+            self.srch_window_location[2:4] * self.config.MODEL.SCALES[scale_ind]
         )
         self.srch_window_location[0:2] = (
             target_loc_center[0:2] - (self.srch_window_location[2:4]) / 2

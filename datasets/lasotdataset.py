@@ -36,9 +36,7 @@ class LaSOTDatasetClass(BaseDataset):
         return clean_lst
 
     def get_sequence_list(self):
-        return SequenceList(
-            [self._construct_sequence(s) for s in self.sequence_list]
-        )
+        return SequenceList([self._construct_sequence(s) for s in self.sequence_list])
 
     def _construct_sequence(self, sequence_name):
         class_name = sequence_name.split("-")[0]
@@ -52,22 +50,14 @@ class LaSOTDatasetClass(BaseDataset):
                 str(anno_path), delimiter=",", dtype=np.float64
             )
 
-        frames_path = "{}/{}/{}/img".format(
-            self.base_path, class_name, sequence_name
-        )
+        frames_path = "{}/{}/{}/img".format(self.base_path, class_name, sequence_name)
         frame_list = [
-            frame
-            for frame in os.listdir(frames_path)
-            if frame.endswith(".jpg")
+            frame for frame in os.listdir(frames_path) if frame.endswith(".jpg")
         ]
         frame_list.sort(key=lambda f: int(f[:-4]))
-        frames_list = [
-            os.path.join(frames_path, frame) for frame in frame_list
-        ]
+        frames_list = [os.path.join(frames_path, frame) for frame in frame_list]
 
-        return Sequence(
-            sequence_name, frames_list, ground_truth_rect.reshape(-1, 4)
-        )
+        return Sequence(sequence_name, frames_list, ground_truth_rect.reshape(-1, 4))
 
     def __len__(self):
         return len(self.sequence_list)

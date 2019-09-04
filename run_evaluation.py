@@ -35,11 +35,7 @@ def main(trackers, algorithms, dataset_name):
         algorithms
     )
     benchmark.show_result_offline(
-        success_offline,
-        overlap_anchor,
-        precision_offline,
-        dist_anchor,
-        anchor_ratio,
+        success_offline, overlap_anchor, precision_offline, dist_anchor, anchor_ratio
     )
 
 
@@ -56,12 +52,12 @@ if __name__ == "__main__":
         "STRCF",
         "TADT",
         "Average",
-        # "Max",
+        "Max",
         "MCCT",
     ]
     algorithms = [
         "AAA_select_0.0_%s_False_False_True_True_True_True" % threshold
-        for threshold in [0.75]
+        for threshold in [0.7, 0.75]
     ]
     trackers += algorithms
 

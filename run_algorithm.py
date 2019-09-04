@@ -55,9 +55,7 @@ def run_sequence(seq, algorithm, experts, debug=False, input_gt=False):
             pickle.dump(offline_bb, fp)
 
 
-def run_dataset(
-    dataset, algorithms, experts, debug=False, input_gt=False, threads=0
-):
+def run_dataset(dataset, algorithms, experts, debug=False, input_gt=False, threads=0):
     """Runs a list of experts on a dataset.
     args:
         dataset: List of Sequence instances, forming a dataset.
@@ -74,11 +72,7 @@ def run_dataset(
         for seq in dataset:
             for algorithm_info in algorithms:
                 run_sequence(
-                    seq,
-                    algorithm_info,
-                    experts,
-                    debug=debug,
-                    input_gt=input_gt,
+                    seq, algorithm_info, experts, debug=debug, input_gt=input_gt
                 )
     elif mode == "parallel":
         param_list = [
@@ -91,13 +85,7 @@ def run_dataset(
 
 
 def run_tracker(
-    algorithm,
-    experts,
-    dataset,
-    sequence=None,
-    debug=0,
-    input_gt=False,
-    threads=0,
+    algorithm, experts, dataset, sequence=None, debug=0, input_gt=False, threads=0
 ):
     """Run tracker on sequence or dataset.
     args:
