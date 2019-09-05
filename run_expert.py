@@ -8,6 +8,7 @@ from datasets.tpldataset import TPLDataset
 from datasets.uavdataset import UAVDataset
 from datasets.nfsdataset import NFSDataset
 from datasets.lasotdataset import LaSOTDataset
+from datasets.got10kdataset import GOT10KDatasetVal
 
 
 def run_sequence(seq, tracker, debug=False):
@@ -17,7 +18,7 @@ def run_sequence(seq, tracker, debug=False):
     results_path = "{}.txt".format(base_results_path)
     times_path = "{}_time.txt".format(base_results_path)
 
-    if os.path.isfile(results_path) and not debug:
+    if os.path.isfile(results_path):
         return
 
     print("Tracker: {},  Sequence: {}".format(tracker.name, seq.name))
@@ -100,6 +101,14 @@ def main(tracker_name, dataset_name):
         from experts.dasiamrpn import DaSiamRPN
 
         tracker = DaSiamRPN()
+    elif tracker_name == "DiMP18":
+        from experts.dimp18 import DiMP18
+
+        tracker = DiMP18()
+    elif tracker_name == "DiMP50":
+        from experts.dimp50 import DiMP50
+
+        tracker = DiMP50()
     elif tracker_name == "ECO":
         from experts.eco import ECO
 
@@ -155,10 +164,12 @@ def main(tracker_name, dataset_name):
         dataset = VOTDataset()
     elif dataset_name == "LaSOT":
         dataset = LaSOTDataset()
+    elif dataset_name == "Got10K":
+        dataset = GOT10KDatasetVal()
     else:
         raise ValueError("Unknown dataset name")
 
-    run_tracker(tracker, dataset)
+    run_tracker(tracker, dataset, debug=0)
 
 
 if __name__ == "__main__":
@@ -166,7 +177,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--expert", default="ECO", type=str, help="expert")
-    parser.add_argument("-d", "--dataset", default="OTB", type=str, help="dataset")
+    parser.add_argument("-d", "--dataset", default="Got10K", type=str, help="dataset")
     args = parser.parse_args()
 
     main(args.expert, args.dataset)

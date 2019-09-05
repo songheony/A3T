@@ -24,8 +24,8 @@ def main(trackers, algorithms, dataset_name):
         raise ValueError("Unknown dataset name")
 
     benchmark = OPEBenchmark(dataset)
-    success = benchmark.eval_success(trackers)
-    precision = benchmark.eval_precision(trackers)
+    success = benchmark.eval_success(trackers + algorithms)
+    precision = benchmark.eval_precision(trackers + algorithms)
     benchmark.show_result(success, precision, show_video_level=False)
 
     success_offline, overlap_anchor, anchor_ratio = benchmark.eval_success_offline(
@@ -55,11 +55,7 @@ if __name__ == "__main__":
         "Max",
         "MCCT",
     ]
-    algorithms = [
-        "AAA_select_0.0_%s_False_False_True_True_True_True" % threshold
-        for threshold in [0.7, 0.75]
-    ]
-    trackers += algorithms
+    algorithms = [""]
 
     dataset = "OTB"
 

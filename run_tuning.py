@@ -3,12 +3,8 @@ import multiprocessing
 import os
 import pickle
 from itertools import product
-from datasets.otbdataset import OTBDataset
-from datasets.votdataset import VOTDataset
-from datasets.tpldataset import TPLDataset
-from datasets.uavdataset import UAVDataset
-from datasets.nfsdataset import NFSDataset
-from datasets.lasotdataset import LaSOTDataset
+from datasets.got10kdataset import GOT10KDatasetVal
+from evaluations.ope_benchmark import OPEBenchmark
 
 
 def run_sequence(seq, algorithm, experts, debug=False):
@@ -71,7 +67,9 @@ def run_dataset(dataset, algorithms, experts, debug=False, threads=0):
     if mode == "sequential":
         for seq in dataset:
             for algorithm_info in algorithms:
-                run_sequence(seq, algorithm_info, experts, debug=debug)
+                run_sequence(
+                    seq, algorithm_info, experts, debug=debug
+                )
     elif mode == "parallel":
         param_list = [
             (seq, algorithm_info, experts, debug)
@@ -82,7 +80,9 @@ def run_dataset(dataset, algorithms, experts, debug=False, threads=0):
     print("Done")
 
 
-def run_tracker(algorithm, experts, dataset, sequence=None, debug=0, threads=0):
+def run_tracker(
+    algorithm, experts, dataset, sequence=None, debug=0, threads=0
+):
     """Run tracker on sequence or dataset.
     args:
         tracker_name: Name of tracking method.
@@ -102,39 +102,50 @@ def run_tracker(algorithm, experts, dataset, sequence=None, debug=0, threads=0):
     run_dataset(dataset, algorithms, experts, debug, threads)
 
 
-def main(algorithm_name, experts, dataset_name, **kargs):
+def main(algorithm_name, experts, thresholds):
+    algorithms = []
     n_experts = len(experts)
-    if algorithm_name == "Average":
-        from algorithms.average import Average
+    dataset = GOT10KDatasetVal()
 
-        algorithm = Average(n_experts)
-    elif algorithm_name == "MCCT":
-        from algorithms.mcct import MCCT
+    for threshold in thresholds:
+        if algorithm_name == "AAA":
+            from algorithms.aaa import AAA
 
-        algorithm = MCCT(n_experts)
-    elif algorithm_name == "Max":
-        from algorithms.baseline import Baseline
+            algorithm = AAA(
+                n_experts,
+                iou_threshold=0.0,
+                feature_threshold=threshold,
+                only_max=False,
+                use_iou=False,
+                use_feature=True,
+                cost_iou=True,
+                cost_feature=True,
+                cost_score=True,
+            )
+        elif algorithm_name == "AAA_select":
+            from algorithms.aaa_select import AAA_select
 
-        algorithm = Baseline(n_experts, name="Max", use_iou=False, use_feature=True)
-    else:
-        raise ValueError("Unknown algorithm name")
+            algorithm = AAA_select(
+                n_experts,
+                iou_threshold=0.0,
+                feature_threshold=threshold,
+                only_max=False,
+                use_iou=False,
+                use_feature=True,
+                cost_iou=True,
+                cost_feature=True,
+                cost_score=True,
+            )
+        else:
+            raise ValueError("Unknown algorithm name")
 
-    if dataset_name == "OTB":
-        dataset = OTBDataset()
-    elif dataset_name == "NFS":
-        dataset = NFSDataset()
-    elif dataset_name == "UAV":
-        dataset = UAVDataset()
-    elif dataset_name == "TPL":
-        dataset = TPLDataset()
-    elif dataset_name == "VOT":
-        dataset = VOTDataset()
-    elif dataset_name == "LaSOT":
-        dataset = LaSOTDataset()
-    else:
-        raise ValueError("Unknown dataset name")
+        run_tracker(algorithm, experts, dataset, debug=0)
+        algorithms.append(algorithm.name)
 
-    run_tracker(algorithm, experts, dataset, debug=0)
+    benchmark = OPEBenchmark(dataset)
+    success = benchmark.eval_success(algorithms)
+    precision = benchmark.eval_precision(algorithms)
+    benchmark.show_result(success, precision, show_video_level=False)
 
 
 if __name__ == "__main__":
@@ -156,9 +167,17 @@ if __name__ == "__main__":
     ]
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--algorithm", default="MCCT", type=str)
+    parser.add_argument("-a", "--algorithm", default="AAA_select", type=str)
     parser.add_argument("-e", "--experts", default=experts, nargs="+")
-    parser.add_argument("-d", "--dataset", default="OTB", type=str)
+    parser.add_argument("-s", "--start_point", default=0.6, type=float)
+    parser.add_argument("-e", "--end_point", default=0.9, type=float)
+    parser.add_argument("-n", "--sample_number", default=0, type=int)
     args = parser.parse_args()
 
-    main(args.algorithm, args.experts, args.dataset)
+    thresholds = np.linspace(args.start_point, args.end_point, num=args.sample_number)
+
+    main(
+        args.algorithm,
+        args.experts,
+        thresholds
+    )

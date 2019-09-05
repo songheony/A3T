@@ -155,6 +155,8 @@ if __name__ == "__main__":
     experts = [
         "ATOM",
         "DaSiamRPN",
+        "DiMP18",
+        "DiMP50",
         "ECO",
         "SiamDW",
         "SiamFC",

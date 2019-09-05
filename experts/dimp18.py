@@ -12,7 +12,8 @@ class DiMP18(Expert):
         self.tracker = Tracker(dimp18.parameters())
 
     def initialize(self, image, box):
-        self.tracker.initialize(image, box)
+        state = {'init_bbox': box}
+        self.tracker.initialize(image, state)
 
     def track(self, image):
-        return self.tracker.track(image)
+        return self.tracker.track(image)['target_bbox']

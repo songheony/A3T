@@ -1,4 +1,4 @@
-# Welcome to Adaptive Aggregation of Arbitrary Online Trackers with a Regret Bound 👋
+# Adaptive Aggregation of Arbitrary Online Trackers with a Regret Bound
 
 ## Experts
 
