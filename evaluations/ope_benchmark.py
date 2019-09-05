@@ -354,7 +354,7 @@ class OPEBenchmark:
             for value in dist_ret[tracker_name].values():
                 values += value.tolist()
             dist = np.mean(values)
-            tracker_dist[tracker_name] = dist
+            tracker_dist[tracker_name] = 1 / dist
 
         tracker_ratio = {}
         for tracker_name in anchor_ratio.keys():
