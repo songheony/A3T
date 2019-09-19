@@ -1,6 +1,6 @@
-dataset=Got10K
+dataset=OTB
 
-experts=("ATOM" "DaSiamRPN" "DiMP18" "DiMP50" "ECO" "SiamDW" "SiamFC" "SiamRPN" "SiamRPN++" "Staple" "STRCF" "TADT")
+experts=("ATOM" "DaSiamRPN" "ECO" "SiamDW" "SiamRPN++" "STRCF" "UDT")
 len=${#experts[@]}
 for (( i=0; i<$len; i++ )); do
     python ./run_expert.py -e ${experts[$i]} -d $dataset

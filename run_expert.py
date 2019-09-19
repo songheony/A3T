@@ -101,14 +101,10 @@ def main(tracker_name, dataset_name):
         from experts.dasiamrpn import DaSiamRPN
 
         tracker = DaSiamRPN()
-    elif tracker_name == "DiMP18":
-        from experts.dimp18 import DiMP18
+    elif tracker_name == "DiMP":
+        from experts.dimp import DiMP
 
-        tracker = DiMP18()
-    elif tracker_name == "DiMP50":
-        from experts.dimp50 import DiMP50
-
-        tracker = DiMP50()
+        tracker = DiMP()
     elif tracker_name == "ECO":
         from experts.eco import ECO
 
@@ -145,6 +141,10 @@ def main(tracker_name, dataset_name):
         from experts.tadt import TADT
 
         tracker = TADT()
+    elif tracker_name == "UDT":
+        from experts.udt import UDT
+
+        tracker = UDT()
     elif tracker_name == "Vital":
         from experts.vital import Vital
 

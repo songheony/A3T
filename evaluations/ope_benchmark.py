@@ -106,7 +106,7 @@ class OPEBenchmark:
                         offline_gt, results, len(results)
                     )
                 else:
-                    offline_ret_[seq.name] = np.array([0])
+                    offline_ret_[seq.name] = np.nan
 
                 valid_idx = [x is not None for x in offline_bb]
                 anchor_box = np.array(
@@ -118,7 +118,7 @@ class OPEBenchmark:
                 if len(anchor_box) > 0:
                     anchor_ret_[seq.name] = overlap_ratio(anchor_gt, anchor_box)
                 else:
-                    anchor_ret_[seq.name] = np.array([0])
+                    anchor_ret_[seq.name] = np.nan
 
                 anchor_ratio_[seq.name] = sum(valid_idx) / len(gt_traj)
             offline_ret[algorithm_name] = offline_ret_
@@ -194,7 +194,7 @@ class OPEBenchmark:
                         offline_gt_center, results_center, thresholds, len(results)
                     )
                 else:
-                    offline_ret_[seq.name] = np.array([0])
+                    offline_ret_[seq.name] = np.nan
 
                 valid_idx = [x is not None for x in offline_bb]
                 anchor_box = np.array(
@@ -212,7 +212,7 @@ class OPEBenchmark:
                         )
                     )
                 else:
-                    anchor_ret_[seq.name] = np.array([0])
+                    anchor_ret_[seq.name] = np.nan
 
                 anchor_ratio_[seq.name] = sum(valid_idx) / len(gt_traj)
             offline_ret[algorithm_name] = offline_ret_
@@ -332,28 +332,43 @@ class OPEBenchmark:
         """
         tracker_auc = {}
         for tracker_name in success_ret.keys():
-            auc = np.mean(list(success_ret[tracker_name].values()))
+            auc = np.nanmean(
+                [
+                    value
+                    for value in success_ret[tracker_name].values()
+                    if value is not np.nan
+                ]
+            )
             tracker_auc[tracker_name] = auc
 
         tracker_overlap = {}
         for tracker_name in overlap_ret.keys():
             values = []
             for value in overlap_ret[tracker_name].values():
-                values += value.tolist()
-            overlap = np.mean(values)
+                if value is not np.nan:
+                    values += value.tolist()
+            overlap = np.nanmean(values)
             tracker_overlap[tracker_name] = overlap
 
         tracker_dp = {}
         for tracker_name in precision_ret.keys():
-            dp = np.mean(list(precision_ret[tracker_name].values()), axis=0)[20]
+            dp = np.nanmean(
+                [
+                    value
+                    for value in precision_ret[tracker_name].values()
+                    if value is not np.nan
+                ],
+                axis=0,
+            )[20]
             tracker_dp[tracker_name] = dp
 
         tracker_dist = {}
         for tracker_name in dist_ret.keys():
             values = []
             for value in dist_ret[tracker_name].values():
-                values += value.tolist()
-            dist = np.mean(values)
+                if value is not np.nan:
+                    values += value.tolist()
+            dist = np.nanmean(values)
             tracker_dist[tracker_name] = 1 / dist
 
         tracker_ratio = {}

@@ -67,9 +67,7 @@ def run_dataset(dataset, algorithms, experts, debug=False, threads=0):
     if mode == "sequential":
         for seq in dataset:
             for algorithm_info in algorithms:
-                run_sequence(
-                    seq, algorithm_info, experts, debug=debug
-                )
+                run_sequence(seq, algorithm_info, experts, debug=debug)
     elif mode == "parallel":
         param_list = [
             (seq, algorithm_info, experts, debug)
@@ -80,9 +78,7 @@ def run_dataset(dataset, algorithms, experts, debug=False, threads=0):
     print("Done")
 
 
-def run_tracker(
-    algorithm, experts, dataset, sequence=None, debug=0, threads=0
-):
+def run_tracker(algorithm, experts, dataset, sequence=None, debug=0, threads=0):
     """Run tracker on sequence or dataset.
     args:
         tracker_name: Name of tracking method.
@@ -115,6 +111,7 @@ def main(algorithm_name, experts, thresholds):
                 n_experts,
                 iou_threshold=0.0,
                 feature_threshold=threshold,
+                reset_target=False,
                 only_max=False,
                 use_iou=False,
                 use_feature=True,
@@ -129,6 +126,7 @@ def main(algorithm_name, experts, thresholds):
                 n_experts,
                 iou_threshold=0.0,
                 feature_threshold=threshold,
+                reset_target=True,
                 only_max=False,
                 use_iou=False,
                 use_feature=True,
@@ -143,41 +141,39 @@ def main(algorithm_name, experts, thresholds):
         algorithms.append(algorithm.name)
 
     benchmark = OPEBenchmark(dataset)
+
+    # success = benchmark.eval_success(experts)
+    # precision = benchmark.eval_precision(experts)
+    # benchmark.show_result(success, precision, show_video_level=False)
+
     success = benchmark.eval_success(algorithms)
     precision = benchmark.eval_precision(algorithms)
     benchmark.show_result(success, precision, show_video_level=False)
+
+    success_offline, overlap_anchor, anchor_ratio = benchmark.eval_success_offline(
+        algorithms
+    )
+    precision_offline, dist_anchor, anchor_ratio = benchmark.eval_precision_offline(
+        algorithms
+    )
+    benchmark.show_result_offline(
+        success_offline, overlap_anchor, precision_offline, dist_anchor, anchor_ratio
+    )
 
 
 if __name__ == "__main__":
     import argparse
 
-    experts = [
-        "ATOM",
-        "DaSiamRPN",
-        "DiMP18",
-        "DiMP50",
-        "ECO",
-        "SiamDW",
-        "SiamFC",
-        "SiamRPN",
-        "SiamRPN++",
-        "Staple",
-        "STRCF",
-        "TADT",
-    ]
+    experts = ["ATOM", "DaSiamRPN", "ECO", "SiamDW", "SiamRPN++", "STRCF"]
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--algorithm", default="AAA_select", type=str)
     parser.add_argument("-e", "--experts", default=experts, nargs="+")
-    parser.add_argument("-s", "--start_point", default=0.6, type=float)
-    parser.add_argument("-e", "--end_point", default=0.9, type=float)
-    parser.add_argument("-n", "--sample_number", default=0, type=int)
+    parser.add_argument("-s", "--start_point", default=0.7, type=float)
+    parser.add_argument("-t", "--end_point", default=0.9, type=float)
+    parser.add_argument("-n", "--sample_number", default=21, type=int)
     args = parser.parse_args()
 
     thresholds = np.linspace(args.start_point, args.end_point, num=args.sample_number)
 
-    main(
-        args.algorithm,
-        args.experts,
-        thresholds
-    )
+    main(args.algorithm, args.experts, thresholds)

@@ -44,15 +44,15 @@ class Algorithm(object):
         start_time = time.time()
         if input_gt:
             self.initialize(
-                image, np.array(sequence.init_state), sequence.ground_truth_rect
+                image, np.array(sequence.init_bbox()), sequence.ground_truth_rect
             )
         else:
-            self.initialize(image, np.array(sequence.init_state))
+            self.initialize(image, np.array(sequence.init_bbox()))
         init_time = getattr(self, "time", time.time() - start_time)
         times.append(init_time)
 
         # Track
-        tracked_bb = [sequence.init_state]
+        tracked_bb = [sequence.init_bbox()]
         offline_bb = []
         weights = []
         for n, frame in enumerate(sequence.frames[1:]):

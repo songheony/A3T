@@ -18,6 +18,7 @@ class AAA(Algorithm):
         n_experts,
         iou_threshold=0.0,
         feature_threshold=0.0,
+        reset_target=True,
         only_max=True,
         use_iou=True,
         use_feature=True,
@@ -26,10 +27,11 @@ class AAA(Algorithm):
         cost_score=True,
     ):
         super(AAA, self).__init__(
-            "AAA_%s_%s_%s_%s_%s_%s_%s_%s"
+            "AAA_%s_%s_%s_%s_%s_%s_%s_%s_%s"
             % (
                 iou_threshold,
                 feature_threshold,
+                reset_target,
                 only_max,
                 use_iou,
                 use_feature,
@@ -38,6 +40,9 @@ class AAA(Algorithm):
                 cost_score,
             )
         )
+
+        # Whether reset target feature
+        self.reset_target = reset_target
 
         # Whether reset offline tracker
         self.reset_offline = True
@@ -148,6 +153,10 @@ class AAA(Algorithm):
             else:
                 # Get only unevaluated frames' boxes
                 path = path[-len(self.prev_boxes) :]
+
+            if self.reset_target:
+                # Init detector with target feature
+                self.detector.init(features[final_box_id])
 
             # Get offline tracking results
             self.prev_boxes = np.array(self.prev_boxes)

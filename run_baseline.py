@@ -9,6 +9,7 @@ from datasets.tpldataset import TPLDataset
 from datasets.uavdataset import UAVDataset
 from datasets.nfsdataset import NFSDataset
 from datasets.lasotdataset import LaSOTDataset
+from datasets.got10kdataset import GOT10KDatasetVal
 
 
 def run_sequence(seq, algorithm, experts, debug=False):
@@ -131,6 +132,8 @@ def main(algorithm_name, experts, dataset_name, **kargs):
         dataset = VOTDataset()
     elif dataset_name == "LaSOT":
         dataset = LaSOTDataset()
+    elif dataset_name == "Got10K":
+        dataset = GOT10KDatasetVal()
     else:
         raise ValueError("Unknown dataset name")
 
@@ -143,16 +146,13 @@ if __name__ == "__main__":
     experts = [
         "ATOM",
         "DaSiamRPN",
-        "DiMP18",
-        "DiMP50",
+        "DiMP",
         "ECO",
         "SiamDW",
         "SiamFC",
         "SiamRPN",
         "SiamRPN++",
         "Staple",
-        "STRCF",
-        "TADT",
     ]
 
     parser = argparse.ArgumentParser()

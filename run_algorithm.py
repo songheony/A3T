@@ -155,16 +155,13 @@ if __name__ == "__main__":
     experts = [
         "ATOM",
         "DaSiamRPN",
-        "DiMP18",
-        "DiMP50",
+        "DiMP",
         "ECO",
         "SiamDW",
         "SiamFC",
         "SiamRPN",
         "SiamRPN++",
         "Staple",
-        "STRCF",
-        "TADT",
     ]
 
     parser = argparse.ArgumentParser()
@@ -173,6 +170,7 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--dataset", default="OTB", type=str)
     parser.add_argument("-t", "--iou_threshold", default=0.0, type=float)
     parser.add_argument("-r", "--feature_threshold", default=0.0, type=float)
+    parser.add_argument("-s", "--reset_target", action="store_true")
     parser.add_argument("-m", "--only_max", action="store_true")
     parser.add_argument("-i", "--use_iou", action="store_true")
     parser.add_argument("-f", "--use_feature", action="store_false")
@@ -187,6 +185,7 @@ if __name__ == "__main__":
         args.dataset,
         iou_threshold=args.iou_threshold,
         feature_threshold=args.feature_threshold,
+        reset_target=args.reset_target,
         only_max=args.only_max,
         use_iou=args.use_iou,
         use_feature=args.use_feature,

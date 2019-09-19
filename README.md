@@ -14,15 +14,15 @@
 * [SiamRPN](http://openaccess.thecvf.com/content_cvpr_2018/papers/Li_High_Performance_Visual_CVPR_2018_paper.pdf)[<https://github.com/huanglianghua/siamrpn-pytorch>]
 * [SiamRPN++](https://arxiv.org/abs/1812.11703)[<https://github.com/STVIR/pysot>]
 * [Staple](https://arxiv.org/abs/1512.01355)[<https://github.com/wwdguu/pyCFTrackers>]
-* [STRCF](https://arxiv.org/abs/1803.08679)[<https://github.com/wwdguu/pyCFTrackers>]
-* [TADT](https://arxiv.org/abs/1904.01772)[<https://github.com/ZikunZhou/TADT-python>]
+* [STRCF](https://arxiv.org/abs/1803.08679)[<https://github.com/wwdguu/pyCFTrackers>]<sup>[5]</sup>
+* [TADT](https://arxiv.org/abs/1904.01772)[<https://github.com/ZikunZhou/TADT-python>]<sup>[5]</sup>
 * [Vital](https://arxiv.org/abs/1804.04273)[<https://github.com/abnerwang/py-Vital.git>]<sup>[4]</sup>
 
 [1] Since the original code of DaSiamRPN is for Python2, We had to modify the code a little bit to be compatible with Python3.  
 [2] The author's new ECO is used. You still can use previous ECO with ECO_prev.  
 [3] The version of scipy should be under 1.1.0 because MDNet need to use imresize function.  
 [4] CSRDCF, MDNet, and Vital are implemented but they aren't used in experiments since they are too slow.
-[5] We've found that there are errors on some dataset with SAMF.
+[5] We've found that there are errors on some dataset with SAMF and TADT.
 
 ## Datasets
 
