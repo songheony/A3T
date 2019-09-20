@@ -33,12 +33,16 @@ class Algorithm(object):
         image = self._read_image(sequence.frames[0])
 
         boxes = np.zeros((len(trackers), len(sequence.ground_truth_rect), 4))
+        tracker_times = np.zeros((len(trackers), len(sequence.ground_truth_rect)))
         for n, tracker_name in enumerate(trackers):
             results_dir = "{}/{}".format(env_settings().results_path, tracker_name)
             base_results_path = "{}/{}".format(results_dir, sequence.name)
             results_path = "{}.txt".format(base_results_path)
             tracker_traj = np.loadtxt(results_path, delimiter="\t", dtype=float)
+            times_path = "{}_time.txt".format(base_results_path)
+            tracker_time = np.loadtxt(times_path, delimiter="\t", dtype=float)
             boxes[n] = tracker_traj
+            tracker_times[n] = tracker_time
 
         times = []
         start_time = time.time()
@@ -60,7 +64,9 @@ class Algorithm(object):
 
             start_time = time.time()
             state, offline, weight = self.track(image, boxes[:, n + 1, :])
-            times.append(time.time() - start_time)
+            calc_time = time.time() - start_time
+            last_time = np.max(tracker_times[:, n])
+            times.append(calc_time + last_time)
 
             tracked_bb.append(state)
             offline_bb.append(offline)

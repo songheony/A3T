@@ -146,13 +146,9 @@ if __name__ == "__main__":
     experts = [
         "ATOM",
         "DaSiamRPN",
-        "DiMP",
         "ECO",
         "SiamDW",
-        "SiamFC",
-        "SiamRPN",
         "SiamRPN++",
-        "Staple",
     ]
 
     parser = argparse.ArgumentParser()

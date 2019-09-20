@@ -3,26 +3,21 @@
 ## Experts
 
 * [ATOM](https://arxiv.org/abs/1811.07628)[<https://github.com/visionml/pytracking>]
-* [CSRDCF](https://arxiv.org/abs/1611.08461)[<https://github.com/wwdguu/pyCFTrackers>]<sup>[4]</sup>
 * [DaSiamRPN](https://arxiv.org/abs/1808.06048)[<https://github.com/foolwood/DaSiamRPN>,<https://github.com/songheony/DaSiamRPN>]<sup>[1]</sup>
 * [DiMP](https://arxiv.org/abs/1904.07220)[<https://github.com/visionml/pytracking>]
 * [ECO](https://arxiv.org/abs/1611.09224)[<https://github.com/visionml/pytracking>]<sup>[2]</sup>
-* [MDNet](https://arxiv.org/abs/1510.07945)[<https://github.com/hyeonseobnam/py-MDNet.git>]<sup>[3,4]</sup>
-* [SAMF](https://link.springer.com/chapter/10.1007/978-3-319-16181-5_18)[<https://github.com/wwdguu/pyCFTrackers>]<sup>[5]</sup>
 * [SiamDW](https://arxiv.org/abs/1901.01660)[<https://github.com/researchmm/SiamDW>]
 * [SiamFC](https://arxiv.org/abs/1606.09549)[<https://github.com/huanglianghua/siamfc-pytorch>]
 * [SiamRPN](http://openaccess.thecvf.com/content_cvpr_2018/papers/Li_High_Performance_Visual_CVPR_2018_paper.pdf)[<https://github.com/huanglianghua/siamrpn-pytorch>]
 * [SiamRPN++](https://arxiv.org/abs/1812.11703)[<https://github.com/STVIR/pysot>]
 * [Staple](https://arxiv.org/abs/1512.01355)[<https://github.com/wwdguu/pyCFTrackers>]
-* [STRCF](https://arxiv.org/abs/1803.08679)[<https://github.com/wwdguu/pyCFTrackers>]<sup>[5]</sup>
-* [TADT](https://arxiv.org/abs/1904.01772)[<https://github.com/ZikunZhou/TADT-python>]<sup>[5]</sup>
-* [Vital](https://arxiv.org/abs/1804.04273)[<https://github.com/abnerwang/py-Vital.git>]<sup>[4]</sup>
+* [STRCF](https://arxiv.org/abs/1803.08679)[<https://github.com/wwdguu/pyCFTrackers>]<sup>[4]</sup>
+* [TADT](https://arxiv.org/abs/1904.01772)[<https://github.com/ZikunZhou/TADT-python>]<sup>[4]</sup>
 
-[1] Since the original code of DaSiamRPN is for Python2, We had to modify the code a little bit to be compatible with Python3.  
-[2] The author's new ECO is used. You still can use previous ECO with ECO_prev.  
+[1] Since the original code of DaSiamRPN is for Python2, We've had to modify the code a little bit to be compatible with Python3.  
+[2] The author's new ECO is used.  
 [3] The version of scipy should be under 1.1.0 because MDNet need to use imresize function.  
-[4] CSRDCF, MDNet, and Vital are implemented but they aren't used in experiments since they are too slow.
-[5] We've found that there are errors on some dataset with SAMF and TADT.
+[4] We've found that there are errors on some dataset with SAMF and TADT.
 
 ## Datasets
 

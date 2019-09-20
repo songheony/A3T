@@ -109,6 +109,10 @@ def main(tracker_name, dataset_name):
         from experts.eco import ECO
 
         tracker = ECO()
+    elif tracker_name == "LDES":
+        from experts.ldes import LDES
+
+        tracker = LDES()
     elif tracker_name == "MDNet":
         from experts.mdnet import MDnet
 
