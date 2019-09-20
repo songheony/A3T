@@ -143,13 +143,7 @@ def main(algorithm_name, experts, dataset_name, **kargs):
 if __name__ == "__main__":
     import argparse
 
-    experts = [
-        "ATOM",
-        "DaSiamRPN",
-        "ECO",
-        "SiamDW",
-        "SiamRPN++",
-    ]
+    experts = ["ATOM", "DaSiamRPN", "ECO", "SiamDW", "SiamRPN++", "TADT"]
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--algorithm", default="MCCT", type=str)

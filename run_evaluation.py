@@ -40,20 +40,9 @@ def main(trackers, algorithms, dataset_name):
 
 
 if __name__ == "__main__":
-    trackers = [
-        "ATOM",
-        "DaSiamRPN",
-        "DiMP",
-        "ECO",
-        "SiamDW",
-        "SiamFC",
-        "SiamRPN",
-        "SiamRPN++",
-        "Staple",
-        "Average",
-        "Max",
-        "MCCT",
-    ]
+    experts = ["ATOM", "DaSiamRPN", "ECO", "SiamDW", "SiamRPN++", "TADT"]
+    baselines = ["Average", "Max", "MCCT"]
+    trackers = experts + baselines
     algorithms = [""]
 
     dataset = "OTB"

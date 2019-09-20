@@ -164,7 +164,7 @@ def main(algorithm_name, experts, thresholds):
 if __name__ == "__main__":
     import argparse
 
-    experts = ["ATOM", "DaSiamRPN", "ECO", "SiamDW", "SiamRPN++", "STRCF"]
+    experts = ["ATOM", "DaSiamRPN", "ECO", "SiamDW", "SiamRPN++", "TADT"]
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--algorithm", default="AAA_select", type=str)
