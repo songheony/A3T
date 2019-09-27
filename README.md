@@ -11,13 +11,12 @@
 * [SiamRPN](http://openaccess.thecvf.com/content_cvpr_2018/papers/Li_High_Performance_Visual_CVPR_2018_paper.pdf)[<https://github.com/huanglianghua/siamrpn-pytorch>]
 * [SiamRPN++](https://arxiv.org/abs/1812.11703)[<https://github.com/STVIR/pysot>]
 * [Staple](https://arxiv.org/abs/1512.01355)[<https://github.com/wwdguu/pyCFTrackers>]
-* [STRCF](https://arxiv.org/abs/1803.08679)[<https://github.com/wwdguu/pyCFTrackers>]<sup>[4]</sup>
-* [TADT](https://arxiv.org/abs/1904.01772)[<https://github.com/ZikunZhou/TADT-python>]<sup>[4]</sup>
+* [STRCF](https://arxiv.org/abs/1803.08679)[<https://github.com/wwdguu/pyCFTrackers>]<sup>[3]</sup>
+* [TADT](https://arxiv.org/abs/1904.01772)[<https://github.com/ZikunZhou/TADT-python>]<sup>[3]</sup>
 
 [1] Since the original code of DaSiamRPN is for Python2, We've had to modify the code a little bit to be compatible with Python3.  
 [2] The author's new ECO is used.  
-[3] The version of scipy should be under 1.1.0 because MDNet need to use imresize function.  
-[4] We've found that there are errors on some dataset with SAMF and TADT.
+[3] We've found that there are errors on some dataset with SAMF, STRCF, and TADT.
 
 ## Datasets
 
@@ -49,6 +48,7 @@ pip install python-igraph opencv-python opencv-contrib-python
 git clone https://github.com/songheony/AAA-journal
 mkdir AAA-journal/external
 cd AAA-journal/external
+git clone [FRAMEWORK_GIT]
 git clone [EXPERT_GIT]
 conda activate [ENV_NAME]
 bash run.sh

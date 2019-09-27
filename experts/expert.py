@@ -30,21 +30,21 @@ class Expert(object):
         """Run tracker on a sequence."""
 
         # Initialize
-        image = self._read_image(sequence.frames[0])
+        # image = self._read_image(sequence.frames[0])
 
         times = []
         start_time = time.time()
-        self.initialize(image, np.array(sequence.init_bbox()))
+        self.initialize(sequence.frames[0], np.array(sequence.init_bbox()))
         init_time = getattr(self, "time", time.time() - start_time)
         times.append(init_time)
 
         # Track
         tracked_bb = [sequence.init_bbox()]
         for frame in sequence.frames[1:]:
-            image = self._read_image(frame)
+            # image = self._read_image(frame)
 
             start_time = time.time()
-            state = self.track(image)
+            state = self.track(frame)
             times.append(time.time() - start_time)
 
             tracked_bb.append(state)

@@ -173,7 +173,7 @@ def main(tracker_name, dataset_name):
     else:
         raise ValueError("Unknown dataset name")
 
-    run_tracker(tracker, dataset, debug=0)
+    run_tracker(tracker, dataset, debug=1)
 
 
 if __name__ == "__main__":

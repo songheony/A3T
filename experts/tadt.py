@@ -1,6 +1,4 @@
 import sys
-import numpy as np
-import cv2
 import torch
 from .expert import Expert
 
@@ -16,14 +14,14 @@ class TADT(Expert):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = build_vgg16(cfg)
 
-    def initialize(self, image, box):
+    def initialize(self, image_file, box):
         self.idx = 0
         self.tracker = Tadt_Tracker(
             cfg, model=self.model, device=self.device, display=False
         )
-        self.tracker.initialize_tadt(image, box)
+        self.tracker.initialize_tadt(image_file, box)
 
-    def track(self, image):
+    def track(self, image_file):
         self.idx += 1
-        self.tracker.tracking(image, self.idx)
+        self.tracker.tracking(image_file, self.idx)
         return self.tracker.results[-1]

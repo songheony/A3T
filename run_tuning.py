@@ -126,7 +126,7 @@ def main(algorithm_name, experts, thresholds):
                 n_experts,
                 iou_threshold=0.0,
                 feature_threshold=threshold,
-                reset_target=True,
+                reset_target=False,
                 only_max=False,
                 use_iou=False,
                 use_feature=True,
@@ -142,9 +142,9 @@ def main(algorithm_name, experts, thresholds):
 
     benchmark = OPEBenchmark(dataset)
 
-    # success = benchmark.eval_success(experts)
-    # precision = benchmark.eval_precision(experts)
-    # benchmark.show_result(success, precision, show_video_level=False)
+    success = benchmark.eval_success(experts)
+    precision = benchmark.eval_precision(experts)
+    benchmark.show_result(success, precision, show_video_level=False)
 
     success = benchmark.eval_success(algorithms)
     precision = benchmark.eval_precision(algorithms)
@@ -164,7 +164,7 @@ def main(algorithm_name, experts, thresholds):
 if __name__ == "__main__":
     import argparse
 
-    experts = ["ATOM", "DaSiamRPN", "ECO", "SiamDW", "SiamRPN++", "TADT"]
+    experts = ["ATOM", "DaSiamRPN", "ECO", "SiamDW", "SiamRPN++", "Staple"]
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--algorithm", default="AAA_select", type=str)

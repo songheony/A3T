@@ -27,9 +27,9 @@ class Vital(Expert):
             )
         )
 
-    def initialize(self, image, box):
+    def initialize(self, image_file, box):
         self.frame = 0
-        image = Image.fromarray(image)
+        image = Image.open(image_file).convert("RGB")
 
         # Init bbox
         self.target_bbox = np.array(box)
@@ -131,9 +131,9 @@ class Vital(Expert):
         self.pos_feats_all = [self.pos_feats]
         self.neg_feats_all = [self.neg_feats]
 
-    def track(self, image):
+    def track(self, image_file):
         self.frame += 1
-        image = Image.fromarray(image)
+        image = Image.open(image_file).convert("RGB")
 
         # Estimate target bbox
         self.samples = self.sample_generator(self.target_bbox, self.opts["n_samples"])

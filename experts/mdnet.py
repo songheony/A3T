@@ -26,8 +26,8 @@ class MDnet(Expert):
         np.random.seed(0)
         torch.manual_seed(0)
 
-    def initialize(self, image, box):
-        image = Image.fromarray(image)
+    def initialize(self, image_file, box):
+        image = Image.open(image_file).convert("RGB")
         # Init model
         self.model = MDNet(self.opts["model_path"])
         if self.opts["use_gpu"]:
@@ -123,9 +123,9 @@ class MDnet(Expert):
 
         self.before_target = box
 
-    def track(self, image):
+    def track(self, image_file):
         self.frame += 1
-        image = Image.fromarray(image)
+        image = Image.open(image_file).convert("RGB")
 
         # Estimate target bbox
         self.samples = self.sample_generator(self.before_target, self.opts["n_samples"])

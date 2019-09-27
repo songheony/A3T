@@ -380,17 +380,6 @@ def main(experts, algorithm):
 
 
 if __name__ == "__main__":
-    experts = [
-        "ATOM",
-        "DaSiamRPN",
-        "ECO",
-        "SiamDW",
-        "SiamFC",
-        "SiamRPN",
-        "SiamRPN++",
-        "Staple",
-        "STRCF",
-        "TADT",
-    ]
+    experts = ["ATOM", "DaSiamRPN", "ECO", "SiamDW", "SiamRPN++", "Staple"]
 
     main(experts, "AAA_0.8_0.0_True_True_False_True_False_True")

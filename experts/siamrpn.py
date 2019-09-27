@@ -14,11 +14,11 @@ class SiamRPN(Expert):
             "/home/heonsong/Desktop/AAA/AAA-journal/external/siamrpn_pytorch/model.pth"
         )
 
-    def initialize(self, image, box):
-        image = Image.fromarray(image)
+    def initialize(self, image_file, box):
+        image = Image.open(image_file).convert("RGB")
         self.tracker = TrackerSiamRPN(net_path=self.net_file)
         self.tracker.init(image, box)
 
-    def track(self, image):
-        image = Image.fromarray(image)
+    def track(self, image_file):
+        image = Image.open(image_file).convert("RGB")
         return self.tracker.update(image)

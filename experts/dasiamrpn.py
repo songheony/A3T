@@ -17,19 +17,19 @@ class DaSiamRPN(Expert):
             "/home/heonsong/Desktop/AAA/AAA-journal/external/DaSiamRPN/SiamRPNOTB.model"
         )
 
-    def initialize(self, image, box):
+    def initialize(self, image_file, box):
         self.net = SiamRPNotb()
         self.net.load_state_dict(torch.load(self.net_file))
         self.net.eval().cuda()
 
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        image = cv2.imread(image_file)
         box = box - np.array([1, 1, 0, 0])
         self.state = SiamRPN_init(
             image, box[:2] + box[2:] / 2.0, box[2:], self.net
         )  # init tracker
 
-    def track(self, image):
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+    def track(self, image_file):
+        image = cv2.imread(image_file)
         self.state = SiamRPN_track(self.state, image)  # track
         center = self.state["target_pos"] + 1
         target_sz = self.state["target_sz"]
