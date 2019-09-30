@@ -11,7 +11,7 @@ import src.siamese as siam
 class SiamMCF(Expert):
     def __init__(self):
         super(SiamMCF, self).__init__("SiamMCF")
-        root_dir = ""
+        root_dir = "/home/heonsong/Desktop/AAA/AAA-journal/external/siam-mcf/"
         self.hp, self.evaluation, self.env, self.design = parse_arguments(root_dir)
         self.final_score_sz = self.hp.response_up * (self.design.score_sz - 1) + 1
         # build TF graph once for all

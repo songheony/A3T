@@ -1,21 +1,21 @@
 import sys
 import json
 import cv2
+import numpy as np
 from .expert import Expert
 
-sys.path.append("external/pyCFTrackers")
+sys.path.append("external/THOR")
 from trackers.tracker import SiamFC_Tracker, SiamRPN_Tracker, SiamMask_Tracker
-from benchmark.bench_utils.bbox_helper import cxy_wh_2_rect
 
 
 class THOR(Expert):
     def __init__(self):
         super(THOR, self).__init__("THOR")
-        tracker = ""
-        dataset = ""
+        tracker = "SiamRPN"
+        dataset = "OTB2015"
         vanilla = False
-        lb_type = "dynamic"  # [dynamic, ensemble]
-        json_path = f"configs/{tracker}/"
+        lb_type = "ensemble"  # [dynamic, ensemble]
+        json_path = f"/home/heonsong/Desktop/AAA/AAA-journal/external/THOR/configs/{tracker}/"
         json_path += f"{dataset}_"
         if vanilla:
             json_path += "vanilla.json"
@@ -44,5 +44,5 @@ class THOR(Expert):
     def track(self, image_file):
         image = cv2.imread(image_file)
         self.state = self.tracker.track(image, self.state)
-        bbox = cxy_wh_2_rect(self.state["target_pos"], self.state["target_sz"])
+        bbox = np.array(self.state["target_pos"][0], self.state["target_pos"][1], self.state["target_sz"][0], self.state["target_sz"][1])
         return bbox

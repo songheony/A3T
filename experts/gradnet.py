@@ -94,7 +94,7 @@ class GradNet(Expert):
         self.config = tf.ConfigProto()
         self.config.gpu_options.allow_growth = True
         self.sess = tf.Session(config=self.config)
-        self.saver.restore(self.sess, self.opts["model_path"])
+        self.saver.restore(self.sess, "/home/heonsong/Desktop/AAA/AAA-journal/external/GradNet-Tensorflow/ckpt/base_l5_1t_49/model_epoch49.ckpt")
 
     def initialize(self, image_file, box):
         im = cv2.imread(image_file)
@@ -191,6 +191,89 @@ class GradNet(Expert):
 
         self.frame = 0
 
+        """tracking results"""
+        self.rectPosition = self.targetPosition - self.targetSize / 2.0
+        self.Position_now = np.concatenate(
+            [
+                np.round(self.rectPosition).astype(int)[::-1],
+                np.round(self.targetSize).astype(int)[::-1],
+            ],
+            0,
+        )
+
+        if (
+            self.Position_now[0] + self.Position_now[2] > im.shape[1]
+            and self.F_max < self.F_max_thred * 0.5
+        ):
+            self.refind = 1
+
+        """if you want use groundtruth"""
+
+        # region = np.copy(gt[i])
+
+        # cx, cy, w, h = getAxisAlignedBB(region)
+        # pos = np.array([cy, cx])
+        # targetSz = np.array([h, w])
+        # iou_ = _compute_distance(region, Position_now)
+        #
+
+        """save the reliable training sample"""
+        if self.F_max >= min(
+            self.F_max_thred * 0.5, np.mean(self.updata_features_score)
+        ):
+            self.scaledInstance = self.sx * self.scales
+            self.xCrops = makeScalePyramid(
+                im,
+                self.targetPosition,
+                self.scaledInstance,
+                self.opts["instanceSize"],
+                self.avgChans,
+                None,
+                self.opts,
+            )
+            self.updata_features.append(self.xCrops)
+            self.updata_features_score.append(self.F_max)
+            self.updata_features_frame.append(self.frame)
+            if self.updata_features_score.__len__() > 5:
+                del self.updata_features_score[0]
+                del self.updata_features[0]
+                del self.updata_features_frame[0]
+        else:
+            if self.frame < 10 and self.F_max < self.F_max_thred * 0.4:
+                self.scaledInstance = self.sx * self.scales
+                self.xCrops = makeScalePyramid(
+                    im,
+                    self.targetPosition,
+                    self.scaledInstance,
+                    self.opts["instanceSize"],
+                    self.avgChans,
+                    None,
+                    self.opts,
+                )
+                self.template_gra, self.zFeat2_gra = self.sess.run(
+                    [self.zFeat5Op_gra, self.zFeat2Op_gra],
+                    feed_dict={
+                        self.zFeat2Op_init: self.hid_gra,
+                        self.instanceOp_init: np.expand_dims(self.xCrops[1], 0),
+                    },
+                )
+                self.hid_gra = np.copy(0.3 * self.hid_gra + 0.7 * self.zFeat2_gra)
+
+        """update the template every 5 frames"""
+
+        if self.frame % 5 == 0:
+            self.template_gra, self.zFeat2_gra = self.sess.run(
+                [self.zFeat5Op_gra, self.zFeat2Op_gra],
+                feed_dict={
+                    self.zFeat2Op_init: self.hid_gra,
+                    self.instanceOp_init: np.expand_dims(
+                        self.updata_features[np.argmax(self.updata_features_score)][1],
+                        0,
+                    ),
+                },
+            )
+            self.hid_gra = np.copy(0.4 * self.hid_gra + 0.6 * self.zFeat2_gra)
+
     def track(self, image_file):
         im = cv2.imread(image_file)
         self.frame += 1
@@ -223,7 +306,7 @@ class GradNet(Expert):
             [self.scoreOp_gra, self.scoreOp_sia],
             feed_dict={
                 self.zFeat5Op_gra: self.template_gra,
-                self.zFeat5Op_sia: self.vtemplate_sia,
+                self.zFeat5Op_sia: self.template_sia,
                 self.instanceOp: self.xCrops,
             },
         )
@@ -318,7 +401,13 @@ class GradNet(Expert):
             ],
             0,
         )
-        bbox = np.copy(self.Position_now)
+        bbox = np.concatenate(
+            [
+                np.round(self.rectPosition).astype(int),
+                np.round(self.targetSize).astype(int),
+            ],
+            0,
+        )
 
         if (
             self.Position_now[0] + self.Position_now[2] > im.shape[1]

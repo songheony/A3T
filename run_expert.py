@@ -109,6 +109,10 @@ def main(tracker_name, dataset_name):
         from experts.eco import ECO
 
         tracker = ECO()
+    elif tracker_name == "GradNet":
+        from experts.gradnet import GradNet
+
+        tracker = GradNet()
     elif tracker_name == "LDES":
         from experts.ldes import LDES
 
@@ -125,6 +129,10 @@ def main(tracker_name, dataset_name):
         from experts.siamfc import SiamFC
 
         tracker = SiamFC()
+    elif tracker_name == "SiamMCF":
+        from experts.siammcf import SiamMCF
+
+        tracker = SiamMCF()
     elif tracker_name == "SiamRPN":
         from experts.siamrpn import SiamRPN
 
@@ -145,10 +153,10 @@ def main(tracker_name, dataset_name):
         from experts.tadt import TADT
 
         tracker = TADT()
-    elif tracker_name == "UDT":
-        from experts.udt import UDT
+    elif tracker_name == "THOR":
+        from experts.thor import THOR
 
-        tracker = UDT()
+        tracker = THOR()
     elif tracker_name == "Vital":
         from experts.vital import Vital
 
@@ -173,7 +181,7 @@ def main(tracker_name, dataset_name):
     else:
         raise ValueError("Unknown dataset name")
 
-    run_tracker(tracker, dataset, debug=1)
+    run_tracker(tracker, dataset, debug=0)
 
 
 if __name__ == "__main__":
