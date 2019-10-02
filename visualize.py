@@ -362,10 +362,9 @@ def main(experts, algorithm):
     successes = {}
     precisions = {}
 
-    trackers = experts + [algorithm]
+    trackers = experts  # + [algorithm]
 
     for dataset, name in zip(datasets, datasets_name):
-        draw_offline_tracking(dataset, algorithm)
         benchmark = OPEBenchmark(dataset)
 
         success = benchmark.eval_success(trackers)
@@ -380,6 +379,6 @@ def main(experts, algorithm):
 
 
 if __name__ == "__main__":
-    experts = ["ATOM", "DaSiamRPN", "ECO", "SiamDW", "SiamRPN++", "Staple"]
+    experts = ["ATOM", "DaSiamRPN", "DiMP", "ECO", "GradNet", "SiamDW", "SiamFC", "SiamRPN", "SiamRPN++", "Staple", "THOR"]
 
     main(experts, "AAA_0.8_0.0_True_True_False_True_False_True")

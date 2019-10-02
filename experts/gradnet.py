@@ -15,6 +15,7 @@ from track import (
     trackerEval,
 )
 from siamese import SiameseNet
+from region_to_bbox import region_to_bbox
 
 
 class GradNet(Expert):
@@ -98,8 +99,9 @@ class GradNet(Expert):
 
     def initialize(self, image_file, box):
         im = cv2.imread(image_file)
-        self.targetSize = box[2:]
-        self.targetPosition = box[:2]
+        cx, cy, w, h = region_to_bbox(box)
+        self.targetSize = np.array([h, w])
+        self.targetPosition = np.array([cy, cx])
         self.avgChans = np.mean(
             im, axis=(0, 1)
         )  # [np.mean(np.mean(img[:, :, 0])), np.mean(np.mean(img[:, :, 1])), np.mean(np.mean(img[:, :, 2]))]
@@ -401,13 +403,7 @@ class GradNet(Expert):
             ],
             0,
         )
-        bbox = np.concatenate(
-            [
-                np.round(self.rectPosition).astype(int),
-                np.round(self.targetSize).astype(int),
-            ],
-            0,
-        )
+        bbox = self.Position_now[:]
 
         if (
             self.Position_now[0] + self.Position_now[2] > im.shape[1]
