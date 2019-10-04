@@ -14,7 +14,7 @@ class THOR(Expert):
         tracker = "SiamRPN"
         dataset = "OTB2015"
         vanilla = False
-        lb_type = "ensemble"  # [dynamic, ensemble]
+        lb_type = "dynamic"  # [dynamic, ensemble]
         json_path = f"/home/heonsong/Desktop/AAA/AAA-journal/external/THOR/configs/{tracker}/"
         json_path += f"{dataset}_"
         if vanilla:

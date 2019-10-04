@@ -28,8 +28,8 @@ class Baseline(Algorithm):
         device = torch.device("cuda:0" if use_cuda else "cpu")
         self.extractor = FeatureExtractor(device)
 
-    def initialize(self, image, box):
-        image = Image.fromarray(image)
+    def initialize(self, image_file, box):
+        image = Image.open(image_file).convert('RGB')
 
         # Extract target image
         if self.detector.use_feature:
@@ -39,8 +39,8 @@ class Baseline(Algorithm):
 
         self.detector.init(self.target_feature)
 
-    def track(self, image, boxes):
-        image = Image.fromarray(image)
+    def track(self, image_file, boxes):
+        image = Image.open(image_file).convert('RGB')
 
         # Extract scores from boxes
         if self.detector.use_iou:

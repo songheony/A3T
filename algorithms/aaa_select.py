@@ -74,8 +74,8 @@ class AAA_select(Algorithm):
         # Online learner
         self.learner = WAADelayed()
 
-    def initialize(self, image, box):
-        image = Image.fromarray(image)
+    def initialize(self, image_file, box):
+        image = Image.open(image_file).convert('RGB')
 
         # Previous boxes of experts
         self.prev_boxes = []
@@ -97,8 +97,8 @@ class AAA_select(Algorithm):
         # Init online learner
         self.learner.init(self.n_experts)
 
-    def track(self, image, boxes):
-        image = Image.fromarray(image)
+    def track(self, image_file, boxes):
+        image = Image.open(image_file).convert('RGB')
 
         # Save box of experts
         self.prev_boxes.append(boxes)

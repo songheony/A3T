@@ -98,7 +98,7 @@ class GradNet(Expert):
         self.saver.restore(self.sess, "/home/heonsong/Desktop/AAA/AAA-journal/external/GradNet-Tensorflow/ckpt/base_l5_1t_49/model_epoch49.ckpt")
 
     def initialize(self, image_file, box):
-        im = cv2.imread(image_file)
+        im = cv2.imread(image_file, cv2.IMREAD_COLOR)
         cx, cy, w, h = region_to_bbox(box)
         self.targetSize = np.array([h, w])
         self.targetPosition = np.array([cy, cx])
@@ -277,7 +277,7 @@ class GradNet(Expert):
             self.hid_gra = np.copy(0.4 * self.hid_gra + 0.6 * self.zFeat2_gra)
 
     def track(self, image_file):
-        im = cv2.imread(image_file)
+        im = cv2.imread(image_file, cv2.IMREAD_COLOR)
         self.frame += 1
 
         if self.frame - self.updata_features_frame[-1] == 9 and self.no_cos:

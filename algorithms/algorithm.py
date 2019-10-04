@@ -30,7 +30,7 @@ class Algorithm(object):
         """Run tracker on a sequence."""
 
         # Initialize
-        image = self._read_image(sequence.frames[0])
+        # image = self._read_image(sequence.frames[0])
 
         boxes = np.zeros((len(trackers), len(sequence.ground_truth_rect), 4))
         tracker_times = np.zeros((len(trackers), len(sequence.ground_truth_rect)))
@@ -48,10 +48,10 @@ class Algorithm(object):
         start_time = time.time()
         if input_gt:
             self.initialize(
-                image, np.array(sequence.init_bbox()), sequence.ground_truth_rect
+                sequence.frames[0], np.array(sequence.init_bbox()), sequence.ground_truth_rect
             )
         else:
-            self.initialize(image, np.array(sequence.init_bbox()))
+            self.initialize(sequence.frames[0], np.array(sequence.init_bbox()))
         init_time = getattr(self, "time", time.time() - start_time)
         times.append(init_time)
 
@@ -60,10 +60,10 @@ class Algorithm(object):
         offline_bb = []
         weights = []
         for n, frame in enumerate(sequence.frames[1:]):
-            image = self._read_image(frame)
+            # image = self._read_image(frame)
 
             start_time = time.time()
-            state, offline, weight = self.track(image, boxes[:, n + 1, :])
+            state, offline, weight = self.track(frame, boxes[:, n + 1, :])
             calc_time = time.time() - start_time
             last_time = np.max(tracker_times[:, n])
             times.append(calc_time + last_time)

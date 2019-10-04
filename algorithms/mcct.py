@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+import cv2
 from .algorithm import Algorithm
 
 sys.path.append("external/pyCFTrackers")
@@ -25,7 +26,8 @@ class MCCT(Algorithm):
 
         self.n_experts = n_experts
 
-    def initialize(self, image, box):
+    def initialize(self, image_file, box):
+        image = cv2.imread(image_file)
         config = MCCTHOTBConfig()
         self.scale_adaptation = config.scale_adaptation
 
@@ -79,7 +81,8 @@ class MCCT(Algorithm):
             self.experts[i].smooth_scores.append(1)
             self.experts[i].centers.append((self._center[0], self._center[1]))
 
-    def track(self, image, boxes):
+    def track(self, image_file, boxes):
+        image = cv2.imread(image_file)
         self.frame_idx += 1
         current_frame = image
 

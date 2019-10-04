@@ -48,8 +48,8 @@ class AAA_gt(Algorithm):
         # Online learner
         self.learner = WAADelayed()
 
-    def initialize(self, image, box, gt):
-        image = Image.fromarray(image)
+    def initialize(self, image_file, box, gt):
+        image = Image.open(image_file).convert('RGB')
         self.anchor = 0
         self.frame = 0
         self.gt = gt
@@ -69,8 +69,8 @@ class AAA_gt(Algorithm):
         # Init online learner
         self.learner.init(self.n_experts)
 
-    def track(self, image, boxes):
-        image = Image.fromarray(image)
+    def track(self, image_file, boxes):
+        image = Image.open(image_file).convert('RGB')
         self.frame += 1
 
         # Save box of experts
