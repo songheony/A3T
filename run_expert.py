@@ -121,6 +121,18 @@ def main(tracker_name, dataset_name):
         from experts.mdnet import MDnet
 
         tracker = MDnet()
+    elif tracker_name == "MemDTC":
+        from experts.memdtc import MemDTC
+
+        tracker = MemDTC()
+    elif tracker_name == "MemTrack":
+        from experts.memtrack import MemTrack
+
+        tracker = MemTrack()
+    elif tracker_name == "RT-MDNet":
+        from experts.rt_mdent import RTMDNet
+
+        tracker = RTMDNet()
     elif tracker_name == "SiamDW":
         from experts.siamdw import SiamDW
 
@@ -141,6 +153,10 @@ def main(tracker_name, dataset_name):
         from experts.siamrpnpp import SiamRPNPP
 
         tracker = SiamRPNPP()
+    elif tracker_name == "SPM":
+        from experts.spm import SPM
+
+        tracker = SPM()
     elif tracker_name == "Staple":
         from experts.staple import Staple
 

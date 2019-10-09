@@ -30,12 +30,16 @@ class SiamDW(Expert):
 
     def initialize(self, image_file, box):
         image = cv2.imread(image_file)
+        if len(image.shape) == 2:
+            image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
         center = np.array([box[0] + (box[2] - 1) / 2, box[1] + (box[3] - 1) / 2])
         size = np.array([box[2], box[3]])
         self.state = self.tracker.init(image, center, size, self.net)
 
     def track(self, image_file):
         image = cv2.imread(image_file)
+        if len(image.shape) == 2:
+            image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
         self.state = self.tracker.track(self.state, image)
         center = self.state["target_pos"]
         size = self.state["target_sz"]

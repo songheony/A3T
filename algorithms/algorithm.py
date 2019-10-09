@@ -48,7 +48,9 @@ class Algorithm(object):
         start_time = time.time()
         if input_gt:
             self.initialize(
-                sequence.frames[0], np.array(sequence.init_bbox()), sequence.ground_truth_rect
+                sequence.frames[0],
+                np.array(sequence.init_bbox()),
+                sequence.ground_truth_rect,
             )
         else:
             self.initialize(sequence.frames[0], np.array(sequence.init_bbox()))

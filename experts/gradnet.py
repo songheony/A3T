@@ -95,7 +95,10 @@ class GradNet(Expert):
         self.config = tf.ConfigProto()
         self.config.gpu_options.allow_growth = True
         self.sess = tf.Session(config=self.config)
-        self.saver.restore(self.sess, "/home/heonsong/Desktop/AAA/AAA-journal/external/GradNet-Tensorflow/ckpt/base_l5_1t_49/model_epoch49.ckpt")
+        self.saver.restore(
+            self.sess,
+            "/home/heonsong/Desktop/AAA/AAA-journal/external/GradNet-Tensorflow/ckpt/base_l5_1t_49/model_epoch49.ckpt",
+        )
 
     def initialize(self, image_file, box):
         im = cv2.imread(image_file, cv2.IMREAD_COLOR)

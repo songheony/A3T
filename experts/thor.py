@@ -15,7 +15,9 @@ class THOR(Expert):
         dataset = "OTB2015"
         vanilla = False
         lb_type = "dynamic"  # [dynamic, ensemble]
-        json_path = f"/home/heonsong/Desktop/AAA/AAA-journal/external/THOR/configs/{tracker}/"
+        json_path = (
+            f"/home/heonsong/Desktop/AAA/AAA-journal/external/THOR/configs/{tracker}/"
+        )
         json_path += f"{dataset}_"
         if vanilla:
             json_path += "vanilla.json"
@@ -42,5 +44,5 @@ class THOR(Expert):
     def track(self, image_file):
         image = cv2.imread(image_file)
         self.state = self.tracker.track(image, self.state)
-        bbox = cxy_wh_2_rect(self.state['target_pos'], self.state['target_sz'])
+        bbox = cxy_wh_2_rect(self.state["target_pos"], self.state["target_sz"])
         return bbox

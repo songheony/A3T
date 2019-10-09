@@ -74,7 +74,7 @@ class AAA(Algorithm):
         self.learner = WAADelayed()
 
     def initialize(self, image_file, box):
-        image = Image.open(image_file).convert('RGB')
+        image = Image.open(image_file).convert("RGB")
 
         # Previous boxes of experts
         self.prev_boxes = []
@@ -97,7 +97,7 @@ class AAA(Algorithm):
         self.learner.init(self.n_experts)
 
     def track(self, image_file, boxes):
-        image = Image.open(image_file).convert('RGB')
+        image = Image.open(image_file).convert("RGB")
 
         # Save box of experts
         self.prev_boxes.append(boxes)

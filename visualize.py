@@ -96,7 +96,7 @@ def draw_curve(dataset_name, trackers, success_ret, precision_ret):
     plt.axis("off")
     plt.grid(False)
 
-    plt.savefig("%s_curve.pdf" % dataset_name, bbox_inches="tight")
+    plt.savefig("results/%s_curve.pdf" % dataset_name, bbox_inches="tight")
     plt.close()
 
 
@@ -128,7 +128,7 @@ def draw_rank(dataset_name, trackers, success_ret, precision_ret):
     plt.xlabel("Rank")
     plt.ylabel("Frequency")
 
-    plt.savefig("%s_rank.pdf" % dataset_name, bbox_inches="tight")
+    plt.savefig("results/%s_rank.pdf" % dataset_name, bbox_inches="tight")
     plt.close()
 
 
@@ -166,7 +166,7 @@ def draw_score(datasets, trackers, success_rets):
     plt.xlabel("Dataset")
     plt.ylabel("AUC")
 
-    plt.savefig("score.pdf", bbox_inches="tight")
+    plt.savefig("results/score.pdf", bbox_inches="tight")
     plt.close()
 
 
@@ -192,7 +192,7 @@ def draw_ratio(datasets, algorithm, success_rets, anchor_ratios):
     plt.xlabel("Anchor ratio")
     plt.ylabel("AUC")
 
-    plt.savefig("ratio.pdf", bbox_inches="tight")
+    plt.savefig("results/ratio.pdf", bbox_inches="tight")
     plt.close()
 
 
@@ -379,6 +379,18 @@ def main(experts, algorithm):
 
 
 if __name__ == "__main__":
-    experts = ["ATOM", "DaSiamRPN", "DiMP", "ECO", "GradNet", "SiamDW", "SiamFC", "SiamRPN", "SiamRPN++", "Staple", "THOR"]
+    experts = [
+        "ATOM",
+        "DaSiamRPN",
+        "DiMP",
+        "ECO",
+        "GradNet",
+        "SiamDW",
+        "SiamFC",
+        "SiamRPN",
+        "SiamRPN++",
+        "Staple",
+        "THOR",
+    ]
 
     main(experts, "AAA_0.8_0.0_True_True_False_True_False_True")
