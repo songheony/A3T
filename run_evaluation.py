@@ -40,11 +40,12 @@ def main(trackers, algorithms, dataset_name):
 
 
 if __name__ == "__main__":
-    experts = ["ATOM", "DaSiamRPN", "ECO", "SiamDW", "SiamRPN++", "TADT"]
-    baselines = ["Average", "Max", "MCCT"]
-    trackers = experts + baselines
-    algorithms = [""]
+    import argparse
 
-    dataset = "OTB"
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-a", "--algorithms", default="AAA_select", type=str)
+    parser.add_argument("-t", "--trackers", default=list(), nargs="+")
+    parser.add_argument("-d", "--dataset", default="OTB", type=str)
+    args = parser.parse_args()
 
-    main(trackers, algorithms, dataset)
+    main(args.trackers, [args.algorithm], args.dataset)

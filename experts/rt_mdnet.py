@@ -5,13 +5,15 @@ import torch
 from torch.autograd import Variable
 from .expert import Expert
 
-sys.path.append("external/pytracking/")
-from modules.sample_generator import gen_samples, SampleGenerator
-from modules.model import BinaryLoss, MDNet
-from modules.img_cropper import imgCropper
-from modules.roi_align import RoIAlignAdaMax
-from modules.utils import samples2maskroi
-from modules.bbreg import BBRegressor
+sys.path.append("external/RT-MDNet/modules")
+from sample_generator import gen_samples, SampleGenerator
+from model import BinaryLoss, MDNet
+from img_cropper import imgCropper
+from roi_align import RoIAlignAdaMax
+from utils import samples2maskroi
+from bbreg import BBRegressor
+
+sys.path.append("external/RT-MDNet")
 from tracker import set_optimizer, train
 from options import opts
 
@@ -31,7 +33,9 @@ class RTMDNet(Expert):
 
     def initialize(self, image_file, box):
         self.target_bbox = box
-        self.model = MDNet(opts["model_path"])
+        self.model = MDNet(
+            "/home/heonsong/Desktop/AAA/AAA-journal/external/RT-MDNet/rt-mdnet.pth"
+        )
         if opts["adaptive_align"]:
             self.align_h = self.model.roi_align_model.aligned_height
             self.align_w = self.model.roi_align_model.aligned_width

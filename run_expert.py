@@ -130,7 +130,7 @@ def main(tracker_name, dataset_name):
 
         tracker = MemTrack()
     elif tracker_name == "RT-MDNet":
-        from experts.rt_mdent import RTMDNet
+        from experts.rt_mdnet import RTMDNet
 
         tracker = RTMDNet()
     elif tracker_name == "SiamDW":

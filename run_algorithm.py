@@ -152,11 +152,9 @@ def main(algorithm_name, experts, dataset_name, **kargs):
 if __name__ == "__main__":
     import argparse
 
-    experts = ["ATOM", "DaSiamRPN", "ECO", "SiamDW", "SiamRPN++", "Staple"]
-
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--algorithm", default="AAA_select", type=str)
-    parser.add_argument("-e", "--experts", default=experts, nargs="+")
+    parser.add_argument("-e", "--experts", default=list(), nargs="+")
     parser.add_argument("-d", "--dataset", default="OTB", type=str)
     parser.add_argument("-t", "--iou_threshold", default=0.0, type=float)
     parser.add_argument("-r", "--feature_threshold", default=0.0, type=float)

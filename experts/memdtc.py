@@ -11,11 +11,10 @@ class MemDTC(Expert):
         super(MemDTC, self).__init__("MemDTC")
         self.config_proto = tf.ConfigProto()
         self.config_proto.gpu_options.allow_growth = True
-        tf.Graph().as_default()
         self.sess = tf.Session(config=self.config_proto)
+        self.model = Model(self.sess)
 
     def initialize(self, image_file, box):
-        self.model = Model(self.sess)
         self.tracker = Tracker(self.model)
         self.tracker.initialize(image_file, box)
 
