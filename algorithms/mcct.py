@@ -32,7 +32,7 @@ class MCCT(Algorithm):
         self.scale_adaptation = config.scale_adaptation
 
         self.period = config.period
-        self.expert_num = config.expert_num
+        self.expert_num = self.n_experts
 
         self.scale_config = config.scale_config
 
@@ -42,7 +42,7 @@ class MCCT(Algorithm):
         self.id_ensemble = []
         self.frame_idx = -1
         self.experts = []
-        for i in range(self.n_experts):
+        for i in range(self.expert_num):
             self.experts.append(Expert())
             self.id_ensemble.append(1)
 
@@ -122,7 +122,7 @@ class MCCT(Algorithm):
         else:
             for i in range(self.expert_num):
                 self.experts[i].rob_scores.append(1)
-            self._center = self.experts[6].pos
+            self._center = self.experts[-1].pos
             self.mean_score.append(0)
 
         if self.scale_adaptation:
