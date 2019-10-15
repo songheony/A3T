@@ -141,7 +141,14 @@ class MCCT(Algorithm):
                 self.target_sz[0],
                 self.target_sz[1],
             ],
-            None,
+            [
+                [
+                    self._center[0] - self.target_sz[0] / 2,
+                    self._center[1] - self.target_sz[1] / 2,
+                    self.target_sz[0],
+                    self.target_sz[1],
+                ]
+            ],
             self.id_ensemble,
         )
 
