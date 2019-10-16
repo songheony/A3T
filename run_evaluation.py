@@ -43,7 +43,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--algorithms", default="AAA_select", type=str)
+    parser.add_argument("-a", "--algorithm", default="AAA_select", type=str)
     parser.add_argument("-t", "--trackers", default=list(), nargs="+")
     parser.add_argument("-d", "--dataset", default="OTB", type=str)
     args = parser.parse_args()

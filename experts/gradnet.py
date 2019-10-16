@@ -1,6 +1,9 @@
+import os
+
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+os.environ["C_CPP_MIN_LOG_LEVEL"] = "3"
 import sys
 import cv2
-import os
 import numpy as np
 import tensorflow as tf
 from .expert import Expert
@@ -21,8 +24,6 @@ from region_to_bbox import region_to_bbox
 class GradNet(Expert):
     def __init__(self):
         super(GradNet, self).__init__("GradNet")
-        os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
-        os.environ["C_CPP_MIN_LOG_LEVEL"] = "3"
         self.opts = configParams()
         self.opts = getOpts(self.opts)
 

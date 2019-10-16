@@ -1,11 +1,16 @@
+import os
 import sys
 from .expert import Expert
 import tensorflow as tf
+
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+os.environ["C_CPP_MIN_LOG_LEVEL"] = "3"
 
 sys.path.append("external/siam-mcf")
 from src.parse_arguments import parse_arguments
 from src.siam_mcf.siam_mcf_tracker import SiamMcfTracker
 import src.siamese as siam
+from src.region_to_bbox import region_to_bbox
 
 
 class SiamMCF(Expert):
@@ -21,19 +26,18 @@ class SiamMCF(Expert):
         config = tf.ConfigProto()
         config.gpu_options.allow_growth = True
         self.sess = tf.Session(config=config)
-        tf.global_variables_initializer().run()
+        tf.global_variables_initializer().run(session=self.sess)
         vars_to_load = []
         for v in tf.global_variables():
             if "postnorm" not in v.name:
                 vars_to_load.append(v)
 
-        siam_ckpt_name = "pretrained/siam_mcf.ckpt-50000"
+        siam_ckpt_name = "/home/heonsong/Desktop/AAA/AAA-journal/external/siam-mcf/pretrained/siam_mcf.ckpt-50000"
         siam_saver = tf.train.Saver(vars_to_load)
         siam_saver.restore(self.sess, siam_ckpt_name)
 
     def initialize(self, image_file, box):
-        pos_x, pos_y = box[:2] + box[2:] / 2
-        target_w, target_h = box[2:]
+        pos_x, pos_y, target_w, target_h = region_to_bbox(box)
         self.tracker = SiamMcfTracker(
             self.design.context,
             self.design.exemplar_sz,

@@ -164,11 +164,9 @@ def main(algorithm_name, experts, thresholds):
 if __name__ == "__main__":
     import argparse
 
-    experts = ["ATOM", "DaSiamRPN", "ECO", "SiamDW", "SiamRPN++", "Staple"]
-
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--algorithm", default="AAA_select", type=str)
-    parser.add_argument("-e", "--experts", default=experts, nargs="+")
+    parser.add_argument("-e", "--experts", default=list(), nargs="+")
     parser.add_argument("-s", "--start_point", default=0.7, type=float)
     parser.add_argument("-t", "--end_point", default=0.9, type=float)
     parser.add_argument("-n", "--sample_number", default=21, type=int)
