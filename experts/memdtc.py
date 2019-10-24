@@ -4,6 +4,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 os.environ["C_CPP_MIN_LOG_LEVEL"] = "3"
 import sys
 import tensorflow as tf
+tf.get_logger().setLevel('INFO')
 from .expert import Expert
 
 sys.path.append("external/MemDTC/")

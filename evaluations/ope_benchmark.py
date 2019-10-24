@@ -32,7 +32,31 @@ class OPEBenchmark:
     def convert_bb_to_norm_center(self, bboxes, gt_wh):
         return self.convert_bb_to_center(bboxes) / (gt_wh + 1e-16)
 
-    def eval_success(self, eval_trackers, show_anchor=False):
+    def eval_anchor_frame(self, eval_trackers):
+        """
+        Args:
+            eval_trackers: list of tracker
+        Return:
+            res: dict of results
+        """
+
+        anchor_frame = {}
+        for tracker_name in eval_trackers:
+            anchor_frame_ = {}
+            for seq in self.dataset:
+                gt_traj = np.array(seq.ground_truth_rect)
+                results_dir = "{}/{}".format(env_settings().results_path, tracker_name)
+                base_results_path = "{}/{}".format(results_dir, seq.name)
+                offline_path = "{}_offline.pkl".format(base_results_path)
+                with open(offline_path, "rb") as fp:
+                    offline_bb = pickle.load(fp)
+                offline_bb.insert(0, [gt_traj[0]])
+                valid_idx = [x is not None for x in offline_bb]
+                anchor_frame_[seq.name] = valid_idx
+            anchor_frame[tracker_name] = anchor_frame_
+        return anchor_frame
+
+    def eval_success(self, eval_trackers):
         """
         Args:
             eval_trackers: list of tracker
@@ -41,10 +65,8 @@ class OPEBenchmark:
         """
 
         success_ret = {}
-        anchor_frame = {}
         for tracker_name in eval_trackers:
             success_ret_ = {}
-            anchor_frame_ = {}
             for seq in self.dataset:
                 gt_traj = np.array(seq.ground_truth_rect)
                 results_dir = "{}/{}".format(env_settings().results_path, tracker_name)
@@ -53,21 +75,8 @@ class OPEBenchmark:
                 tracker_traj = np.loadtxt(results_path, delimiter="\t")
                 n_frame = len(gt_traj)
                 success_ret_[seq.name] = success_overlap(gt_traj, tracker_traj, n_frame)
-                if show_anchor:
-                    offline_path = "{}_offline.pkl".format(base_results_path)
-                    with open(offline_path, "rb") as fp:
-                        offline_bb = pickle.load(fp)
-                    offline_bb.insert(0, [gt_traj[0]])
-                    valid_idx = [x is not None for x in offline_bb]
-                    anchor_frame_[seq.name] = valid_idx
-                else:
-                    anchor_frame_[seq.name] = None
             success_ret[tracker_name] = success_ret_
-            anchor_frame[tracker_name] = anchor_frame_
-        if show_anchor:
-            return success_ret, anchor_frame
-        else:
-            return success_ret
+        return success_ret
 
     def eval_success_offline(self, eval_algorithms):
         """

@@ -167,11 +167,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--algorithm", default="AAA_select", type=str)
     parser.add_argument("-e", "--experts", default=list(), nargs="+")
-    parser.add_argument("-s", "--start_point", default=0.7, type=float)
-    parser.add_argument("-t", "--end_point", default=0.9, type=float)
-    parser.add_argument("-n", "--sample_number", default=21, type=int)
+    parser.add_argument("-s", "--start_point", default=0.5, type=float)
+    parser.add_argument("-t", "--end_point", default=0.8, type=float)
     args = parser.parse_args()
 
-    thresholds = np.linspace(args.start_point, args.end_point, num=args.sample_number)
+    thresholds = np.arange(args.start_point, args.end_point, 0.01)
 
     main(args.algorithm, args.experts, thresholds)
