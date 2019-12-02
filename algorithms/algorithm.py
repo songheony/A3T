@@ -18,7 +18,7 @@ class Algorithm(object):
         if not os.path.exists(self.results_dir):
             os.makedirs(self.results_dir)
 
-    def initialize(self, image, state, gt=None):
+    def initialize(self, image, state):
         """Overload this function in your tracker. This should initialize the model."""
         raise NotImplementedError
 
@@ -26,7 +26,7 @@ class Algorithm(object):
         """Overload this function in your tracker. This should track in the frame and update the model."""
         raise NotImplementedError
 
-    def track_sequence(self, sequence, trackers, input_gt=False):
+    def track_sequence(self, sequence, trackers):
         """Run tracker on a sequence."""
 
         # Initialize
@@ -46,14 +46,7 @@ class Algorithm(object):
 
         times = []
         start_time = time.time()
-        if input_gt:
-            self.initialize(
-                sequence.frames[0],
-                np.array(sequence.init_bbox()),
-                sequence.ground_truth_rect,
-            )
-        else:
-            self.initialize(sequence.frames[0], np.array(sequence.init_bbox()))
+        self.initialize(sequence.frames[0], np.array(sequence.init_bbox()))
         init_time = getattr(self, "time", time.time() - start_time)
         times.append(init_time)
 
@@ -79,7 +72,7 @@ class Algorithm(object):
     def _read_image(self, image_file: str):
         return cv2.cvtColor(cv2.imread(image_file), cv2.COLOR_BGR2RGB)
 
-    def run(self, seq, trackers, input_gt=False):
+    def run(self, seq, trackers):
         """Run tracker on sequence.
         args:
             seq: Sequence to run the tracker on.
@@ -88,7 +81,7 @@ class Algorithm(object):
         """
 
         output_bb, offline_bb, weights, execution_times = self.track_sequence(
-            seq, trackers, input_gt
+            seq, trackers
         )
 
         return output_bb, offline_bb, weights, execution_times

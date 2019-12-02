@@ -3,8 +3,8 @@ from .algorithm import Algorithm
 
 
 class Average(Algorithm):
-    def __init__(self, n_experts):
-        super(Average, self).__init__("Average")
+    def __init__(self, n_experts, mode):
+        super(Average, self).__init__(f"Average_{mode}")
 
     def initialize(self, image, box):
         pass

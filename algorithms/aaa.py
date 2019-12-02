@@ -1,4 +1,5 @@
 import torch
+import random
 import numpy as np
 from PIL import Image
 from .algorithm import Algorithm
@@ -11,11 +12,15 @@ from .aaa_util import (
     calc_iou_score,
 )
 
+np.random.seed(42)
+torch.random.manual_seed(42)
+
 
 class AAA(Algorithm):
     def __init__(
         self,
         n_experts,
+        mode="Expert",
         iou_threshold=0.0,
         feature_threshold=0.0,
         reset_target=True,
@@ -27,8 +32,9 @@ class AAA(Algorithm):
         cost_score=True,
     ):
         super(AAA, self).__init__(
-            "AAA_%s_%s_%s_%s_%s_%s_%s_%s_%s"
+            "AAA_%s_%s_%s_%s_%s_%s_%s_%s_%s_%s"
             % (
+                mode,
                 iou_threshold,
                 feature_threshold,
                 reset_target,
@@ -40,6 +46,9 @@ class AAA(Algorithm):
                 cost_score,
             )
         )
+
+        # Whether select expert randomly
+        self.random_select = True
 
         # Whether reset target feature
         self.reset_target = reset_target
@@ -190,7 +199,10 @@ class AAA(Algorithm):
             offline_results = None
 
             # Return box with aggrogating experts' box
-            predict = np.dot(self.learner.w, boxes)
+            if self.random_select:
+                predict = boxes[self._weighted_random_choice()]
+            else:
+                np.dot(self.learner.w, boxes)
 
         return predict, offline_results, self.learner.w
 
@@ -208,3 +220,11 @@ class AAA(Algorithm):
             )
 
         return expert_gradient_losses
+
+    def _weighted_random_choice(self):
+        pick = random.uniform(0, sum(self.learner.w))
+        current = 0
+        for i, weight in enumerate(self.learner.w):
+            current += weight
+            if current >= pick:
+                return i

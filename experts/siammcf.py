@@ -1,10 +1,12 @@
 import os
+
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 os.environ["C_CPP_MIN_LOG_LEVEL"] = "3"
 import sys
 from .expert import Expert
 import tensorflow as tf
-tf.get_logger().setLevel('INFO')
+
+tf.get_logger().setLevel("INFO")
 
 sys.path.append("external/siam-mcf")
 from src.parse_arguments import parse_arguments

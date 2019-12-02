@@ -15,10 +15,14 @@ class BACF(Expert):
 
     def initialize(self, image_file, box):
         image = cv2.imread(image_file)
+        self.prev_box = box
         self.tracker.init(image, box)
 
     def track(self, image_file):
         image = cv2.imread(image_file)
-        bbox = self.tracker.update(image)
-        bbox = np.array(bbox, dtype=int)
+        try:
+            bbox = self.tracker.update(image)
+        except:
+            bbox = self.prev_box
+        self.prev_box = bbox
         return bbox

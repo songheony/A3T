@@ -21,8 +21,8 @@ class Expert:
 
 
 class MCCT(Algorithm):
-    def __init__(self, n_experts):
-        super(MCCT, self).__init__("MCCT")
+    def __init__(self, n_experts, mode):
+        super(MCCT, self).__init__(f"MCCT_{mode}")
 
         self.n_experts = n_experts
 
@@ -126,13 +126,16 @@ class MCCT(Algorithm):
             self.mean_score.append(0)
 
         if self.scale_adaptation:
-            self.scale_factor = self.scale_estimator.update(
-                current_frame, self._center, self.base_target_sz, self.scale_factor
-            )
-            self.target_sz = (
-                round(self.base_target_sz[0] * self.scale_factor),
-                round(self.base_target_sz[1] * self.scale_factor),
-            )
+            try:
+                self.scale_factor = self.scale_estimator.update(
+                    current_frame, self._center, self.base_target_sz, self.scale_factor
+                )
+                self.target_sz = (
+                    round(self.base_target_sz[0] * self.scale_factor),
+                    round(self.base_target_sz[1] * self.scale_factor),
+                )
+            except Exception as e:
+                print(e)
 
         return (
             [

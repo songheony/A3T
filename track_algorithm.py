@@ -11,7 +11,7 @@ from datasets.nfsdataset import NFSDataset
 from datasets.lasotdataset import LaSOTDataset
 
 
-def run_sequence(seq, algorithm, experts, debug=False, input_gt=False):
+def run_sequence(seq, algorithm, experts, debug=False):
     """Runs a tracker on a sequence."""
 
     base_results_path = "{}/{}".format(algorithm.results_dir, seq.name)
@@ -26,14 +26,10 @@ def run_sequence(seq, algorithm, experts, debug=False, input_gt=False):
     print("Tracker: {},  Sequence: {}".format(algorithm.name, seq.name))
 
     if debug:
-        tracked_bb, offline_bb, weights, exec_times = algorithm.run(
-            seq, experts, input_gt=input_gt
-        )
+        tracked_bb, offline_bb, weights, exec_times = algorithm.run(seq, experts)
     else:
         try:
-            tracked_bb, offline_bb, weights, exec_times = algorithm.run(
-                seq, experts, input_gt=input_gt
-            )
+            tracked_bb, offline_bb, weights, exec_times = algorithm.run(seq, experts)
         except Exception as e:
             print(e)
             return
@@ -55,7 +51,7 @@ def run_sequence(seq, algorithm, experts, debug=False, input_gt=False):
             pickle.dump(offline_bb, fp)
 
 
-def run_dataset(dataset, algorithms, experts, debug=False, input_gt=False, threads=0):
+def run_dataset(dataset, algorithms, experts, debug=False, threads=0):
     """Runs a list of experts on a dataset.
     args:
         dataset: List of Sequence instances, forming a dataset.
@@ -71,9 +67,7 @@ def run_dataset(dataset, algorithms, experts, debug=False, input_gt=False, threa
     if mode == "sequential":
         for seq in dataset:
             for algorithm_info in algorithms:
-                run_sequence(
-                    seq, algorithm_info, experts, debug=debug, input_gt=input_gt
-                )
+                run_sequence(seq, algorithm_info, experts, debug=debug)
     elif mode == "parallel":
         param_list = [
             (seq, algorithm_info, experts, debug)
@@ -84,9 +78,7 @@ def run_dataset(dataset, algorithms, experts, debug=False, input_gt=False, threa
     print("Done")
 
 
-def run_tracker(
-    algorithm, experts, dataset, sequence=None, debug=0, input_gt=False, threads=0
-):
+def run_tracker(algorithm, experts, dataset, sequence=None, debug=0, threads=0):
     """Run tracker on sequence or dataset.
     args:
         tracker_name: Name of tracking method.
@@ -103,31 +95,15 @@ def run_tracker(
 
     algorithms = [algorithm]
 
-    run_dataset(dataset, algorithms, experts, debug, input_gt, threads)
+    run_dataset(dataset, algorithms, experts, debug, threads)
 
 
 def main(algorithm_name, experts, dataset_name, **kargs):
     n_experts = len(experts)
-    input_gt = False
     if algorithm_name == "AAA":
         from algorithms.aaa import AAA
 
         algorithm = AAA(n_experts, **kargs)
-    elif algorithm_name == "AAA_select":
-        from algorithms.aaa_select import AAA_select
-
-        algorithm = AAA_select(n_experts, **kargs)
-    elif algorithm_name == "AAA_gt":
-        input_gt = True
-        from algorithms.aaa_gt import AAA_gt
-
-        algorithm = AAA_gt(
-            n_experts,
-            iou_threshold=kargs["iou_threshold"],
-            feature_threshold=kargs["feature_threshold"],
-            use_iou=kargs["use_iou"],
-            use_feature=kargs["use_feature"],
-        )
     else:
         raise ValueError("Unknown algorithm name")
 
@@ -146,16 +122,17 @@ def main(algorithm_name, experts, dataset_name, **kargs):
     else:
         raise ValueError("Unknown dataset name")
 
-    run_tracker(algorithm, experts, dataset, debug=0, input_gt=input_gt)
+    run_tracker(algorithm, experts, dataset, debug=0)
 
 
 if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--algorithm", default="AAA_select", type=str)
+    parser.add_argument("-a", "--algorithm", default="AAA", type=str)
     parser.add_argument("-e", "--experts", default=list(), nargs="+")
     parser.add_argument("-d", "--dataset", default="OTB", type=str)
+    parser.add_argument("-n", "--mode", default="Expert", type=str)
     parser.add_argument("-t", "--iou_threshold", default=0.0, type=float)
     parser.add_argument("-r", "--feature_threshold", default=0.0, type=float)
     parser.add_argument("-s", "--reset_target", action="store_true")
@@ -171,6 +148,7 @@ if __name__ == "__main__":
         args.algorithm,
         args.experts,
         args.dataset,
+        mode=args.mode,
         iou_threshold=args.iou_threshold,
         feature_threshold=args.feature_threshold,
         reset_target=args.reset_target,

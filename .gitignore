@@ -111,7 +111,8 @@ external/
 
 # result and report
 tracking_results/
-results/
+Eval/
+Tracking/
 
 # graph
 *.pdf

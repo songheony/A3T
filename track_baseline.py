@@ -3,8 +3,13 @@ import multiprocessing
 import os
 import pickle
 from itertools import product
+from datasets.otbdataset import OTBDataset
+from datasets.votdataset import VOTDataset
+from datasets.tpldataset import TPLDataset
+from datasets.uavdataset import UAVDataset
+from datasets.nfsdataset import NFSDataset
+from datasets.lasotdataset import LaSOTDataset
 from datasets.got10kdataset import GOT10KDatasetVal
-from evaluations.ope_benchmark import OPEBenchmark
 
 
 def run_sequence(seq, algorithm, experts, debug=False):
@@ -22,14 +27,10 @@ def run_sequence(seq, algorithm, experts, debug=False):
     print("Tracker: {},  Sequence: {}".format(algorithm.name, seq.name))
 
     if debug:
-        tracked_bb, offline_bb, weights, exec_times = algorithm.run(
-            seq, experts, input_gt=False
-        )
+        tracked_bb, offline_bb, weights, exec_times = algorithm.run(seq, experts)
     else:
         try:
-            tracked_bb, offline_bb, weights, exec_times = algorithm.run(
-                seq, experts, input_gt=False
-            )
+            tracked_bb, offline_bb, weights, exec_times = algorithm.run(seq, experts)
         except Exception as e:
             print(e)
             return
@@ -98,79 +99,53 @@ def run_tracker(algorithm, experts, dataset, sequence=None, debug=0, threads=0):
     run_dataset(dataset, algorithms, experts, debug, threads)
 
 
-def main(algorithm_name, experts, thresholds):
-    algorithms = []
+def main(algorithm_name, experts, mode, dataset_name, **kargs):
     n_experts = len(experts)
-    dataset = GOT10KDatasetVal()
+    if algorithm_name == "Average":
+        from algorithms.average import Average
 
-    for threshold in thresholds:
-        if algorithm_name == "AAA":
-            from algorithms.aaa import AAA
+        algorithm = Average(n_experts, mode)
+    elif algorithm_name == "MCCT":
+        from algorithms.mcct import MCCT
 
-            algorithm = AAA(
-                n_experts,
-                iou_threshold=0.0,
-                feature_threshold=threshold,
-                reset_target=False,
-                only_max=False,
-                use_iou=False,
-                use_feature=True,
-                cost_iou=True,
-                cost_feature=True,
-                cost_score=True,
-            )
-        elif algorithm_name == "AAA_select":
-            from algorithms.aaa_select import AAA_select
+        algorithm = MCCT(n_experts, mode)
+    elif algorithm_name == "Max":
+        from algorithms.baseline import Baseline
 
-            algorithm = AAA_select(
-                n_experts,
-                iou_threshold=0.0,
-                feature_threshold=threshold,
-                reset_target=False,
-                only_max=False,
-                use_iou=False,
-                use_feature=True,
-                cost_iou=True,
-                cost_feature=True,
-                cost_score=True,
-            )
-        else:
-            raise ValueError("Unknown algorithm name")
+        algorithm = Baseline(
+            n_experts, name=f"Max_{mode}", use_iou=False, use_feature=True
+        )
+    else:
+        raise ValueError("Unknown algorithm name")
 
-        run_tracker(algorithm, experts, dataset, debug=0)
-        algorithms.append(algorithm.name)
+    if dataset_name == "OTB":
+        dataset = OTBDataset()
+    elif dataset_name == "NFS":
+        dataset = NFSDataset()
+    elif dataset_name == "UAV":
+        dataset = UAVDataset()
+    elif dataset_name == "TPL":
+        dataset = TPLDataset()
+    elif dataset_name == "VOT":
+        dataset = VOTDataset()
+    elif dataset_name == "LaSOT":
+        dataset = LaSOTDataset()
+    elif dataset_name == "Got10K":
+        dataset = GOT10KDatasetVal()
+    else:
+        raise ValueError("Unknown dataset name")
 
-    benchmark = OPEBenchmark(dataset)
-
-    success = benchmark.eval_success(experts)
-    precision = benchmark.eval_precision(experts)
-    benchmark.show_result(success, precision, show_video_level=False)
-
-    success = benchmark.eval_success(algorithms)
-    precision = benchmark.eval_precision(algorithms)
-    benchmark.show_result(success, precision, show_video_level=False)
-
-    success_offline, overlap_anchor, anchor_ratio = benchmark.eval_success_offline(
-        algorithms
-    )
-    precision_offline, dist_anchor, anchor_ratio = benchmark.eval_precision_offline(
-        algorithms
-    )
-    benchmark.show_result_offline(
-        success_offline, overlap_anchor, precision_offline, dist_anchor, anchor_ratio
-    )
+    run_tracker(algorithm, experts, dataset, debug=0)
 
 
 if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--algorithm", default="AAA_select", type=str)
+    parser.add_argument("-a", "--algorithm", default="MCCT", type=str)
     parser.add_argument("-e", "--experts", default=list(), nargs="+")
-    parser.add_argument("-s", "--start_point", default=0.5, type=float)
-    parser.add_argument("-t", "--end_point", default=0.8, type=float)
+    parser.add_argument("-n", "--mode", default="Expert", type=str)
+    parser.add_argument("-d", "--dataset", default="OTB", type=str)
     args = parser.parse_args()
 
-    thresholds = np.arange(args.start_point, args.end_point, 0.01)
-
-    main(args.algorithm, args.experts, thresholds)
+    main(args.algorithm, args.experts, args.mode, args.dataset)

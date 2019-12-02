@@ -34,7 +34,7 @@ def draw_offline_tracking(dataset, algorithm, result_dir):
         results = [gt_traj[0].tolist()]
         for box in offline_bb:
             if box is not None:
-                results += box
+                results += list(box)
 
         save_dir = result_dir / "Offline" / seq.name
         os.makedirs(save_dir, exist_ok=True)
@@ -42,7 +42,6 @@ def draw_offline_tracking(dataset, algorithm, result_dir):
         for frame in range(len(results)):
             filename = os.path.basename(seq.frames[frame])
             im = Image.open(seq.frames[frame]).convert("RGB")
-            box = results[frame]
 
             fig, ax = plt.subplots(nrows=1, ncols=1)
             fig.add_subplot(111, frameon=False)
@@ -54,6 +53,7 @@ def draw_offline_tracking(dataset, algorithm, result_dir):
             else:
                 color = "w"
 
+            box = results[frame]
             rect = patches.Rectangle(
                 (box[0], box[1]),
                 box[2],
@@ -74,14 +74,33 @@ def draw_offline_tracking(dataset, algorithm, result_dir):
                 color=color,
                 arrowprops=dict(arrowstyle="->", color=color),
             )
+
+            box = gt_traj[frame]
+            rect = patches.Rectangle(
+                (box[0], box[1]),
+                box[2],
+                box[3],
+                linewidth=2,
+                edgecolor="b",
+                facecolor="none",
+                alpha=1,
+            )
+            ax.add_patch(rect)
+            ax.annotate(
+                "Ground Truth",
+                xy=(box[0], box[1]),
+                xycoords="data",
+                xytext=(-50, 10),
+                textcoords="offset points",
+                size=10,
+                color="b",
+                arrowprops=dict(arrowstyle="->", color="b"),
+            )
             ax.axis("off")
 
             # hide tick and tick label of the big axes
             plt.axis("off")
             plt.grid(False)
-            plt.xlabel("Anchor ratio")
-            plt.ylabel("AUC")
-
             plt.savefig(os.path.join(save_dir, filename))
             plt.close()
 
@@ -161,9 +180,6 @@ def draw_result(dataset, trackers, result_dir):
             # hide tick and tick label of the big axes
             plt.axis("off")
             plt.grid(False)
-            plt.xlabel("Anchor ratio")
-            plt.ylabel("AUC")
-
             plt.savefig(save_dir / filename)
             plt.close()
 
@@ -185,17 +201,15 @@ def main(experts, algorithm, result_dir):
 
 
 if __name__ == "__main__":
-    experts = [
-        "ATOM",
-        "DaSiamRPN",
-        "ECO",
-        "SiamDW",
-        "SiamMCF",
-        "SiamRPN++",
-        "SPM",
-        "THOR",
-    ]
+    import argparse
 
-    result_dir = Path("./Tracking")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-a", "--algoritm", default="AAA", type=str)
+    parser.add_argument("-t", "--trackers", default=list(), nargs="+")
+    parser.add_argument("-d", "--dir", default="Expert", type=str)
+    args = parser.parse_args()
 
-    main(experts, "AAA")
+    result_dir = Path(f"./Eval/{args.dir}")
+    os.makedirs(result_dir, exist_ok=True)
+
+    main(args.trackers, args.algorithm, result_dir)

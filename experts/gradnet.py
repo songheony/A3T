@@ -6,7 +6,8 @@ import sys
 import cv2
 import numpy as np
 import tensorflow as tf
-tf.get_logger().setLevel('INFO')
+
+tf.get_logger().setLevel("INFO")
 from .expert import Expert
 
 sys.path.append("external/GradNet-Tensorflow")

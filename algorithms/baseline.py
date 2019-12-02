@@ -6,7 +6,14 @@ from .aaa_util import FeatureExtractor, AnchorDetector, calc_iou_score
 
 
 class Baseline(Algorithm):
-    def __init__(self, n_experts, name="Baseline", use_iou=True, use_feature=True):
+    def __init__(
+        self,
+        n_experts,
+        name="Baseline",
+        use_iou=True,
+        use_feature=True,
+        reset_target=True,
+    ):
         super(Baseline, self).__init__(name)
 
         self.n_experts = n_experts
@@ -22,6 +29,9 @@ class Baseline(Algorithm):
             cost_feature=False,
             cost_score=False,
         )
+
+        # Whether reset target feature
+        self.reset_target = reset_target
 
         # Feature extractor
         use_cuda = torch.cuda.is_available()
@@ -62,6 +72,10 @@ class Baseline(Algorithm):
             max_id = detected[0]
             weight = np.zeros((len(boxes)))
             weight[max_id] = 1
+
+            if self.reset_target:
+                # Init detector with target feature
+                self.detector.init(features[max_id])
 
             return boxes[max_id], [boxes[max_id]], weight
         else:
