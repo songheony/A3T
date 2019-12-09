@@ -1,7 +1,7 @@
 import sys
 import numpy as np
 import cv2
-from .algorithm import Algorithm
+from base_tracker import BaseTracker
 
 sys.path.append("external/pyCFTrackers")
 from cftracker.scale_estimator import LPScaleEstimator
@@ -20,7 +20,7 @@ class Expert:
         self.rob_scores = []
 
 
-class MCCT(Algorithm):
+class MCCT(BaseTracker):
     def __init__(self, n_experts, mode):
         super(MCCT, self).__init__(f"MCCT_{mode}")
 

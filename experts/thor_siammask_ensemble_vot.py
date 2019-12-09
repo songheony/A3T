@@ -1,14 +1,14 @@
 import sys
 import json
 import cv2
-from .expert import Expert
+from base_tracker import BaseTracker
 
 sys.path.append("external/THOR")
 from trackers.tracker import SiamFC_Tracker, SiamRPN_Tracker, SiamMask_Tracker
 from benchmark.bench_utils.bbox_helper import cxy_wh_2_rect, rect_2_cxy_wh
 
 
-class THOR(Expert):
+class THOR(BaseTracker):
     def __init__(self):
         super(THOR, self).__init__("THOR_SiamMask_Ensemble_VOT")
         tracker = "SiamMask"

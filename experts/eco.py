@@ -1,13 +1,13 @@
 import sys
 import cv2
-from .expert import Expert
+from base_tracker import BaseTracker
 
 sys.path.append("external/pytracking/")
 from pytracking.tracker.eco.eco import ECO as Tracker
 from pytracking.parameter.eco import default
 
 
-class ECO(Expert):
+class ECO(BaseTracker):
     def __init__(self):
         super(ECO, self).__init__("ECO")
         self.tracker = Tracker(default.parameters())

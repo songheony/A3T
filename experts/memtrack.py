@@ -6,13 +6,13 @@ import sys
 import tensorflow as tf
 
 tf.get_logger().setLevel("INFO")
-from .expert import Expert
+from base_tracker import BaseTracker
 
 sys.path.append("external/MemTrack/")
 from tracking.tracker import Tracker, Model
 
 
-class MemTrack(Expert):
+class MemTrack(BaseTracker):
     def __init__(self):
         super(MemTrack, self).__init__("MemTrack")
         self.config_proto = tf.ConfigProto()

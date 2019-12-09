@@ -1,12 +1,12 @@
 import sys
 from PIL import Image
-from .expert import Expert
+from base_tracker import BaseTracker
 
 sys.path.append("external/siamfc")
 from siamfc import TrackerSiamFC
 
 
-class SiamFC(Expert):
+class SiamFC(BaseTracker):
     def __init__(self):
         super(SiamFC, self).__init__("SiamFC")
         # TODO: edit this path

@@ -1,7 +1,7 @@
 import numpy as np
-from track_algorithm import run_tracker
 from datasets.got10kdataset import GOT10KDatasetVal
 from evaluations.ope_benchmark import OPEBenchmark
+from track_dataset import run_tracker
 
 
 def main(algorithm_name, experts, thresholds, **kargs):
@@ -29,7 +29,7 @@ def main(algorithm_name, experts, thresholds, **kargs):
         else:
             raise ValueError("Unknown algorithm name")
 
-        run_tracker(algorithm, experts, dataset, debug=0)
+        run_tracker(algorithm, dataset, experts=experts)
         algorithms.append(algorithm.name)
 
     benchmark = OPEBenchmark(dataset)

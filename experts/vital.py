@@ -3,7 +3,7 @@ from PIL import Image
 import numpy as np
 import yaml
 import torch
-from .expert import Expert
+from base_tracker import BaseTracker
 
 sys.path.append("external/py_Vital")
 sys.path.append("external/py_Vital/gnet")
@@ -16,7 +16,7 @@ from g_pretrain import g_pretrain
 from run_tracker import forward_samples, train
 
 
-class Vital(Expert):
+class Vital(BaseTracker):
     def __init__(self):
         super(Vital, self).__init__("Vital")
         # TODO: edit this path and edit the file

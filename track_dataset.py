@@ -9,13 +9,12 @@ from datasets.tpldataset import TPLDataset
 from datasets.uavdataset import UAVDataset
 from datasets.nfsdataset import NFSDataset
 from datasets.lasotdataset import LaSOTDataset
-from datasets.got10kdataset import GOT10KDatasetVal
 
 
-def run_sequence(seq, algorithm, experts, debug=False):
+def run_sequence(seq, tracker, experts=None, debug=False):
     """Runs a tracker on a sequence."""
 
-    base_results_path = "{}/{}".format(algorithm.results_dir, seq.name)
+    base_results_path = "{}/{}".format(tracker.results_dir, seq.name)
     results_path = "{}.txt".format(base_results_path)
     times_path = "{}_time.txt".format(base_results_path)
     weights_path = "{}_weight.txt".format(base_results_path)
@@ -24,13 +23,13 @@ def run_sequence(seq, algorithm, experts, debug=False):
     if os.path.isfile(results_path):
         return
 
-    print("Tracker: {},  Sequence: {}".format(algorithm.name, seq.name))
+    print("Tracker: {},  Sequence: {}".format(tracker.name, seq.name))
 
     if debug:
-        tracked_bb, offline_bb, weights, exec_times = algorithm.run(seq, experts)
+        tracked_bb, offline_bb, weights, exec_times = tracker.run(seq, experts)
     else:
         try:
-            tracked_bb, offline_bb, weights, exec_times = algorithm.run(seq, experts)
+            tracked_bb, offline_bb, weights, exec_times = tracker.run(seq, experts)
         except Exception as e:
             print(e)
             return
@@ -46,13 +45,14 @@ def run_sequence(seq, algorithm, experts, debug=False):
     )
     if not debug:
         np.savetxt(results_path, tracked_bb, delimiter="\t", fmt="%f")
-        np.savetxt(weights_path, weights, delimiter="\t", fmt="%f")
         np.savetxt(times_path, exec_times, delimiter="\t", fmt="%f")
-        with open(offline_path, "wb") as fp:
-            pickle.dump(offline_bb, fp)
+        if experts is not None:
+            np.savetxt(weights_path, weights, delimiter="\t", fmt="%f")
+            with open(offline_path, "wb") as fp:
+                pickle.dump(offline_bb, fp)
 
 
-def run_dataset(dataset, algorithms, experts, debug=False, threads=0):
+def run_dataset(dataset, trackers, experts=None, debug=False, threads=0):
     """Runs a list of experts on a dataset.
     args:
         dataset: List of Sequence instances, forming a dataset.
@@ -67,19 +67,19 @@ def run_dataset(dataset, algorithms, experts, debug=False, threads=0):
 
     if mode == "sequential":
         for seq in dataset:
-            for algorithm_info in algorithms:
-                run_sequence(seq, algorithm_info, experts, debug=debug)
+            for tracker_info in trackers:
+                run_sequence(seq, tracker_info, experts=experts, debug=debug)
     elif mode == "parallel":
         param_list = [
-            (seq, algorithm_info, experts, debug)
-            for seq, algorithm_info in product(dataset, algorithms)
+            (seq, tracker_info, experts, debug)
+            for seq, tracker_info in product(dataset, trackers)
         ]
         with multiprocessing.Pool(processes=threads) as pool:
             pool.starmap(run_sequence, param_list)
     print("Done")
 
 
-def run_tracker(algorithm, experts, dataset, sequence=None, debug=0, threads=0):
+def run_tracker(tracker, dataset, experts=None, sequence=None, debug=0, threads=0):
     """Run tracker on sequence or dataset.
     args:
         tracker_name: Name of tracking method.
@@ -94,30 +94,10 @@ def run_tracker(algorithm, experts, dataset, sequence=None, debug=0, threads=0):
     if sequence is not None:
         dataset = [dataset[sequence]]
 
-    algorithms = [algorithm]
-
-    run_dataset(dataset, algorithms, experts, debug, threads)
+    run_dataset(dataset, [tracker], experts=experts, debug=debug, threads=threads)
 
 
-def main(algorithm_name, experts, mode, dataset_name, **kargs):
-    n_experts = len(experts)
-    if algorithm_name == "Average":
-        from algorithms.average import Average
-
-        algorithm = Average(n_experts, mode)
-    elif algorithm_name == "MCCT":
-        from algorithms.mcct import MCCT
-
-        algorithm = MCCT(n_experts, mode)
-    elif algorithm_name == "Max":
-        from algorithms.baseline import Baseline
-
-        algorithm = Baseline(
-            n_experts, name=f"Max_{mode}", use_iou=False, use_feature=True
-        )
-    else:
-        raise ValueError("Unknown algorithm name")
-
+def run(tracker, dataset_name, experts=None):
     if dataset_name == "OTB":
         dataset = OTBDataset()
     elif dataset_name == "NFS":
@@ -130,22 +110,7 @@ def main(algorithm_name, experts, mode, dataset_name, **kargs):
         dataset = VOTDataset()
     elif dataset_name == "LaSOT":
         dataset = LaSOTDataset()
-    elif dataset_name == "Got10K":
-        dataset = GOT10KDatasetVal()
     else:
         raise ValueError("Unknown dataset name")
 
-    run_tracker(algorithm, experts, dataset, debug=0)
-
-
-if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--algorithm", default="MCCT", type=str)
-    parser.add_argument("-e", "--experts", default=list(), nargs="+")
-    parser.add_argument("-n", "--mode", default="Expert", type=str)
-    parser.add_argument("-d", "--dataset", default="OTB", type=str)
-    args = parser.parse_args()
-
-    main(args.algorithm, args.experts, args.mode, args.dataset)
+    run_tracker(tracker, dataset, experts=experts, debug=0)

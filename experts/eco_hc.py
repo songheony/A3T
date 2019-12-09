@@ -1,6 +1,6 @@
 import sys
 import cv2
-from .expert import Expert
+from base_tracker import BaseTracker
 
 import faulthandler
 
@@ -9,7 +9,7 @@ from cftracker.eco import ECO as Tracker
 from lib.eco.config import otb_hc_config
 
 
-class ECO_HC(Expert):
+class ECO_HC(BaseTracker):
     def __init__(self):
         super(ECO_HC, self).__init__("ECO-HC")
         self.tracker = Tracker(config=otb_hc_config.OTBHCConfig())

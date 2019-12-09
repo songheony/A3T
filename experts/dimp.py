@@ -1,13 +1,13 @@
 import sys
 import cv2
-from .expert import Expert
+from base_tracker import BaseTracker
 
 sys.path.append("external/pytracking/")
 from pytracking.tracker.dimp.dimp import DiMP as Tracker
 from pytracking.parameter.dimp import dimp50
 
 
-class DiMP(Expert):
+class DiMP(BaseTracker):
     def __init__(self):
         super(DiMP, self).__init__("DiMP")
         self.tracker = Tracker(dimp50.parameters())

@@ -3,7 +3,7 @@ import numpy as np
 from PIL import Image
 import torch
 from torch.autograd import Variable
-from .expert import Expert
+from base_tracker import BaseTracker
 
 sys.path.append("external/RT-MDNet/modules")
 from sample_generator import gen_samples, SampleGenerator
@@ -18,7 +18,7 @@ from tracker import set_optimizer, train
 from options import opts
 
 
-class RTMDNet(Expert):
+class RTMDNet(BaseTracker):
     def __init__(self):
         super(RTMDNet, self).__init__("RT-MDNet")
         # option setting

@@ -2,7 +2,7 @@ import sys
 import numpy as np
 import cv2
 from easydict import EasyDict as edict
-from .expert import Expert
+from base_tracker import BaseTracker
 
 sys.path.append("external/SiamDW/lib")
 from tracker.siamfc import SiamFC
@@ -10,7 +10,7 @@ import models.models as models
 from utils.utils import load_pretrain
 
 
-class SiamDW(Expert):
+class SiamDW(BaseTracker):
     def __init__(self):
         super().__init__("SiamDW_SiamFCIncep22")
         # TODO: edit this path

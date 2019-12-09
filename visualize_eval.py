@@ -5,6 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sympy import preview
 import seaborn as sns
+import plotly.graph_objects as go
+import plotly.io as pio
 from datasets.otbdataset import OTBDataset
 from datasets.votdataset import VOTDataset
 from datasets.tpldataset import TPLDataset
@@ -75,10 +77,41 @@ def draw_curves(datasets, trackers, success_rets, precision_rets, figsize, eval_
     plt.close()
 
 
-def draw_scores(datasets, trackers, success_rets, precision_rets, figsize, eval_dir):
+def draw_ranks(datasets, trackers, rets, eval_dir):
+    for dataset in datasets:
+        seq_names = list(rets[dataset][trackers[0]].keys())
+        ranks = []
+        for seq_name in seq_names:
+            value = np.mean(
+                [rets[dataset][tracker_name][seq_name] for tracker_name in trackers],
+                axis=1,
+            )
+            temp = value.argsort()
+            rank = np.empty_like(temp)
+            rank[temp] = np.arange(len(value))
+            rank = len(trackers) - rank
+            ranks.append(rank)
+        ranks = np.array(ranks)
+        fig = go.Figure()
+        for i in range(len(trackers)):
+            fig.add_trace(
+                go.Scatter(
+                    x=seq_names,
+                    y=ranks[:, i],
+                    mode="lines+markers",
+                    name=f"{trackers[i]}[{np.mean(ranks[:,i]):.2f}]",
+                )
+            )
+        fig.update_yaxes(autorange="reversed")
+        pio.write_html(fig, str(eval_dir / f"{dataset}.html"))
+
+
+def draw_scores(
+    datasets, trackers, success_rets, precision_rets, figsize, eval_dir, norm=None
+):
     sns.set_palette(sns.color_palette("hls", len(trackers) + 1))
     ind = np.arange(len(datasets)) * 2
-    width = 0.17
+    width = 0.10
 
     fig, axes = plt.subplots(nrows=2, ncols=1, sharex=True, figsize=figsize)
     fig.add_subplot(111, frameon=False)
@@ -94,8 +127,17 @@ def draw_scores(datasets, trackers, success_rets, precision_rets, figsize, eval_
             value = [v for k, v in success_rets[dataset][tracker_name].items()]
             values.append(np.mean(value))
         succs[tracker_name] = values
+    maxi = np.max(np.array(list(succs.values())), axis=0)
+    mini = np.min(np.array(list(succs.values())), axis=0)
+    mean = np.mean(np.array(list(succs.values())), axis=0)
+    std = np.std(np.array(list(succs.values())), axis=0)
     for idx, tracker_name in enumerate(trackers):
-        value = succs[tracker_name]
+        if norm == "minmax":
+            value = (np.array(succs[tracker_name]) - mini) / (maxi - mini)
+        elif norm == "std":
+            value = (np.array(succs[tracker_name]) - mean) / std
+        else:
+            value = succs[tracker_name]
         line = ax.bar(
             ind + (idx - (len(trackers) - 1) / 2.0) * width,
             value,
@@ -115,8 +157,17 @@ def draw_scores(datasets, trackers, success_rets, precision_rets, figsize, eval_
             value = [v for k, v in precision_rets[dataset][tracker_name].items()]
             values.append(np.mean(value, axis=0)[20])
         precs[tracker_name] = values
+    maxi = np.max(np.array(list(precs.values())), axis=0)
+    mini = np.min(np.array(list(precs.values())), axis=0)
+    mean = np.mean(np.array(list(precs.values())), axis=0)
+    std = np.std(np.array(list(precs.values())), axis=0)
     for idx, tracker_name in enumerate(trackers):
-        value = precs[tracker_name]
+        if norm == "minmax":
+            value = (np.array(precs[tracker_name]) - mini) / (maxi - mini)
+        elif norm == "std":
+            value = (np.array(precs[tracker_name]) - mean) / std
+        else:
+            value = precs[tracker_name]
         ax.bar(
             ind + (idx - (len(trackers) - 1) / 2.0) * width,
             value,
@@ -141,7 +192,10 @@ def draw_scores(datasets, trackers, success_rets, precision_rets, figsize, eval_
 
     fig.legend(lines, trackers, loc="upper center", ncol=(len(trackers) + 1) // 2)
 
-    plt.savefig(eval_dir / "scores.pdf", bbox_inches="tight")
+    if norm is None:
+        plt.savefig(eval_dir / "scores.pdf", bbox_inches="tight")
+    else:
+        plt.savefig(eval_dir / f"scores_{norm}.pdf", bbox_inches="tight")
     plt.close()
 
 
@@ -356,7 +410,7 @@ def draw_ratio(
 
     fig.legend(lines, datasets, loc="upper center", ncol=(len(datasets) + 1) // 2)
 
-    plt.savefig(eval_dir / "ratios.pdf", bbox_inches="tight")
+    plt.savefig(eval_dir / f"{algorithm}_ratios.pdf", bbox_inches="tight")
     plt.close()
 
 
@@ -432,7 +486,7 @@ def main(experts, baselines, algorithms, eval_dir):
 
     datasets_name = ["OTB", "NFS", "UAV", "TPL", "VOT", "LaSOT"]
     datasets = [otb, nfs, uav, tpl, vot, lasot]
-    eval_trackers = experts + algorithms  # + baselines
+    eval_trackers = experts + baselines + algorithms
     viz_trackers = experts + algorithms
 
     eval_save = eval_dir / "eval.pkl"
@@ -448,10 +502,10 @@ def main(experts, baselines, algorithms, eval_dir):
 
             success = benchmark.eval_success(eval_trackers)
             precision = benchmark.eval_precision(eval_trackers)
-            # anchor_frame = benchmark.eval_anchor_frame(algorithms)
+            anchor_frame = benchmark.eval_anchor_frame(algorithms)
             successes[name] = success
             precisions[name] = precision
-            # anchor_frames[name] = anchor_frame
+            anchor_frames[name] = anchor_frame
         eval_save.write_bytes(pickle.dumps((successes, precisions, anchor_frames)))
 
     make_table(
@@ -462,18 +516,39 @@ def main(experts, baselines, algorithms, eval_dir):
     draw_curves(datasets_name, viz_trackers, successes, precisions, figsize, eval_dir)
     draw_dists(datasets_name, viz_trackers, successes, precisions, figsize, eval_dir)
     draw_scores(datasets_name, viz_trackers, successes, precisions, figsize, eval_dir)
+    draw_scores(
+        datasets_name,
+        viz_trackers,
+        successes,
+        precisions,
+        figsize,
+        eval_dir,
+        norm="minmax",
+    )
+    draw_scores(
+        datasets_name,
+        viz_trackers,
+        successes,
+        precisions,
+        figsize,
+        eval_dir,
+        norm="std",
+    )
     draw_hists(datasets_name, viz_trackers, successes, precisions, figsize, eval_dir)
 
-    # figsize = (10, 5)
-    # draw_ratio(
-    #     datasets_name,
-    #     algorithm,
-    #     successes,
-    #     precisions,
-    #     anchor_frames,
-    #     figsize,
-    #     eval_dir,
-    # )
+    draw_ranks(datasets_name, viz_trackers, successes, eval_dir)
+
+    figsize = (10, 5)
+    for algorithm in algorithms:
+        draw_ratio(
+            datasets_name,
+            algorithm,
+            successes,
+            precisions,
+            anchor_frames,
+            figsize,
+            eval_dir,
+        )
 
 
 if __name__ == "__main__":
@@ -486,7 +561,7 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--dir", default="Expert", type=str)
     args = parser.parse_args()
 
-    eval_dir = Path(f"./Eval/{args.dir}")
+    eval_dir = Path(f"./evaluation_results/{args.dir}")
     os.makedirs(eval_dir, exist_ok=True)
 
     main(args.experts, args.baselines, args.algorithms, eval_dir)

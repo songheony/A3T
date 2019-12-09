@@ -1,11 +1,11 @@
 import torch
 import numpy as np
 from PIL import Image
-from .algorithm import Algorithm
+from base_tracker import BaseTracker
 from .aaa_util import FeatureExtractor, AnchorDetector, calc_iou_score
 
 
-class Baseline(Algorithm):
+class Baseline(BaseTracker):
     def __init__(
         self,
         n_experts,

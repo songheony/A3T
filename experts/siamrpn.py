@@ -1,12 +1,12 @@
 import sys
 from PIL import Image
-from .expert import Expert
+from base_tracker import BaseTracker
 
 sys.path.append("external/siamrpn_pytorch")
 from siamrpn import TrackerSiamRPN
 
 
-class SiamRPN(Expert):
+class SiamRPN(BaseTracker):
     def __init__(self):
         super(SiamRPN, self).__init__("SiamRPN")
         # TODO: edit this path

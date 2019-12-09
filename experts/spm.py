@@ -2,7 +2,7 @@ import sys
 import cv2
 import torch
 import numpy as np
-from .expert import Expert
+from base_tracker import BaseTracker
 
 sys.path.append("external/SPM-Tracker/")
 from siam_tracker.core.inference import SiamTracker
@@ -16,7 +16,7 @@ def img2tensor(img, device):
     return img_tensor
 
 
-class SPM(Expert):
+class SPM(BaseTracker):
     def __init__(self):
         super(SPM, self).__init__("SPM")
         cfg_path = "/home/heonsong/Desktop/AAA/AAA-journal/external/SPM-Tracker/configs/spm_tracker/alexnet_c42_otb.yaml"

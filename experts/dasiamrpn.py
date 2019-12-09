@@ -2,7 +2,7 @@ import sys
 import cv2
 import torch
 import numpy as np
-from .expert import Expert
+from base_tracker import BaseTracker
 
 sys.path.append("external/DaSiamRPN/code")
 from net import SiamRPNotb
@@ -10,7 +10,7 @@ from run_SiamRPN import SiamRPN_init, SiamRPN_track
 from utils import cxy_wh_2_rect
 
 
-class DaSiamRPN(Expert):
+class DaSiamRPN(BaseTracker):
     def __init__(self):
         super(DaSiamRPN, self).__init__(name="DaSiamRPN")
         self.net_file = (

@@ -1,13 +1,13 @@
 import sys
 import cv2
-from .expert import Expert
+from base_tracker import BaseTracker
 
 sys.path.append("external/pyCFTrackers")
 from cftracker.ldes import LDES as Tracker
 from cftracker.config import ldes_config
 
 
-class LDES(Expert):
+class LDES(BaseTracker):
     def __init__(self):
         super(LDES, self).__init__("LDES")
         self.tracker = Tracker(config=ldes_config.LDESDemoLinearConfig())
@@ -19,9 +19,6 @@ class LDES(Expert):
 
     def track(self, image_file):
         image = cv2.imread(image_file)
-        try:
-            bbox = self.tracker.update(image)
-        except:
-            bbox = self.prev_box
+        bbox = self.tracker.update(image)
         self.prev_box = bbox
         return bbox

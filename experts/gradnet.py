@@ -8,7 +8,7 @@ import numpy as np
 import tensorflow as tf
 
 tf.get_logger().setLevel("INFO")
-from .expert import Expert
+from base_tracker import BaseTracker
 
 sys.path.append("external/GradNet-Tensorflow")
 from parameters import configParams
@@ -23,7 +23,7 @@ from siamese import SiameseNet
 from region_to_bbox import region_to_bbox
 
 
-class GradNet(Expert):
+class GradNet(BaseTracker):
     def __init__(self):
         super(GradNet, self).__init__("GradNet")
         self.opts = configParams()

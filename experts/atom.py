@@ -1,13 +1,13 @@
 import sys
 import cv2
-from .expert import Expert
+from base_tracker import BaseTracker
 
 sys.path.append("external/pytracking/")
 from pytracking.tracker.atom.atom import ATOM as Tracker
 from pytracking.parameter.atom import default
 
 
-class ATOM(Expert):
+class ATOM(BaseTracker):
     def __init__(self):
         super(ATOM, self).__init__("ATOM")
         self.tracker = Tracker(default.parameters())

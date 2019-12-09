@@ -7,7 +7,6 @@ from torchvision import transforms
 import torch.nn as nn
 import scipy.special as sc
 
-
 iou_factor = 1
 feature_factor = 5
 
@@ -211,13 +210,6 @@ class WAADelayed:
 
 
 class ShortestPathTracker:
-    """
-        Object tracking based on data association via minimum cost flow algorithm
-        L. Zhang et al.,
-        "Global data association for multi-object tracking using network flows",
-        CVPR 2008
-    """
-
     def __init__(self, cost_link):
         self._cost_link = cost_link
 

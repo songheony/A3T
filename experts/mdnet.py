@@ -3,7 +3,7 @@ from PIL import Image
 import numpy as np
 import yaml
 import torch
-from .expert import Expert
+from base_tracker import BaseTracker
 
 sys.path.append("external/py_MDNet")
 sys.path.append("external/py_MDNet/tracking")
@@ -13,7 +13,7 @@ from tracking.bbreg import BBRegressor
 from tracking.run_tracker import forward_samples, train
 
 
-class MDnet(Expert):
+class MDnet(BaseTracker):
     def __init__(self):
         super().__init__("MDNet")
         # TODO: edit this path

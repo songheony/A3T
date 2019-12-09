@@ -1,7 +1,7 @@
 import sys
 import cv2
 import torch
-from .expert import Expert
+from base_tracker import BaseTracker
 
 sys.path.append("external/pysot")
 from pysot.core.config import cfg
@@ -9,7 +9,7 @@ from pysot.models.model_builder import ModelBuilder
 from pysot.tracker.tracker_builder import build_tracker
 
 
-class SiamRPNPP(Expert):
+class SiamRPNPP(BaseTracker):
     def __init__(self):
         super(SiamRPNPP, self).__init__("SiamRPN++")
         # TODO: edit this path

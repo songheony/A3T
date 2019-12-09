@@ -1,13 +1,13 @@
 import sys
 import cv2
-from .expert import Expert
+from base_tracker import BaseTracker
 
 sys.path.append("external/pyCFTrackers")
 from cftracker.csrdcf import CSRDCF as Tracker
 from cftracker.config import csrdcf_config
 
 
-class CSRDCF(Expert):
+class CSRDCF(BaseTracker):
     def __init__(self):
         super(CSRDCF, self).__init__("CSRDCF")
         self.tracker = Tracker(config=csrdcf_config.CSRDCFConfig())

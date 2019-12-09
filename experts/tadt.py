@@ -1,6 +1,6 @@
 import sys
 import torch
-from .expert import Expert
+from base_tracker import BaseTracker
 
 sys.path.append("external/TADT_python")
 from tadt_tracker import Tadt_Tracker
@@ -8,7 +8,7 @@ from defaults import _C as cfg
 from backbone_v2 import build_vgg16
 
 
-class TADT(Expert):
+class TADT(BaseTracker):
     def __init__(self):
         super(TADT, self).__init__("TADT")
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

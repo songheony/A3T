@@ -3,7 +3,7 @@ import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 os.environ["C_CPP_MIN_LOG_LEVEL"] = "3"
 import sys
-from .expert import Expert
+from base_tracker import BaseTracker
 import tensorflow as tf
 
 tf.get_logger().setLevel("INFO")
@@ -15,7 +15,7 @@ import src.siamese as siam
 from src.region_to_bbox import region_to_bbox
 
 
-class SiamMCF(Expert):
+class SiamMCF(BaseTracker):
     def __init__(self):
         super(SiamMCF, self).__init__("SiamMCF")
         root_dir = "/home/heonsong/Desktop/AAA/AAA-journal/external/siam-mcf/"

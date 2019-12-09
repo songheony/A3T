@@ -2,7 +2,7 @@ import torch
 import random
 import numpy as np
 from PIL import Image
-from .algorithm import Algorithm
+from base_tracker import BaseTracker
 from .aaa_util import (
     FeatureExtractor,
     ShortestPathTracker,
@@ -12,11 +12,8 @@ from .aaa_util import (
     calc_iou_score,
 )
 
-np.random.seed(42)
-torch.random.manual_seed(42)
 
-
-class AAA(Algorithm):
+class AAA(BaseTracker):
     def __init__(
         self,
         n_experts,
@@ -32,7 +29,7 @@ class AAA(Algorithm):
         cost_score=True,
     ):
         super(AAA, self).__init__(
-            "AAA_%s_%s_%s_%s_%s_%s_%s_%s_%s_%s"
+            "AAA_%s_%.2f_%.2f_%s_%s_%s_%s_%s_%s_%s"
             % (
                 mode,
                 iou_threshold,
