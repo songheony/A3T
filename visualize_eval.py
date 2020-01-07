@@ -459,6 +459,15 @@ def make_table(datasets, trackers, nexperts, success_rets, precision_rets, eval_
                     line += f' & {{\\color{{blue}} \\textbf{{{value[i, j]:0.2f}}}}}'
                 else:
                     line += f" & {value[i, j]:0.2f}"
+
+        # for value in [mean_succ, mean_prec]:
+        #     sorted_idx = np.argsort(np.mean(value, axis=1))
+        #     if i == sorted_idx[-1]:
+        #         line += f' & {{\\color{{red}} \\textbf{{{np.mean(value, axis=1)[i]:0.2f}}}}}'
+        #     elif i == sorted_idx[-2]:
+        #         line += f' & {{\\color{{blue}} \\textbf{{{np.mean(value, axis=1)[i]:0.2f}}}}}'
+        #     else:
+        #         line += f" & {np.mean(value, axis=1)[i]:0.2f}"
         line += " \\\\\n"
         latex += f"{line}"
 

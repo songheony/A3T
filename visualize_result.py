@@ -23,6 +23,42 @@ sns.set()
 sns.set_style("whitegrid")
 
 
+def draw_groudtruth(dataset, result_dir):
+    for seq in dataset:
+        gt_traj = np.array(seq.ground_truth_rect)
+
+        save_dir = result_dir / "GroundTruth" / seq.name
+        os.makedirs(save_dir, exist_ok=True)
+
+        for frame in range(len(gt_traj)):
+            filename = os.path.basename(seq.frames[frame])
+            im = Image.open(seq.frames[frame]).convert("RGB")
+
+            fig, ax = plt.subplots(nrows=1, ncols=1)
+            fig.add_subplot(111, frameon=False)
+
+            ax.imshow(np.asarray(im), aspect="auto")
+
+            box = gt_traj[frame]
+            rect = patches.Rectangle(
+                (box[0], box[1]),
+                box[2],
+                box[3],
+                linewidth=4,
+                edgecolor="r",
+                facecolor="none",
+                alpha=1,
+            )
+            ax.add_patch(rect)
+            ax.axis("off")
+
+            # hide tick and tick label of the big axes
+            plt.axis("off")
+            plt.grid(False)
+            plt.savefig(os.path.join(save_dir, filename))
+            plt.close()
+
+
 def draw_offline_tracking(dataset, algorithm, result_dir):
     for seq in dataset:
         gt_traj = np.array(seq.ground_truth_rect)

@@ -32,6 +32,7 @@ def calc_overlap(rect1, rect2):
     closure = np.maximum(0, right_max - left_min) * np.maximum(0, bottom_max - top_min)
     g_iou = iou - (closure - union) / closure
     g_iou = (1 + g_iou) / 2
+    g_iou = np.nan_to_num(g_iou)
     return g_iou
 
 
