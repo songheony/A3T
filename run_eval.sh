@@ -6,7 +6,7 @@ python ./visualize_eval.py -e ${goods[@]} -d Good -a ${algorithmgood[@]} -b ${ba
 algorithmbad=("AAA_Bad_0.00_0.60_False_False_False_True_True_True_True")
 baselinerbad=("Random_Bad" "MCCT_Bad" "Max_Bad")
 bads=("GradNet" "MemTrack" "SiamDW" "SiamFC" "SiamRPN" "Staple")
-python ./visualize_eval.py -e ${bads[@]} -d Bad -a ${algorithms[@]} -b ${baselinerbad[@]}
+python ./visualize_eval.py -e ${bads[@]} -d Bad -a ${algorithmbad[@]} -b ${baselinerbad[@]}
 
 algorithmdw=("AAA_SiamDW_0.00_0.67_False_False_False_True_True_True_True")
 baselinedw=("Random_SiamDW" "MCCT_SiamDW" "Max_SiamDW") 
