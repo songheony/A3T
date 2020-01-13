@@ -67,7 +67,7 @@ bash run_eval.sh
 
 5. Edit run_eval.sh and evaluate the trackers.
 
-[3] Depending on the expert, you may need to install additional subparty libraries such as tensorflow.
+[3] Depending on the expert, you may need to install additional subparty libraries such as tensorflow.  
 [4] The code is supposed to run algorithms after running experts for test. However, it is easy to modify the code to do both simultaneously.
 
 ## Author
