@@ -4,7 +4,6 @@
 
 * [ATOM](https://arxiv.org/abs/1811.07628)[<https://github.com/visionml/pytracking>]
 * [DaSiamRPN](https://arxiv.org/abs/1808.06048)[<https://github.com/foolwood/DaSiamRPN>,<https://github.com/songheony/DaSiamRPN>]<sup>[1]</sup>
-* [DiMP](https://arxiv.org/abs/1904.07220)[<https://github.com/visionml/pytracking>]
 * [GradNet](https://arxiv.org/abs/1909.06800)[<https://github.com/LPXTT/GradNet-Tensorflow>]
 * [MemTrack](https://arxiv.org/abs/1803.07268)[<https://github.com/skyoung/MemTrack>]
 * [SiamDW](https://arxiv.org/abs/1901.01660)[<https://github.com/researchmm/SiamDW>]
