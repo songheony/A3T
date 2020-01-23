@@ -1,10 +1,9 @@
-# Adaptive Aggregation of Arbitrary Online Trackers with a Regret Bound
+# Adaptive Aggregation of Arbitrary Online Trackers <br/> with a Regret Bound
 
 ## Experts
 
 * [ATOM](https://arxiv.org/abs/1811.07628)[<https://github.com/visionml/pytracking>]
 * [DaSiamRPN](https://arxiv.org/abs/1808.06048)[<https://github.com/foolwood/DaSiamRPN>,<https://github.com/songheony/DaSiamRPN>]<sup>[1]</sup>
-* [DiMP](https://arxiv.org/abs/1904.07220)[<https://github.com/visionml/pytracking>]
 * [GradNet](https://arxiv.org/abs/1909.06800)[<https://github.com/LPXTT/GradNet-Tensorflow>]
 * [MemTrack](https://arxiv.org/abs/1803.07268)[<https://github.com/skyoung/MemTrack>]
 * [SiamDW](https://arxiv.org/abs/1901.01660)[<https://github.com/researchmm/SiamDW>]
@@ -67,7 +66,7 @@ bash run_eval.sh
 
 5. Edit run_eval.sh and evaluate the trackers.
 
-[3] Depending on the expert, you may need to install additional subparty libraries such as tensorflow.
+[3] Depending on the expert, you may need to install additional subparty libraries such as tensorflow.  
 [4] The code is supposed to run algorithms after running experts for test. However, it is easy to modify the code to do both simultaneously.
 
 ## Author
@@ -76,10 +75,3 @@ bash run_eval.sh
 
 * Github: [@songheony](https://github.com/songheony)
 * Contact: songheony@gmail.com
-
-## Show your support
-
-Give a ⭐️ if this project helped you!
-
-***
-_This README was generated with ❤️ by [readme-md-generator](https://github.com/kefranabg/readme-md-generator)
