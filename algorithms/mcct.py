@@ -4,7 +4,6 @@ import cv2
 from base_tracker import BaseTracker
 
 sys.path.append("external/pyCFTrackers")
-from cftracker.scale_estimator import LPScaleEstimator
 from cftracker.mccth_staple import cal_ious
 from cftracker.config.mccth_staple_config import MCCTHOTBConfig
 
@@ -29,12 +28,9 @@ class MCCT(BaseTracker):
     def initialize(self, image_file, box):
         image = cv2.imread(image_file)
         config = MCCTHOTBConfig()
-        self.scale_adaptation = config.scale_adaptation
 
         self.period = config.period
         self.expert_num = self.n_experts
-
-        self.scale_config = config.scale_config
 
         weight_num = np.arange(self.period)
         self.weight = 1.1 ** weight_num
@@ -50,36 +46,19 @@ class MCCT(BaseTracker):
         first_frame = image.astype(np.float32)
         bbox = np.array(box).astype(np.int64)
         x, y, w, h = tuple(bbox)
-        self._center = (x + w / 2, y + h / 2)
-        self.w, self.h = w, h
-        self.target_sz = (self.w, self.h)
+        center = (x + w / 2, y + h / 2)
 
         avg_dim = (w + h) / 2
 
-        if self.scale_adaptation is True:
-            self.scale_factor = 1
-            self.base_target_sz = self.target_sz
-            self.scale_estimator = LPScaleEstimator(
-                self.target_sz, config=self.scale_config
-            )
-            self.scale_estimator.init(
-                first_frame, self._center, self.base_target_sz, self.scale_factor
-            )
-
         self.avg_dim = avg_dim
         for i in range(self.expert_num):
-            self.experts[i].rect_positions.append(
-                [
-                    self._center[0] - self.target_sz[0] / 2,
-                    self._center[1] - self.target_sz[1] / 2,
-                    self.target_sz[0],
-                    self.target_sz[1],
-                ]
-            )
+            self.experts[i].rect_positions.append(box)
             self.experts[i].rob_scores.append(1)
             self.experts[i].smoothes.append(0)
             self.experts[i].smooth_scores.append(1)
-            self.experts[i].centers.append((self._center[0], self._center[1]))
+            self.experts[i].centers.append(center)
+
+        self.box = box
 
     def track(self, image_file, boxes):
         image = cv2.imread(image_file)
@@ -118,42 +97,13 @@ class MCCT(BaseTracker):
                 self.id_ensemble[i] = self.experts[i].rob_scores[self.frame_idx]
             self.mean_score.append(np.sum(np.array(self.id_ensemble)) / self.expert_num)
             idx = np.argmax(np.array(self.id_ensemble))
-            self._center = self.experts[idx].pos
+            self.box = self.experts[idx].rect_positions[-1]
         else:
             for i in range(self.expert_num):
                 self.experts[i].rob_scores.append(1)
-            self._center = self.experts[-1].pos
-            self.mean_score.append(0)
+            self.box = self.experts[-1].rect_positions[-1]
 
-        if self.scale_adaptation:
-            try:
-                self.scale_factor = self.scale_estimator.update(
-                    current_frame, self._center, self.base_target_sz, self.scale_factor
-                )
-                self.target_sz = (
-                    round(self.base_target_sz[0] * self.scale_factor),
-                    round(self.base_target_sz[1] * self.scale_factor),
-                )
-            except Exception as e:
-                print(e)
-
-        return (
-            [
-                self._center[0] - self.target_sz[0] / 2,
-                self._center[1] - self.target_sz[1] / 2,
-                self.target_sz[0],
-                self.target_sz[1],
-            ],
-            [
-                [
-                    self._center[0] - self.target_sz[0] / 2,
-                    self._center[1] - self.target_sz[1] / 2,
-                    self.target_sz[0],
-                    self.target_sz[1],
-                ]
-            ],
-            self.id_ensemble,
-        )
+        return (self.box, [self.box], self.id_ensemble)
 
     def robustness_eva(self, experts, num, frame_idx, period, weight, expert_num):
         overlap_score = np.zeros((period, expert_num))
