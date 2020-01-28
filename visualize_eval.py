@@ -467,6 +467,85 @@ def draw_rank_sum(datasets, trackers, success_rets, figsize, eval_dir):
     plt.close()
 
 
+def draw_rank_both(datasets, trackers, success_rets, figsize, eval_dir):
+    fig, axes = plt.subplots(nrows=2, ncols=len(datasets), figsize=figsize)
+    fig.add_subplot(111, frameon=False)
+
+    lines = []
+    xs = list(range(1, len(trackers) + 1))
+
+    for i, dataset_name in enumerate(datasets):
+        # draw success plot
+        ax = axes[0, i]
+
+        seq_names = sorted(success_rets[dataset_name][trackers[0]].keys())
+        ranks = calc_rank(success_rets, trackers, dataset_name, seq_names)
+
+        for tracker_name, rank in zip(trackers, ranks.T):
+            line = ax.plot(
+                xs,
+                [np.sum(rank == x) / len(seq_names) for x in xs],
+                # c=color,
+                label=tracker_name if "AAA" not in tracker_name else "AAA",
+                linewidth=8 if "AAA" in tracker_name else 4,
+            )[0]
+            if i == 0:
+                lines.append(line)
+
+        ax.yaxis.set_major_formatter(FormatStrFormatter("%.1f"))
+        ax.set_xticks([1, len(trackers) // 2 + 1, len(trackers)])
+        ax.set_xticklabels([])
+        if i == 0:
+            ax.set_ylabel("Frequency of rank")
+
+    for i, dataset_name in enumerate(datasets):
+        # draw precision plot
+        ax = axes[1, i]
+
+        seq_names = sorted(success_rets[dataset_name][trackers[0]].keys())
+        ranks = calc_rank(success_rets, trackers, dataset_name, seq_names)
+
+        for tracker_name, rank in zip(trackers, ranks.T):
+            ax.plot(
+                xs,
+                np.cumsum([np.sum(rank == x) for x in xs]) / len(seq_names),
+                # c=color,
+                label=tracker_name if "AAA" not in tracker_name else "AAA",
+                linewidth=8 if "AAA" in tracker_name else 4,
+            )
+
+        ax.yaxis.set_major_formatter(FormatStrFormatter("%.1f"))
+        ax.set_xticks([1, len(trackers) // 2 + 1, len(trackers)])
+        ax.set_xticklabels(['Best', str(len(trackers) // 2 + 1), 'Worst'], fontsize=15)
+        if i == 0:
+            ax.set_ylabel("Cumulrative frequency")
+        ax.set_xlabel(dataset_name)
+
+    # hide tick and tick label of the big axes
+    plt.tick_params(
+        labelcolor="none",
+        which="both",
+        top=False,
+        bottom=False,
+        left=False,
+        right=False,
+    )
+    plt.grid(False)
+    plt.xlabel("\nRank")
+
+    # changed_trackers = [
+    #     tracker_name if "AAA" not in tracker_name else "AAA"
+    #     for tracker_name in trackers
+    # ]
+    # fig.legend(
+    #     lines, changed_trackers, loc="upper center", ncol=(len(trackers) + 1) // 2
+    # )
+
+    plt.subplots_adjust(wspace=0.2, hspace=0.1)
+    plt.savefig(eval_dir / "rank_both.pdf", bbox_inches="tight")
+    plt.close()
+
+
 def draw_ratio(
     datasets, algorithm, success_rets, precision_rets, anchor_frames, figsize, eval_dir
 ):
@@ -596,20 +675,22 @@ def make_table(datasets, trackers, nexperts, success_rets, precision_rets, eval_
     latex += "\\begin{small}\n"
 
     header = "c"
-    for i in range(len(datasets) * 2):
+    for i in range(len(datasets) * 2 - 1):
         header += "|c"
 
     latex += f"\\begin{{tabular}}{{{header}}}\n"
     latex += "\\hline\n"
 
     columns = "\\multirow{2}{*}{Tracker}"
-    for i in range(len(datasets)):
+    for i in range(len(datasets) - 1):
         columns += f" & \\multicolumn{{2}}{{c}}{{{datasets[i]}}}"
+    columns += f" & {datasets[-1]}"
     latex += f"{columns} \\\\\n"
 
     small_columns = " "
-    for i in range(len(datasets)):
+    for i in range(len(datasets) - 1):
         small_columns += " & AUC & DP"
+    small_columns += " & AO"
     latex += f"{small_columns} \\\\\n"
     latex += "\\hline\\hline\n"
 
@@ -621,7 +702,7 @@ def make_table(datasets, trackers, nexperts, success_rets, precision_rets, eval_
             line = trackers[i][: trackers[i].index("_")]
         else:
             line = trackers[i].replace("_", "\\_")
-        for j in range(len(datasets)):
+        for j in range(len(datasets) - 1):
             for value in [mean_succ, mean_prec]:
                 sorted_idx = np.argsort(value[:, j])
                 if i == sorted_idx[-1]:
@@ -630,6 +711,14 @@ def make_table(datasets, trackers, nexperts, success_rets, precision_rets, eval_
                     line += f' & {{\\color{{blue}} \\textbf{{{value[i, j]:0.2f}}}}}'
                 else:
                     line += f" & {value[i, j]:0.2f}"
+
+        sorted_idx = np.argsort(mean_succ[:, j])
+        if i == sorted_idx[-1]:
+            line += f' & {{\\color{{red}} \\textbf{{{mean_succ[i, j]:0.2f}}}}}'
+        elif i == sorted_idx[-2]:
+            line += f' & {{\\color{{blue}} \\textbf{{{mean_succ[i, j]:0.2f}}}}}'
+        else:
+            line += f" & {mean_succ[i, j]:0.2f}"
         line += " \\\\\n"
 
         latex += f"{line}"
@@ -706,14 +795,16 @@ def main(experts, baselines, algorithms, eval_dir):
     vot = VOTDataset()
     lasot = LaSOTDataset()
 
-    datasets_name = ["OTB", "NFS", "UAV", "TPL", "VOT", "LaSOT"]
+    datasets_name = ["OTB", "NFS", "UAV", "TPL", "LaSOT", "VOT"]
     datasets = [otb, nfs, uav, tpl, vot, lasot]
     eval_trackers = experts + baselines + algorithms
     viz_trackers = experts + algorithms
 
     eval_save = eval_dir / "eval.pkl"
     if eval_save.exists():
-        successes, precisions, anchor_frames = pickle.loads(eval_save.read_bytes())
+        successes, precisions, anchor_frames = pickle.loads(
+            eval_save.read_bytes()
+        )
     else:
         successes = {}
         precisions = {}
@@ -728,27 +819,10 @@ def main(experts, baselines, algorithms, eval_dir):
             successes[name] = success
             precisions[name] = precision
             anchor_frames[name] = anchor_frame
-        eval_save.write_bytes(pickle.dumps((successes, precisions, anchor_frames)))
 
-    make_table(
-        datasets_name, eval_trackers, len(experts), successes, precisions, eval_dir
-    )
-
-    colors = sns.color_palette("hls", len(viz_trackers) + 1).as_hex()[::-1][1:]
-    sns.set_palette(colors)
-
-    figsize = (20, 6)
-    draw_curves(datasets_name, viz_trackers, successes, precisions, figsize, eval_dir)
-    draw_dists(datasets_name, viz_trackers, successes, precisions, figsize, eval_dir)
-    draw_scores(datasets_name, viz_trackers, successes, precisions, figsize, eval_dir)
-    draw_score_hists(
-        datasets_name, viz_trackers, successes, precisions, figsize, eval_dir
-    )
-    draw_rank_hists(datasets_name, viz_trackers, successes, figsize, eval_dir)
-
-    figsize = (20, 5)
-    draw_rank_hists(datasets_name, viz_trackers, successes, figsize, eval_dir)
-    draw_rank_sum(datasets_name, viz_trackers, successes, figsize, eval_dir)
+        eval_save.write_bytes(
+            pickle.dumps((successes, precisions, anchor_frames))
+        )
 
     colors = sns.color_palette("hls", len(datasets) + 1).as_hex()
     sns.set_palette(colors)
@@ -764,9 +838,31 @@ def main(experts, baselines, algorithms, eval_dir):
             figsize,
             eval_dir,
         )
-    draw_rank_ratio(
-        datasets_name, viz_trackers, successes, anchor_frames, figsize, eval_dir
+
+    make_table(
+        datasets_name, eval_trackers, len(experts), successes, precisions, eval_dir
     )
+
+    colors = sns.color_palette("hls", len(viz_trackers) + 1).as_hex()[::-1][1:]
+    sns.set_palette(colors)
+
+    figsize = (20, 6)
+    draw_curves(datasets_name, viz_trackers, successes, precisions, figsize, eval_dir)
+    draw_rank_both(datasets_name, viz_trackers, successes, figsize, eval_dir)
+
+    # Not used
+    # draw_dists(datasets_name, viz_trackers, successes, precisions, figsize, eval_dir)
+    # draw_scores(datasets_name, viz_trackers, successes, precisions, figsize, eval_dir)
+    # draw_score_hists(
+    #     datasets_name, viz_trackers, successes, precisions, figsize, eval_dir
+    # )
+    # draw_rank_hists(datasets_name, viz_trackers, successes, figsize, eval_dir)
+    # draw_rank_hists(datasets_name, viz_trackers, successes, figsize, eval_dir)
+    # draw_rank_sum(datasets_name, viz_trackers, successes, figsize, eval_dir)
+
+    # draw_rank_ratio(
+    #     datasets_name, viz_trackers, successes, anchor_frames, figsize, eval_dir
+    # )
 
 
 if __name__ == "__main__":

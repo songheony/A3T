@@ -110,9 +110,9 @@ external/
 .vscode/
 
 # result and report
-tracking_results/
-evaluation_results/
-tracking_video/
+tracking_results*/
+evaluation_results*/
+tracking_video*/
 
 # graph
 *.pdf
