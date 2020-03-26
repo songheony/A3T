@@ -516,7 +516,7 @@ def draw_rank_both(datasets, trackers, success_rets, figsize, eval_dir):
 
         ax.yaxis.set_major_formatter(FormatStrFormatter("%.1f"))
         ax.set_xticks([1, len(trackers) // 2 + 1, len(trackers)])
-        ax.set_xticklabels(['Best', str(len(trackers) // 2 + 1), 'Worst'], fontsize=15)
+        ax.set_xticklabels(["Best", str(len(trackers) // 2 + 1), "Worst"], fontsize=15)
         if i == 0:
             ax.set_ylabel("Cumulrative frequency")
         ax.set_xlabel(dataset_name)
@@ -802,9 +802,7 @@ def main(experts, baselines, algorithms, eval_dir):
 
     eval_save = eval_dir / "eval.pkl"
     if eval_save.exists():
-        successes, precisions, anchor_frames = pickle.loads(
-            eval_save.read_bytes()
-        )
+        successes, precisions, anchor_frames = pickle.loads(eval_save.read_bytes())
     else:
         successes = {}
         precisions = {}
@@ -820,9 +818,7 @@ def main(experts, baselines, algorithms, eval_dir):
             precisions[name] = precision
             anchor_frames[name] = anchor_frame
 
-        eval_save.write_bytes(
-            pickle.dumps((successes, precisions, anchor_frames))
-        )
+        eval_save.write_bytes(pickle.dumps((successes, precisions, anchor_frames)))
 
     colors = sns.color_palette("hls", len(datasets) + 1).as_hex()
     sns.set_palette(colors)

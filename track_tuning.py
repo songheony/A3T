@@ -2,32 +2,16 @@ import numpy as np
 from datasets.got10kdataset import GOT10KDatasetVal
 from evaluations.ope_benchmark import OPEBenchmark
 from track_dataset import run_tracker
+from options import select_algorithms
 
 
-def main(algorithm_name, experts, thresholds, **kargs):
+def main(algorithm_name, experts, thresholds, **kwargs):
     algorithms = []
-    n_experts = len(experts)
     dataset = GOT10KDatasetVal()
 
     for threshold in thresholds:
-        if algorithm_name == "AAA":
-            from algorithms.aaa import AAA
-
-            algorithm = AAA(
-                n_experts,
-                mode=kargs["mode"],
-                iou_threshold=0.0,
-                feature_threshold=threshold,
-                reset_target=kargs["reset_target"],
-                only_max=kargs["only_max"],
-                use_iou=kargs["use_iou"],
-                use_feature=kargs["use_feature"],
-                cost_iou=kargs["cost_iou"],
-                cost_feature=kargs["cost_feature"],
-                cost_score=kargs["cost_score"],
-            )
-        else:
-            raise ValueError("Unknown algorithm name")
+        kwargs["iou_threshold"] = threshold
+        algorithm = select_algorithms(algorithm_name, experts, **kwargs)
 
         run_tracker(algorithm, dataset, experts=experts)
         algorithms.append(algorithm.name)

@@ -3,12 +3,7 @@ import multiprocessing
 import os
 import pickle
 from itertools import product
-from datasets.otbdataset import OTBDataset
-from datasets.votdataset import VOTDataset
-from datasets.tpldataset import TPLDataset
-from datasets.uavdataset import UAVDataset
-from datasets.nfsdataset import NFSDataset
-from datasets.lasotdataset import LaSOTDataset
+from options import select_datasets
 
 
 def run_sequence(seq, tracker, experts=None, debug=False):
@@ -98,19 +93,6 @@ def run_tracker(tracker, dataset, experts=None, sequence=None, debug=0, threads=
 
 
 def run(tracker, dataset_name, experts=None):
-    if dataset_name == "OTB":
-        dataset = OTBDataset()
-    elif dataset_name == "NFS":
-        dataset = NFSDataset()
-    elif dataset_name == "UAV":
-        dataset = UAVDataset()
-    elif dataset_name == "TPL":
-        dataset = TPLDataset()
-    elif dataset_name == "VOT":
-        dataset = VOTDataset()
-    elif dataset_name == "LaSOT":
-        dataset = LaSOTDataset()
-    else:
-        raise ValueError("Unknown dataset name")
+    dataset = select_datasets(dataset_name)
 
     run_tracker(tracker, dataset, experts=experts, debug=0)

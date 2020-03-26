@@ -2,39 +2,15 @@ import random
 import numpy as np
 import torch
 from track_dataset import run
+from options import select_algorithms
 
 random.seed(42)
 np.random.seed(42)
 torch.random.manual_seed(42)
 
 
-def main(algorithm_name, experts, dataset_name, **kargs):
-    n_experts = len(experts)
-    mode = kargs["mode"]
-    if algorithm_name == "AAA":
-        from algorithms.aaa import AAA
-
-        algorithm = AAA(n_experts, **kargs)
-    elif algorithm_name == "Average":
-        from algorithms.average import Average
-
-        algorithm = Average(n_experts, mode)
-    elif algorithm_name == "MCCT":
-        from algorithms.mcct import MCCT
-
-        algorithm = MCCT(n_experts, mode)
-    elif algorithm_name == "Max":
-        from algorithms.baseline import Baseline
-
-        algorithm = Baseline(
-            n_experts, name=f"Max_{mode}", use_iou=False, use_feature=True
-        )
-    elif algorithm_name == "Random":
-        from algorithms.random import Random
-
-        algorithm = Random(n_experts, mode)
-    else:
-        raise ValueError("Unknown algorithm name")
+def main(algorithm_name, experts, dataset_name, **kwargs):
+    algorithm = select_algorithms(algorithm_name, experts, **kwargs)
 
     run(algorithm, dataset_name, experts=experts)
 
