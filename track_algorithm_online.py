@@ -5,7 +5,7 @@ import random
 import torch
 import numpy as np
 import zmq
-from message import MessageType, Message
+from track_expert_online import Message, MessageType
 from options import select_algorithms, select_datasets
 
 sys.path.append("external/pysot-toolkit/pysot")
@@ -18,22 +18,6 @@ torch.random.manual_seed(42)
 
 def run_sequence(seq, tracker, experts, ventilators, sinks):
     """Runs a tracker on a sequence."""
-
-    base_results_path = "{}_supervised/{}".format(tracker.results_dir, seq.name)
-    results_path = "{}.txt".format(base_results_path)
-    weights_path = "{}_weight.txt".format(base_results_path)
-    offline_path = "{}_offline.pkl".format(base_results_path)
-    boxes_path = "{}_boxes.txt".format(base_results_path)
-
-    if os.path.isfile(results_path):
-        return
-
-    print("Tracker: {},  Sequence: {}".format(tracker.name, seq.name))
-
-    boxes = [[] for _ in range(len(experts))]
-    tracked_bb = []
-    offline_bb = []
-    weights = []
 
     def initialize(image_file, box):
         data = {"image_file": image_file, "box": box, "target": "all"}
@@ -60,6 +44,22 @@ def run_sequence(seq, tracker, experts, ventilators, sinks):
 
         state, offline, weight = tracker.track(frame, box)
         return state, offline, weight, box
+
+    base_results_path = "{}_supervised/{}".format(tracker.results_dir, seq.name)
+    results_path = "{}.txt".format(base_results_path)
+    weights_path = "{}_weight.txt".format(base_results_path)
+    offline_path = "{}_offline.pkl".format(base_results_path)
+    boxes_path = "{}_boxes.txt".format(base_results_path)
+
+    if os.path.isfile(results_path):
+        return
+
+    print("Tracker: {},  Sequence: {}".format(tracker.name, seq.name))
+
+    boxes = [[] for _ in range(len(experts))]
+    tracked_bb = []
+    offline_bb = []
+    weights = []
 
     # Track
     frame_counter = 0
