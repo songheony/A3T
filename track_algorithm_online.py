@@ -45,7 +45,7 @@ def run_sequence(seq, tracker, experts, ventilators, sinks):
         state, offline, weight = tracker.track(frame, box)
         return state, offline, weight, box
 
-    base_results_path = "{}_supervised/{}".format(tracker.results_dir, seq.name)
+    base_results_path = "{}/{}_supervised".format(tracker.results_dir, seq.name)
     results_path = "{}.txt".format(base_results_path)
     weights_path = "{}_weight.txt".format(base_results_path)
     offline_path = "{}_offline.pkl".format(base_results_path)

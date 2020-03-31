@@ -8,7 +8,7 @@ import cv2
 sys.path.append("external/pysot-toolkit/pysot")
 sys.path.append("external/pytracking")
 from pytracking.evaluation.environment import env_settings
-from utils import vot_overlap
+from utils.region import vot_overlap
 
 
 class BaseTracker(object):

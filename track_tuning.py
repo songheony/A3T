@@ -1,39 +1,101 @@
+import os
+import pickle
+from pathlib import Path
 import numpy as np
-from datasets.got10kdataset import GOT10KDatasetVal
-from evaluations.ope_benchmark import OPEBenchmark
+
 from track_dataset import run_tracker
 from options import select_algorithms
+from datasets.got10kdataset import GOT10KDatasetVal
+from evaluations.ope_benchmark import OPEBenchmark
+from evaluations.offline_benchmark import OfflineBenchmark
+from visualize_eval import make_table
 
 
-def main(algorithm_name, experts, thresholds, **kwargs):
+def main(eval_dir, algorithm_name, experts, thresholds, **kwargs):
     algorithms = []
     dataset = GOT10KDatasetVal()
+    dataset_name = "GOT10K"
 
     for threshold in thresholds:
-        kwargs["iou_threshold"] = threshold
+        kwargs["feature_threshold"] = threshold
         algorithm = select_algorithms(algorithm_name, experts, **kwargs)
 
         run_tracker(algorithm, dataset, experts=experts)
         algorithms.append(algorithm.name)
 
-    benchmark = OPEBenchmark(dataset)
+    eval_save = eval_dir / "eval.pkl"
+    if eval_save.exists():
+        successes, precisions, anchor_frames, anchor_successes, anchor_precisions, offline_successes, offline_precisions = pickle.loads(
+            eval_save.read_bytes()
+        )
+    else:
+        # algorithms' performance
+        ope = OPEBenchmark(dataset)
+        successes = {dataset_name: ope.eval_success(algorithms)}
+        precisions = {dataset_name: ope.eval_precision(algorithms)}
 
-    success = benchmark.eval_success(experts)
-    precision = benchmark.eval_precision(experts)
-    benchmark.show_result(success, precision, show_video_level=False)
+        # offline trackers' performance
+        offline = OfflineBenchmark(dataset)
+        anchor_frames = {dataset_name: {}}
+        anchor_successes = {dataset_name: {}}
+        anchor_precisions = {dataset_name: {}}
+        offline_successes = {dataset_name: {}}
+        offline_precisions = {dataset_name: {}}
+        for algorithm in algorithms:
+            anchor_frame, anchor_success, anchor_precision = offline.eval_anchor_frame(
+                algorithm, experts
+            )
+            offline_success, offline_precision = offline.eval_offline_tracker(
+                algorithm, experts
+            )
 
-    success = benchmark.eval_success(algorithms)
-    precision = benchmark.eval_precision(algorithms)
-    benchmark.show_result(success, precision, show_video_level=False)
+            anchor_frames[dataset_name][algorithm] = anchor_frame
+            anchor_successes[dataset_name][algorithm] = anchor_success[algorithm]
+            anchor_precisions[dataset_name][algorithm] = anchor_precision[algorithm]
+            offline_successes[dataset_name][algorithm] = offline_success[algorithm]
+            offline_precisions[dataset_name][algorithm] = offline_precision[algorithm]
 
-    success_offline, overlap_anchor, anchor_ratio = benchmark.eval_success_offline(
-        algorithms
+        eval_save.write_bytes(
+            pickle.dumps(
+                (
+                    successes,
+                    precisions,
+                    anchor_frames,
+                    anchor_successes,
+                    anchor_precisions,
+                    offline_successes,
+                    offline_precisions,
+                )
+            )
+        )
+
+    make_table(
+        [dataset_name],
+        algorithms,
+        len(algorithms),
+        successes,
+        precisions,
+        eval_dir,
+        "score",
     )
-    precision_offline, dist_anchor, anchor_ratio = benchmark.eval_precision_offline(
-        algorithms
+    make_table(
+        [dataset_name],
+        algorithms,
+        len(algorithms),
+        anchor_successes,
+        anchor_precisions,
+        eval_dir,
+        "anchor",
     )
-    benchmark.show_result_offline(
-        success_offline, overlap_anchor, precision_offline, dist_anchor, anchor_ratio
+
+    make_table(
+        [dataset_name],
+        algorithms,
+        len(algorithms),
+        offline_successes,
+        offline_precisions,
+        eval_dir,
+        "offline",
     )
 
 
@@ -57,7 +119,11 @@ if __name__ == "__main__":
     end_point = 0.9
     thresholds = np.arange(start_point, end_point, 0.01)
 
+    eval_dir = Path(f"./tuning_results/{args.mode}")
+    os.makedirs(eval_dir, exist_ok=True)
+
     main(
+        eval_dir,
         args.algorithm,
         args.experts,
         thresholds,

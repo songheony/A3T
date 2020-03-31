@@ -113,9 +113,11 @@ external/
 tracking_results*/
 evaluation_results*/
 tracking_video*/
+tuning_results*/
 
 # graph
 *.pdf
 
 # backup
 *.zip
+*_backup.py
