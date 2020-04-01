@@ -3,6 +3,8 @@ import numpy as np
 import sys
 import pickle
 
+from algorithms.aaa_util import calc_overlap
+
 sys.path.append("external/pysot-toolkit/pysot")
 sys.path.append("external/pytracking")
 
@@ -77,8 +79,8 @@ class OfflineBenchmark:
             else:
                 anchor_success_[seq.name] = np.nan
                 anchor_precision_[seq.name] = np.nan
-        anchor_success[eval_algorithm] = anchor_success_
-        anchor_precision[eval_algorithm] = anchor_precision_
+        anchor_success["Anchor"] = anchor_success_
+        anchor_precision["Anchor"] = anchor_precision_
 
         for tracker_name in eval_trackers:
             anchor_success_ = {}
@@ -163,8 +165,8 @@ class OfflineBenchmark:
             else:
                 success_ret_[seq.name] = np.nan
                 precision_ret_[seq.name] = np.nan
-        success_ret[eval_algorithm] = success_ret_
-        precision_ret[eval_algorithm] = precision_ret_
+        success_ret["Offline tracker"] = success_ret_
+        precision_ret["Offline tracker"] = precision_ret_
 
         for tracker_name in eval_trackers:
             success_ret_ = {}
@@ -198,3 +200,60 @@ class OfflineBenchmark:
             precision_ret[tracker_name] = precision_ret_
 
         return success_ret, precision_ret
+
+    def eval_feedback(self, eval_algorithm, eval_trackers):
+        """
+        Args:
+            eval_trackers: list of tracker
+        Return:
+            res: dict of results
+        """
+
+        feedback_gt = {}
+        feedback_ot = {}
+        feedback_diff = {}
+        for tracker_name in eval_trackers:
+            feedback_gt_ = {}
+            feedback_ot_ = {}
+            feedback_diff_ = {}
+            for seq in self.dataset:
+                gt_traj = np.array(seq.ground_truth_rect)
+
+                # get offline
+                results_dir = "{}/{}".format(
+                    env_settings().results_path, eval_algorithm
+                )
+                base_results_path = "{}/{}".format(results_dir, seq.name)
+                offline_path = "{}_offline.pkl".format(base_results_path)
+                with open(offline_path, "rb") as fp:
+                    offline_bb = pickle.load(fp)
+                offline_bb.insert(0, None)
+                offline_results = []
+                for box in offline_bb:
+                    if box is not None:
+                        offline_results += box.tolist()
+                offline_results = np.array(offline_results)
+
+                # get results
+                results_dir = "{}/{}".format(env_settings().results_path, tracker_name)
+                base_results_path = "{}/{}".format(results_dir, seq.name)
+                results_path = "{}.txt".format(base_results_path)
+                tracker_traj = np.loadtxt(results_path, delimiter="\t")
+                valid_gt = gt_traj[: len(offline_results)]
+                valid_results = tracker_traj[: len(offline_results)]
+
+                if len(offline_results) > 0:
+                    feedback_gt_[seq.name] = calc_overlap(valid_gt, valid_results)
+                    feedback_ot_[seq.name] = calc_overlap(
+                        offline_results, valid_results
+                    )
+                    feedback_diff_[seq.name] = calc_overlap(valid_gt, offline_results)
+                else:
+                    feedback_gt_[seq.name] = np.nan
+                    feedback_ot_[seq.name] = np.nan
+                    feedback_diff_[seq.name] = np.nan
+            feedback_gt[tracker_name] = feedback_gt_
+            feedback_ot[tracker_name] = feedback_ot_
+            feedback_diff[tracker_name] = feedback_diff_
+
+        return feedback_gt, feedback_ot, feedback_diff

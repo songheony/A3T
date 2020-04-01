@@ -11,6 +11,85 @@ from evaluations.offline_benchmark import OfflineBenchmark
 from visualize_eval import make_table
 
 
+def vis_all(eval_dir):
+    dataset_name = "GOT10K"
+    modes = ["All", "Good", "Bad", "Mix", "SiamDW", "SiamRPN++"]
+
+    threshold_successes = {mode: {} for mode in modes}
+    threshold_precisions = {mode: {} for mode in modes}
+    threshold_anchor_successes = {mode: {} for mode in modes}
+    threshold_anchor_precisions = {mode: {} for mode in modes}
+    threshold_offline_successes = {mode: {} for mode in modes}
+    threshold_offline_precisions = {mode: {} for mode in modes}
+
+    kwargs = {
+        "reset_target": False,
+        "only_max": False,
+        "use_iou": False,
+        "use_feature": True,
+        "cost_iou": True,
+        "cost_feature": True,
+        "cost_score": True,
+    }
+    for mode in modes:
+        kwargs["mode"] = mode
+
+        eval_save = eval_dir / mode / "eval.pkl"
+        successes, precisions, anchor_frames, anchor_successes, anchor_precisions, offline_successes, offline_precisions = pickle.loads(
+            eval_save.read_bytes()
+        )
+
+        for algorithm in successes[dataset_name].keys():
+            threshold_successes[mode][algorithm.split("_")[3]] = successes[
+                dataset_name
+            ][algorithm]
+            threshold_precisions[mode][algorithm.split("_")[3]] = precisions[
+                dataset_name
+            ][algorithm]
+            threshold_anchor_successes[mode][
+                algorithm.split("_")[3]
+            ] = anchor_successes[dataset_name][algorithm]
+            threshold_anchor_precisions[mode][
+                algorithm.split("_")[3]
+            ] = anchor_precisions[dataset_name][algorithm]
+            threshold_offline_successes[mode][
+                algorithm.split("_")[3]
+            ] = offline_successes[dataset_name][algorithm]
+            threshold_offline_precisions[mode][
+                algorithm.split("_")[3]
+            ] = offline_precisions[dataset_name][algorithm]
+
+    names = sorted(threshold_successes[mode].keys())
+    make_table(
+        modes,
+        names,
+        len(names),
+        threshold_successes,
+        threshold_precisions,
+        eval_dir,
+        "score",
+    )
+    make_table(
+        modes,
+        names,
+        len(names),
+        threshold_anchor_successes,
+        threshold_anchor_precisions,
+        eval_dir,
+        "anchor",
+    )
+
+    make_table(
+        modes,
+        names,
+        len(names),
+        threshold_offline_successes,
+        threshold_offline_precisions,
+        eval_dir,
+        "offline",
+    )
+
+
 def main(eval_dir, algorithm_name, experts, thresholds, **kwargs):
     algorithms = []
     dataset = GOT10KDatasetVal()

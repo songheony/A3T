@@ -1,4 +1,4 @@
-algorithmall=("AAA_All_0.00_0.66_False_False_False_True_True_True_True")
+algorithmall=("AAA_All_0.00_0.62_False_False_False_True_True_True_True")
 baselineall=("Random_All" "Max_All") # "MCCT_All"
 all=("ATOM" "DaSiamRPN" "GradNet" "MemTrack" "SiamDW" "SiamFC" "SiamMCF" "SiamRPN" "SiamRPN++" "SPM" "Staple" "THOR")
 python ./visualize_eval.py -e ${all[@]} -d All -a ${algorithmall[@]} -b ${baselineall[@]}

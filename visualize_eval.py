@@ -37,6 +37,80 @@ def calc_rank(rets, trackers, dataset_name, seq_names):
     return ranks
 
 
+def draw_scores(datasets, trackers, success_rets, precision_rets, figsize, eval_dir):
+    ind = np.arange(len(datasets)) * 2
+    width = 0.15
+
+    fig, axes = plt.subplots(nrows=2, ncols=1, sharex=True, figsize=figsize)
+    fig.add_subplot(111, frameon=False)
+
+    lines = []
+
+    # draw Success score
+    ax = axes[0]
+    for idx, tracker_name in enumerate(trackers):
+        values = []
+        for dataset_name in datasets:
+            value = [
+                v
+                for v in success_rets[dataset_name][tracker_name].values()
+                if not any(np.isnan(v))
+            ]
+            values.append(np.mean(value))
+        line = ax.bar(
+            ind + (idx - (len(trackers) - 1) / 2.0) * width,
+            values,
+            width,
+            label=tracker_name if "AAA" not in tracker_name else "AAA",
+        )
+        lines.append(line)
+    ax.set_ylabel("AUC of Success")
+    ax.set_xticks(ind)
+
+    # draw Precision score
+    ax = axes[1]
+    for idx, tracker_name in enumerate(trackers):
+        values = []
+        for dataset_name in datasets:
+            value = [
+                v
+                for v in precision_rets[dataset_name][tracker_name].values()
+                if not any(np.isnan(v))
+            ]
+            values.append(np.mean(value, axis=0)[20])
+        ax.bar(
+            ind + (idx - (len(trackers) - 1) / 2.0) * width,
+            values,
+            width,
+            label=tracker_name if "AAA" not in tracker_name else "AAA",
+        )
+    ax.set_ylabel("Median of Precision")
+    ax.set_xticks(ind)
+    ax.set_xticklabels(datasets)
+
+    # hide tick and tick label of the big axes
+    plt.tick_params(
+        labelcolor="none",
+        which="both",
+        top=False,
+        bottom=False,
+        left=False,
+        right=False,
+    )
+    plt.grid(False)
+    plt.xlabel("Dataset")
+
+    changed_trackers = [
+        tracker_name if "AAA" not in tracker_name else "AAA"
+        for tracker_name in trackers
+    ]
+    fig.legend(
+        lines, changed_trackers, loc="upper center", ncol=(len(trackers) + 1) // 2
+    )
+    plt.savefig(eval_dir / f"scores.pdf", bbox_inches="tight")
+    plt.close()
+
+
 def draw_curves(datasets, trackers, success_rets, precision_rets, figsize, eval_dir):
     fig, axes = plt.subplots(nrows=2, ncols=len(datasets), figsize=figsize)
     fig.add_subplot(111, frameon=False)
@@ -49,7 +123,11 @@ def draw_curves(datasets, trackers, success_rets, precision_rets, figsize, eval_
         # draw curve of trackers
         thresholds = np.arange(0, 1.05, 0.05)
         for tracker_name in trackers:
-            value = [v for k, v in success_rets[dataset_name][tracker_name].items()]
+            value = [
+                v
+                for v in success_rets[dataset_name][tracker_name].values()
+                if not any(np.isnan(v))
+            ]
             line = ax.plot(
                 thresholds,
                 np.mean(value, axis=0),
@@ -71,7 +149,11 @@ def draw_curves(datasets, trackers, success_rets, precision_rets, figsize, eval_
         # draw curve of trackers
         thresholds = np.arange(0, 51, 1)
         for tracker_name in trackers:
-            value = [v for k, v in precision_rets[dataset_name][tracker_name].items()]
+            value = [
+                v
+                for v in precision_rets[dataset_name][tracker_name].values()
+                if not any(np.isnan(v))
+            ]
             ax.plot(
                 thresholds,
                 np.mean(value, axis=0),
@@ -287,14 +369,14 @@ def make_table(
         for j, dataset_name in enumerate(datasets):
             succ = [
                 v
-                for k, v in success_rets[dataset_name][tracker_name].items()
-                if ~np.isnan(np.sum(v))
+                for v in success_rets[dataset_name][tracker_name].values()
+                if not any(np.isnan(v))
             ]
             mean_succ[i, j] = np.mean(succ)
             prec = [
                 v
-                for k, v in precision_rets[dataset_name][tracker_name].items()
-                if ~np.isnan(np.sum(v))
+                for v in precision_rets[dataset_name][tracker_name].values()
+                if not any(np.isnan(v))
             ]
             mean_prec[i, j] = np.mean(prec, axis=0)[20]
 
@@ -303,12 +385,8 @@ def make_table(
     latex += "\\begin{small}\n"
 
     header = "c"
-    if isvot:
-        for i in range(len(datasets) * 2 - 1):
-            header += "|c"
-    else:
-        for i in range(len(datasets) * 2):
-            header += "|c"
+    for i in range(len(datasets) * 2 - 1 if isvot else len(datasets) * 2):
+        header += "|c"
 
     latex += f"\\begin{{tabular}}{{{header}}}\n"
     latex += "\\hline\n"
@@ -353,13 +431,18 @@ def make_table(
                     else:
                         line += f" & {value[i, j]:0.2f}"
 
-            sorted_idx = np.argsort(mean_succ[:, j])
+            vot_idx = len(datasets) - 1
+            sorted_idx = np.argsort(mean_succ[:, vot_idx])
             if i == sorted_idx[-1]:
-                line += f' & {{\\color{{red}} \\textbf{{{mean_succ[i, j]:0.2f}}}}}'
+                line += (
+                    f' & {{\\color{{red}} \\textbf{{{mean_succ[i, vot_idx]:0.2f}}}}}'
+                )
             elif i == sorted_idx[-2]:
-                line += f' & {{\\color{{blue}} \\textbf{{{mean_succ[i, j]:0.2f}}}}}'
+                line += (
+                    f' & {{\\color{{blue}} \\textbf{{{mean_succ[i, vot_idx]:0.2f}}}}}'
+                )
             else:
-                line += f" & {mean_succ[i, j]:0.2f}"
+                line += f" & {mean_succ[i, vot_idx]:0.2f}"
         else:
             for j in range(len(datasets)):
                 for value in [mean_succ, mean_prec]:
@@ -382,6 +465,85 @@ def make_table(
 
     if filename is None:
         filename = "table"
+    txt_file = eval_dir / f"{filename}.txt"
+    txt_file.write_text(latex)
+
+    preview(
+        latex,
+        viewer="file",
+        filename=eval_dir / f"{filename}.png",
+        packages=("multirow", "xcolor", "arydshln"),
+    )
+
+
+def make_table_feedback(
+    datasets,
+    trackers,
+    feedback_gt,
+    feedback_ot,
+    feedback_diff,
+    eval_dir,
+    filename=None,
+):
+    mean_gt = np.zeros((len(trackers), len(datasets)))
+    mean_ot = np.zeros((len(trackers), len(datasets)))
+    mean_diff = np.zeros((len(trackers), len(datasets)))
+    for i, tracker_name in enumerate(trackers):
+        for j, dataset_name in enumerate(datasets):
+            mean_gt[i, j] = np.nanmean(feedback_gt[dataset_name][tracker_name].values())
+            mean_ot[i, j] = np.nanmean(feedback_gt[dataset_name][tracker_name].values())
+            mean_diff[i, j] = np.nanmean(feedback_gt[dataset_name][tracker_name].values())
+
+    latex = "\\begin{table*}\n"
+    latex += "\\begin{center}\n"
+    latex += "\\begin{small}\n"
+
+    header = "c"
+    for i in range(len(datasets) * 3):
+        header += "|c"
+
+    latex += f"\\begin{{tabular}}{{{header}}}\n"
+    latex += "\\hline\n"
+
+    columns = "\\multirow{3}{*}{Tracker}"
+
+    for i in range(len(datasets)):
+        columns += f" & \\multicolumn{{3}}{{c}}{{{datasets[i]}}}"
+    latex += f"{columns} \\\\\n"
+
+    small_columns = " "
+    for i in range(len(datasets)):
+        small_columns += " & GT & OT & Diff"
+    latex += f"{small_columns} \\\\\n"
+    latex += "\\hline\\hline\n"
+
+    for i in range(len(trackers)):
+        line = trackers[i].replace("_", "\\_")
+        for j in range(len(datasets)):
+            for value in [mean_gt, mean_ot, mean_diff]:
+                line += f" & {value[i, j]:0.2f}"
+        line += " \\\\\n"
+        latex += f"{line}"
+
+    latex += "\\hdashline\n"
+    line = "Average"
+    for j in range(len(datasets)):
+        for value in [mean_gt, mean_ot, mean_diff]:
+            line += f" & {np.mean(value[:, j]):0.2f}"
+    line += " \\\\\n"
+    latex += f"{line}"
+
+    latex += "\\hline\n"
+    latex += "\\end{tabular}\n"
+    latex += "\\end{small}\n"
+    latex += "\\end{center}\n"
+    latex += "\\end{table*}\n"
+
+    if filename is None:
+        filename = "table"
+    txt_file = eval_dir / f"{filename}.txt"
+    txt_file.write_text(latex)
+
     preview(
         latex,
         viewer="file",
@@ -405,7 +567,7 @@ def main(experts, baselines, algorithm, eval_dir):
 
     eval_save = eval_dir / "eval.pkl"
     if eval_save.exists():
-        successes, precisions, anchor_frames, anchor_successes, anchor_precisions, offline_successes, offline_precisions = pickle.loads(
+        successes, precisions, anchor_frames, anchor_successes, anchor_precisions, offline_successes, offline_precisions, feedback_gts, feedback_ots, feedback_diffs = pickle.loads(
             eval_save.read_bytes()
         )
     else:
@@ -416,6 +578,9 @@ def main(experts, baselines, algorithm, eval_dir):
         anchor_precisions = {}
         offline_successes = {}
         offline_precisions = {}
+        feedback_gts = {}
+        feedback_ots = {}
+        feedback_diffs = {}
 
         for dataset, name in zip(datasets, datasets_name):
             ope = OPEBenchmark(dataset)
@@ -429,6 +594,9 @@ def main(experts, baselines, algorithm, eval_dir):
             offline_success, offline_precision = offline.eval_offline_tracker(
                 algorithm, experts
             )
+            feedback_gt, feedback_ot, feedback_diff = offline.eval_feedback(
+                algorithm, experts
+            )
 
             successes[name] = success
             precisions[name] = precision
@@ -437,6 +605,9 @@ def main(experts, baselines, algorithm, eval_dir):
             anchor_precisions[name] = anchor_precision
             offline_successes[name] = offline_success
             offline_precisions[name] = offline_precision
+            feedback_gts[name] = feedback_gt
+            feedback_ots[name] = feedback_ot
+            feedback_diffs[name] = feedback_diff
 
         eval_save.write_bytes(
             pickle.dumps(
@@ -446,6 +617,11 @@ def main(experts, baselines, algorithm, eval_dir):
                     anchor_frames,
                     anchor_successes,
                     anchor_precisions,
+                    offline_successes,
+                    offline_precisions,
+                    feedback_gts,
+                    feedback_ots,
+                    feedback_diffs
                 )
             )
         )
@@ -457,30 +633,40 @@ def main(experts, baselines, algorithm, eval_dir):
         successes,
         precisions,
         eval_dir,
-        "score",
+        "Score",
         isvot=True,
     )
 
     make_table(
         datasets_name,
-        viz_trackers,
+        experts + ["Anchor"],
         len(experts),
         anchor_successes,
         anchor_precisions,
         eval_dir,
-        "anchor",
+        "Anchor",
         isvot=True,
     )
 
     make_table(
         datasets_name,
-        viz_trackers,
+        experts + ["Offline tracker"],
         len(experts),
         offline_successes,
         offline_precisions,
         eval_dir,
-        "offline",
+        "Offline",
         isvot=True,
+    )
+
+    make_table_feedback(
+        datasets_name,
+        experts,
+        feedback_gts,
+        feedback_ots,
+        feedback_diffs,
+        eval_dir,
+        "Feedback"
     )
 
     colors = sns.color_palette("hls", len(datasets) + 1).as_hex()
