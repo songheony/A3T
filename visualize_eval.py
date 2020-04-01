@@ -476,82 +476,6 @@ def make_table(
     )
 
 
-def make_table_feedback(
-    datasets,
-    trackers,
-    feedback_gt,
-    feedback_ot,
-    feedback_diff,
-    eval_dir,
-    filename=None,
-):
-    mean_gt = np.zeros((len(trackers), len(datasets)))
-    mean_ot = np.zeros((len(trackers), len(datasets)))
-    mean_diff = np.zeros((len(trackers), len(datasets)))
-    for i, tracker_name in enumerate(trackers):
-        for j, dataset_name in enumerate(datasets):
-            mean_gt[i, j] = np.nanmean(feedback_gt[dataset_name][tracker_name].values())
-            mean_ot[i, j] = np.nanmean(feedback_gt[dataset_name][tracker_name].values())
-            mean_diff[i, j] = np.nanmean(feedback_gt[dataset_name][tracker_name].values())
-
-    latex = "\\begin{table*}\n"
-    latex += "\\begin{center}\n"
-    latex += "\\begin{small}\n"
-
-    header = "c"
-    for i in range(len(datasets) * 3):
-        header += "|c"
-
-    latex += f"\\begin{{tabular}}{{{header}}}\n"
-    latex += "\\hline\n"
-
-    columns = "\\multirow{3}{*}{Tracker}"
-
-    for i in range(len(datasets)):
-        columns += f" & \\multicolumn{{3}}{{c}}{{{datasets[i]}}}"
-    latex += f"{columns} \\\\\n"
-
-    small_columns = " "
-    for i in range(len(datasets)):
-        small_columns += " & GT & OT & Diff"
-    latex += f"{small_columns} \\\\\n"
-    latex += "\\hline\\hline\n"
-
-    for i in range(len(trackers)):
-        line = trackers[i].replace("_", "\\_")
-        for j in range(len(datasets)):
-            for value in [mean_gt, mean_ot, mean_diff]:
-                line += f" & {value[i, j]:0.2f}"
-        line += " \\\\\n"
-        latex += f"{line}"
-
-    latex += "\\hdashline\n"
-    line = "Average"
-    for j in range(len(datasets)):
-        for value in [mean_gt, mean_ot, mean_diff]:
-            line += f" & {np.mean(value[:, j]):0.2f}"
-    line += " \\\\\n"
-    latex += f"{line}"
-
-    latex += "\\hline\n"
-    latex += "\\end{tabular}\n"
-    latex += "\\end{small}\n"
-    latex += "\\end{center}\n"
-    latex += "\\end{table*}\n"
-
-    if filename is None:
-        filename = "table"
-    txt_file = eval_dir / f"{filename}.txt"
-    txt_file.write_text(latex)
-
-    preview(
-        latex,
-        viewer="file",
-        filename=eval_dir / f"{filename}.png",
-        packages=("multirow", "xcolor", "arydshln"),
-    )
-
-
 def main(experts, baselines, algorithm, eval_dir):
     otb = OTBDataset()
     nfs = NFSDataset()
@@ -567,7 +491,7 @@ def main(experts, baselines, algorithm, eval_dir):
 
     eval_save = eval_dir / "eval.pkl"
     if eval_save.exists():
-        successes, precisions, anchor_frames, anchor_successes, anchor_precisions, offline_successes, offline_precisions, feedback_gts, feedback_ots, feedback_diffs = pickle.loads(
+        successes, precisions, anchor_frames, anchor_successes, anchor_precisions, offline_successes, offline_precisions = pickle.loads(
             eval_save.read_bytes()
         )
     else:
@@ -578,9 +502,6 @@ def main(experts, baselines, algorithm, eval_dir):
         anchor_precisions = {}
         offline_successes = {}
         offline_precisions = {}
-        feedback_gts = {}
-        feedback_ots = {}
-        feedback_diffs = {}
 
         for dataset, name in zip(datasets, datasets_name):
             ope = OPEBenchmark(dataset)
@@ -594,9 +515,6 @@ def main(experts, baselines, algorithm, eval_dir):
             offline_success, offline_precision = offline.eval_offline_tracker(
                 algorithm, experts
             )
-            feedback_gt, feedback_ot, feedback_diff = offline.eval_feedback(
-                algorithm, experts
-            )
 
             successes[name] = success
             precisions[name] = precision
@@ -605,9 +523,6 @@ def main(experts, baselines, algorithm, eval_dir):
             anchor_precisions[name] = anchor_precision
             offline_successes[name] = offline_success
             offline_precisions[name] = offline_precision
-            feedback_gts[name] = feedback_gt
-            feedback_ots[name] = feedback_ot
-            feedback_diffs[name] = feedback_diff
 
         eval_save.write_bytes(
             pickle.dumps(
@@ -619,9 +534,6 @@ def main(experts, baselines, algorithm, eval_dir):
                     anchor_precisions,
                     offline_successes,
                     offline_precisions,
-                    feedback_gts,
-                    feedback_ots,
-                    feedback_diffs
                 )
             )
         )
@@ -657,16 +569,6 @@ def main(experts, baselines, algorithm, eval_dir):
         eval_dir,
         "Offline",
         isvot=True,
-    )
-
-    make_table_feedback(
-        datasets_name,
-        experts,
-        feedback_gts,
-        feedback_ots,
-        feedback_diffs,
-        eval_dir,
-        "Feedback"
     )
 
     colors = sns.color_palette("hls", len(datasets) + 1).as_hex()

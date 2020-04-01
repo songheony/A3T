@@ -209,12 +209,8 @@ class OfflineBenchmark:
             res: dict of results
         """
 
-        feedback_gt = {}
-        feedback_ot = {}
         feedback_diff = {}
         for tracker_name in eval_trackers:
-            feedback_gt_ = {}
-            feedback_ot_ = {}
             feedback_diff_ = {}
             for seq in self.dataset:
                 gt_traj = np.array(seq.ground_truth_rect)
@@ -243,17 +239,9 @@ class OfflineBenchmark:
                 valid_results = tracker_traj[: len(offline_results)]
 
                 if len(offline_results) > 0:
-                    feedback_gt_[seq.name] = calc_overlap(valid_gt, valid_results)
-                    feedback_ot_[seq.name] = calc_overlap(
-                        offline_results, valid_results
-                    )
-                    feedback_diff_[seq.name] = calc_overlap(valid_gt, offline_results)
+                    feedback_diff_[seq.name] = calc_overlap(valid_gt, valid_results) - calc_overlap(offline_results, valid_results)
                 else:
-                    feedback_gt_[seq.name] = np.nan
-                    feedback_ot_[seq.name] = np.nan
                     feedback_diff_[seq.name] = np.nan
-            feedback_gt[tracker_name] = feedback_gt_
-            feedback_ot[tracker_name] = feedback_ot_
             feedback_diff[tracker_name] = feedback_diff_
 
-        return feedback_gt, feedback_ot, feedback_diff
+        return feedback_diff
