@@ -1,6 +1,5 @@
 import sys
 import numpy as np
-import cv2
 from base_tracker import BaseTracker
 
 sys.path.append("external/pyCFTrackers")
@@ -10,11 +9,8 @@ from cftracker.config.mccth_staple_config import MCCTHOTBConfig
 
 class Expert:
     def __init__(self):
-        self.pos = None
         self.rect_positions = []
         self.centers = []
-        self.smoothes = []
-        self.smooth_score = None
         self.smooth_scores = []
         self.rob_scores = []
 
@@ -24,51 +20,40 @@ class MCCT(BaseTracker):
         super(MCCT, self).__init__(f"MCCT_{mode}")
 
         self.n_experts = n_experts
+        self.config = MCCTHOTBConfig()
 
     def initialize(self, image_file, box):
-        image = cv2.imread(image_file)
-        config = MCCTHOTBConfig()
-
-        self.period = config.period
+        self.period = self.config.period
         self.expert_num = self.n_experts
 
         weight_num = np.arange(self.period)
         self.weight = 1.1 ** weight_num
-        self.mean_score = [0]
+        self.psr_score = [0]
         self.id_ensemble = []
-        self.frame_idx = -1
+        self.frame_idx = 0
         self.experts = []
         for i in range(self.expert_num):
             self.experts.append(Expert())
             self.id_ensemble.append(1)
 
-        self.frame_idx += 1
-        first_frame = image.astype(np.float32)
         bbox = np.array(box).astype(np.int64)
         x, y, w, h = tuple(bbox)
         center = (x + w / 2, y + h / 2)
 
-        avg_dim = (w + h) / 2
-
-        self.avg_dim = avg_dim
         for i in range(self.expert_num):
             self.experts[i].rect_positions.append(box)
             self.experts[i].rob_scores.append(1)
-            self.experts[i].smoothes.append(0)
             self.experts[i].smooth_scores.append(1)
             self.experts[i].centers.append(center)
 
         self.box = box
 
     def track(self, image_file, boxes):
-        image = cv2.imread(image_file)
         self.frame_idx += 1
-        current_frame = image
 
         for i in range(self.expert_num):
             x, y, w, h = tuple(boxes[i])
             center = (x + w / 2, y + h / 2)
-            self.experts[i].pos = center
             self.experts[i].rect_positions.append(boxes[i])
             self.experts[i].centers.append(center)
 
@@ -76,9 +61,9 @@ class MCCT(BaseTracker):
             smooth = np.sqrt(
                 (center[0] - pre_center[0]) ** 2 + (center[1] - pre_center[1]) ** 2
             )
-            self.experts[i].smoothes.append(smooth)
+            avg_dim = (w + h) / 2
             self.experts[i].smooth_scores.append(
-                np.exp(-smooth ** 2 / (2 * self.avg_dim ** 2))
+                np.exp(-smooth ** 2 / (2 * avg_dim ** 2))
             )
 
         if self.frame_idx >= self.period - 1:
@@ -95,13 +80,13 @@ class MCCT(BaseTracker):
                 )
 
                 self.id_ensemble[i] = self.experts[i].rob_scores[self.frame_idx]
-            self.mean_score.append(np.sum(np.array(self.id_ensemble)) / self.expert_num)
+
             idx = np.argmax(np.array(self.id_ensemble))
             self.box = self.experts[idx].rect_positions[-1]
         else:
             for i in range(self.expert_num):
                 self.experts[i].rob_scores.append(1)
-            self.box = self.experts[-1].rect_positions[-1]
+            self.box = self.experts[0].rect_positions[-1]
 
         return (self.box, [self.box], self.id_ensemble)
 
