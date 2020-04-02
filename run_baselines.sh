@@ -1,12 +1,12 @@
 datasets=("OTB" "NFS" "UAV" "TPL" "VOT" "LaSOT")
-baselines=("MCCT" "Random" "Max")
+baselines=("MCCT")  # "Random" "Max"
 
-all=("ATOM" "DaSiamRPN" "GradNet" "MemTrack" "SiamDW" "SiamFC" "SiamMCF" "SiamRPN" "SiamRPN++" "SPM" "Staple" "THOR")
-for (( j=0; j<${#datasets[@]}; j++ )); do    
-    for (( i=0; i<${#baselines[@]}; i++ )); do
-        python ./track_algorithm.py -a ${baselines[$i]} -n All -d ${datasets[$j]} -e ${all[@]}
-    done
-done
+# all=("ATOM" "DaSiamRPN" "GradNet" "MemTrack" "SiamDW" "SiamFC" "SiamMCF" "SiamRPN" "SiamRPN++" "SPM" "Staple" "THOR")
+# for (( j=0; j<${#datasets[@]}; j++ )); do    
+#     for (( i=0; i<${#baselines[@]}; i++ )); do
+#         python ./track_algorithm.py -a ${baselines[$i]} -n All -d ${datasets[$j]} -e ${all[@]}
+#     done
+# done
 
 goods=("ATOM" "DaSiamRPN" "SiamMCF" "SiamRPN++" "SPM" "THOR")
 for (( j=0; j<${#datasets[@]}; j++ )); do    
