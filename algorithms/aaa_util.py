@@ -7,7 +7,6 @@ from torchvision import transforms
 import torch.nn as nn
 import scipy.special as sc
 
-iou_factor = 1
 feature_factor = 5
 
 
@@ -104,7 +103,6 @@ class AnchorDetector:
                 flag = False
 
                 if self.use_iou:
-                    iou_score = iou_score ** iou_factor
                     flag = flag or (iou_score >= self.iou_threshold)
                 else:
                     iou_score = 1.0
@@ -131,7 +129,6 @@ class AnchorDetector:
                 flag = False
 
                 if self.use_iou:
-                    iou_score = iou_score ** iou_factor
                     flag = flag or (iou_score >= self.iou_threshold)
 
                 if self.use_feature:
@@ -152,7 +149,6 @@ class AnchorDetector:
 
         if self.cost_iou:
             prob_iou = calc_overlap(rect1, rect2)[0]
-            prob_iou = prob_iou ** iou_factor
         else:
             prob_iou = 1.0
 
@@ -163,9 +159,7 @@ class AnchorDetector:
             prob_feature = 1.0
 
         if self.cost_score:
-            if self.use_iou:
-                iou_score = iou_score ** iou_factor
-            else:
+            if not self.use_iou:
                 iou_score = 1.0
             if self.use_feature:
                 feature_score = calc_similarity(self.target_feature, feature2)

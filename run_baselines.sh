@@ -1,5 +1,5 @@
 datasets=("OTB" "NFS" "UAV" "TPL" "VOT" "LaSOT")
-baselines=("MCCT")  # "Random" "Max"
+baselines=("MCCT" "Random" "Max")
 
 # all=("ATOM" "DaSiamRPN" "GradNet" "MemTrack" "SiamDW" "SiamFC" "SiamMCF" "SiamRPN" "SiamRPN++" "SPM" "Staple" "THOR")
 # for (( j=0; j<${#datasets[@]}; j++ )); do    
