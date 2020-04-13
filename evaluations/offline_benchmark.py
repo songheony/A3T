@@ -79,8 +79,8 @@ class OfflineBenchmark:
             else:
                 anchor_success_[seq.name] = np.nan
                 anchor_precision_[seq.name] = np.nan
-        anchor_success["Anchor"] = anchor_success_
-        anchor_precision["Anchor"] = anchor_precision_
+        anchor_success[eval_algorithm] = anchor_success_
+        anchor_precision[eval_algorithm] = anchor_precision_
 
         for tracker_name in eval_trackers:
             anchor_success_ = {}
@@ -165,8 +165,8 @@ class OfflineBenchmark:
             else:
                 success_ret_[seq.name] = np.nan
                 precision_ret_[seq.name] = np.nan
-        success_ret["Offline tracker"] = success_ret_
-        precision_ret["Offline tracker"] = precision_ret_
+        success_ret[eval_algorithm] = success_ret_
+        precision_ret[eval_algorithm] = precision_ret_
 
         for tracker_name in eval_trackers:
             success_ret_ = {}
@@ -239,7 +239,9 @@ class OfflineBenchmark:
                 valid_results = tracker_traj[: len(offline_results)]
 
                 if len(offline_results) > 0:
-                    feedback_diff_[seq.name] = calc_overlap(valid_gt, valid_results) - calc_overlap(offline_results, valid_results)
+                    feedback_diff_[seq.name] = calc_overlap(
+                        valid_gt, valid_results
+                    ) - calc_overlap(offline_results, valid_results)
                 else:
                     feedback_diff_[seq.name] = np.nan
             feedback_diff[tracker_name] = feedback_diff_

@@ -69,11 +69,7 @@ class MCCT(BaseTracker):
         if self.frame_idx >= self.period - 1:
             for i in range(self.expert_num):
                 rob_score = self.robustness_eva(
-                    self.experts,
-                    i,
-                    self.period,
-                    self.weight,
-                    self.expert_num,
+                    self.experts, i, self.period, self.weight, self.expert_num
                 )
                 self.experts[i].rob_scores.append(rob_score)
                 self.id_ensemble[i] = rob_score

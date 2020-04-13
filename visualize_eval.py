@@ -353,7 +353,7 @@ def draw_anchor_ratio_rank(
     plt.close()
 
 
-def make_table(
+def make_score_table(
     datasets,
     trackers,
     nexperts,
@@ -391,7 +391,7 @@ def make_table(
     latex += f"\\begin{{tabular}}{{{header}}}\n"
     latex += "\\hline\n"
 
-    columns = "\\multirow{2}{*}{Tracker}"
+    columns = "\\multirow{2}{*}{Threshold}"
 
     for i in range(len(datasets) - 1):
         columns += f" & \\multicolumn{{2}}{{c}}{{{datasets[i]}}}"
@@ -453,6 +453,90 @@ def make_table(
                         line += f' & {{\\color{{blue}} \\textbf{{{value[i, j]:0.2f}}}}}'
                     else:
                         line += f" & {value[i, j]:0.2f}"
+        line += " \\\\\n"
+
+        latex += f"{line}"
+
+    latex += "\\hline\n"
+    latex += "\\end{tabular}\n"
+    latex += "\\end{small}\n"
+    latex += "\\end{center}\n"
+    latex += "\\end{table*}\n"
+
+    if filename is None:
+        filename = "table"
+    txt_file = eval_dir / f"{filename}.txt"
+    txt_file.write_text(latex)
+
+    preview(
+        latex,
+        viewer="file",
+        filename=eval_dir / f"{filename}.png",
+        packages=("multirow", "xcolor", "arydshln"),
+    )
+
+
+def make_ratio_table(
+    datasets, trackers, nexperts, success_rets, anchor_ratios, eval_dir, filename=None
+):
+    mean_succ = np.zeros((len(trackers), len(datasets)))
+    mean_ratio = np.zeros((len(trackers), len(datasets)))
+    for i, tracker_name in enumerate(trackers):
+        for j, dataset_name in enumerate(datasets):
+            succ = [
+                v
+                for v in success_rets[dataset_name][tracker_name].values()
+                if not any(np.isnan(v))
+            ]
+            mean_succ[i, j] = np.mean(succ)
+            ratio = [
+                sum(v) / len(v)
+                for v in anchor_ratios[dataset_name].values()
+                if not any(np.isnan(v))
+            ]
+            mean_ratio[i, j] = np.mean(ratio)
+
+    latex = "\\begin{table*}\n"
+    latex += "\\begin{center}\n"
+    latex += "\\begin{small}\n"
+
+    header = "c"
+    for i in range(len(datasets) * 2):
+        header += "|c"
+
+    latex += f"\\begin{{tabular}}{{{header}}}\n"
+    latex += "\\hline\n"
+
+    columns = "\\multirow{2}{*}{Tracker}"
+
+    for i in range(len(datasets)):
+        columns += f" & \\multicolumn{{2}}{{c}}{{{datasets[i]}}}"
+    latex += f"{columns} \\\\\n"
+
+    small_columns = " "
+    for i in range(len(datasets)):
+        small_columns += " & AUC & Ratio"
+    latex += f"{small_columns} \\\\\n"
+    latex += "\\hline\\hline\n"
+
+    for i in range(len(trackers)):
+        if i == nexperts:
+            latex += "\\hdashline\n"
+
+        if (i >= nexperts) and ("_" in trackers[i]):
+            line = trackers[i][: trackers[i].index("_")]
+        else:
+            line = trackers[i].replace("_", "\\_")
+
+        for j in range(len(datasets)):
+            for value in [mean_succ, mean_ratio]:
+                sorted_idx = np.argsort(value[:, j])
+                if i == sorted_idx[-1]:
+                    line += f' & {{\\color{{red}} \\textbf{{{value[i, j]:0.2f}}}}}'
+                elif i == sorted_idx[-2]:
+                    line += f' & {{\\color{{blue}} \\textbf{{{value[i, j]:0.2f}}}}}'
+                else:
+                    line += f" & {value[i, j]:0.2f}"
         line += " \\\\\n"
 
         latex += f"{line}"
@@ -538,7 +622,7 @@ def main(experts, baselines, algorithm, eval_dir):
             )
         )
 
-    make_table(
+    make_score_table(
         datasets_name,
         eval_trackers,
         len(experts),
@@ -549,7 +633,7 @@ def main(experts, baselines, algorithm, eval_dir):
         isvot=True,
     )
 
-    make_table(
+    make_score_table(
         datasets_name,
         experts + ["Anchor"],
         len(experts),
@@ -560,7 +644,7 @@ def main(experts, baselines, algorithm, eval_dir):
         isvot=True,
     )
 
-    make_table(
+    make_score_table(
         datasets_name,
         experts + ["Offline tracker"],
         len(experts),

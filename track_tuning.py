@@ -8,7 +8,7 @@ from options import select_algorithms
 from datasets.got10kdataset import GOT10KDatasetVal
 from evaluations.ope_benchmark import OPEBenchmark
 from evaluations.offline_benchmark import OfflineBenchmark
-from visualize_eval import make_table
+from visualize_eval import make_ratio_table
 
 
 def vis_all(eval_dir):
@@ -60,31 +60,25 @@ def vis_all(eval_dir):
             ] = offline_precisions[dataset_name][algorithm]
 
     names = sorted(threshold_successes[mode].keys())
-    make_table(
-        modes,
-        names,
-        len(names),
-        threshold_successes,
-        threshold_precisions,
-        eval_dir,
-        "score",
+    make_ratio_table(
+        modes, names, len(names), threshold_successes, anchor_frames, eval_dir, "score"
     )
-    make_table(
+    make_ratio_table(
         modes,
         names,
         len(names),
         threshold_anchor_successes,
-        threshold_anchor_precisions,
+        anchor_frames,
         eval_dir,
         "anchor",
     )
 
-    make_table(
+    make_ratio_table(
         modes,
         names,
         len(names),
         threshold_offline_successes,
-        threshold_offline_precisions,
+        anchor_frames,
         eval_dir,
         "offline",
     )
@@ -99,7 +93,7 @@ def main(eval_dir, algorithm_name, experts, thresholds, **kwargs):
         kwargs["feature_threshold"] = threshold
         algorithm = select_algorithms(algorithm_name, experts, **kwargs)
 
-        run_tracker(algorithm, dataset, experts=experts)
+        # run_tracker(algorithm, dataset, experts=experts)
         algorithms.append(algorithm.name)
 
     eval_save = eval_dir / "eval.pkl"
@@ -147,35 +141,6 @@ def main(eval_dir, algorithm_name, experts, thresholds, **kwargs):
                 )
             )
         )
-
-    make_table(
-        [dataset_name],
-        algorithms,
-        len(algorithms),
-        successes,
-        precisions,
-        eval_dir,
-        "score",
-    )
-    make_table(
-        [dataset_name],
-        algorithms,
-        len(algorithms),
-        anchor_successes,
-        anchor_precisions,
-        eval_dir,
-        "anchor",
-    )
-
-    make_table(
-        [dataset_name],
-        algorithms,
-        len(algorithms),
-        offline_successes,
-        offline_precisions,
-        eval_dir,
-        "offline",
-    )
 
 
 if __name__ == "__main__":

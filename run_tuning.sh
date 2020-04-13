@@ -1,5 +1,5 @@
-all=("ATOM" "DaSiamRPN" "GradNet" "MemTrack" "SiamDW" "SiamFC" "SiamMCF" "SiamRPN" "SiamRPN++" "SPM" "Staple" "THOR")
-python ./track_tuning.py -e ${all[@]} -n All
+# all=("ATOM" "DaSiamRPN" "GradNet" "MemTrack" "SiamDW" "SiamFC" "SiamMCF" "SiamRPN" "SiamRPN++" "SPM" "Staple" "THOR")
+# python ./track_tuning.py -e ${all[@]} -n All
 
 goods=("ATOM" "DaSiamRPN" "SiamMCF" "SiamRPN++" "SPM" "THOR")
 python ./track_tuning.py -e ${goods[@]} -n Good
