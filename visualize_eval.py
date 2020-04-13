@@ -635,7 +635,7 @@ def main(experts, baselines, algorithm, eval_dir):
 
     make_score_table(
         datasets_name,
-        experts + ["Anchor"],
+        viz_trackers,
         len(experts),
         anchor_successes,
         anchor_precisions,
@@ -646,7 +646,7 @@ def main(experts, baselines, algorithm, eval_dir):
 
     make_score_table(
         datasets_name,
-        experts + ["Offline tracker"],
+        viz_trackers,
         len(experts),
         offline_successes,
         offline_precisions,
@@ -667,7 +667,8 @@ def main(experts, baselines, algorithm, eval_dir):
         datasets_name, viz_trackers, successes, anchor_frames, figsize, eval_dir
     )
 
-    colors = sns.color_palette("hls", len(viz_trackers) + 1).as_hex()[::-1][1:]
+    colors = sns.color_palette("hls", len(eval_trackers) + 1).as_hex()[::-1][1:]
+    colors = colors[:len(experts)] + [colors[-1]]
     sns.set_palette(colors)
 
     figsize = (20, 6)

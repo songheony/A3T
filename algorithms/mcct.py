@@ -19,13 +19,10 @@ class MCCT(BaseTracker):
     def __init__(self, n_experts, mode):
         super(MCCT, self).__init__(f"MCCT_{mode}")
 
-        self.n_experts = n_experts
-        self.config = MCCTHOTBConfig()
+        self.period = MCCTHOTBConfig().period
+        self.expert_num = n_experts
 
     def initialize(self, image_file, box):
-        self.period = self.config.period
-        self.expert_num = self.n_experts
-
         weight_num = np.arange(self.period)
         self.weight = 1.1 ** weight_num
         self.psr_score = [0]
@@ -36,8 +33,7 @@ class MCCT(BaseTracker):
             self.experts.append(Expert())
             self.id_ensemble.append(1)
 
-        bbox = np.array(box).astype(np.int64)
-        x, y, w, h = tuple(bbox)
+        x, y, w, h = tuple(box)
         center = (x + w / 2, y + h / 2)
 
         for i in range(self.expert_num):
@@ -45,8 +41,6 @@ class MCCT(BaseTracker):
             self.experts[i].rob_scores.append(1)
             self.experts[i].smooth_scores.append(1)
             self.experts[i].centers.append(center)
-
-        self.box = box
 
     def track(self, image_file, boxes):
         self.frame_idx += 1
@@ -81,7 +75,7 @@ class MCCT(BaseTracker):
                 self.experts[i].rob_scores.append(1)
             self.box = self.experts[0].rect_positions[-1]
 
-        return (self.box, [self.box], self.id_ensemble)
+        return (self.box, [self.box], np.array(self.id_ensemble))
 
     def robustness_eva(self, experts, num, period, weight, expert_num):
         overlap_score = np.zeros((period, expert_num))
