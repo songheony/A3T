@@ -1,3 +1,4 @@
+import copy
 import time
 import os
 import sys
@@ -60,7 +61,7 @@ class BaseTracker(object):
                 start_time = time.time()
                 state, offline, weight = self.track(frame, boxes[:, n + 1, :])
                 calc_time = time.time() - start_time
-                last_time = np.max(tracker_times[:, n])
+                last_time = np.max(tracker_times[:, n + 1])
                 duration = calc_time + last_time
             else:
                 start_time = time.time()
@@ -69,9 +70,9 @@ class BaseTracker(object):
                 offline = None
                 weight = None
             times.append(duration)
-            tracked_bb.append(state)
-            offline_bb.append(offline)
-            weights.append(weight)
+            tracked_bb.append(copy.deepcopy(state))
+            offline_bb.append(copy.deepcopy(offline))
+            weights.append(copy.deepcopy(weight))
 
         return tracked_bb, offline_bb, weights, times
 

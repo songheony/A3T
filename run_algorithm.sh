@@ -1,13 +1,5 @@
 datasets=("OTB" "NFS" "UAV" "TPL" "VOT" "LaSOT")
 
-# all=("ATOM" "DaSiamRPN" "GradNet" "MemTrack" "SiamDW" "SiamFC" "SiamMCF" "SiamRPN" "SiamRPN++" "SPM" "Staple" "THOR")
-# thresholds=(0.62)
-# for (( j=0; j<${#datasets[@]}; j++ )); do    
-#     for (( i=0; i<${#thresholds[@]}; i++ )); do
-#         python ./track_algorithm.py -a AAA -d ${datasets[$j]} -n All -e ${all[@]} -r ${thresholds[$i]}
-#     done
-# done
-
 goods=("ATOM" "DaSiamRPN" "SiamMCF" "SiamRPN++" "SPM" "THOR")
 thresholds=(0.69)
 for (( j=0; j<${#datasets[@]}; j++ )); do    

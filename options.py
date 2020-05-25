@@ -223,7 +223,7 @@ def select_algorithms(algorithm_name, experts, **kwargs):
     elif algorithm_name == "MCCT":
         from algorithms.mcct import MCCT
 
-        algorithm = MCCT(n_experts, mode)
+        algorithm = MCCT(n_experts, mode, mu=kwargs["feature_threshold"])
     elif algorithm_name == "Max":
         from algorithms.baseline import Baseline
 

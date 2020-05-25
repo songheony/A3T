@@ -201,7 +201,7 @@ class OfflineBenchmark:
 
         return success_ret, precision_ret
 
-    def eval_feedback(self, eval_algorithm, eval_trackers):
+    def eval_regret(self, eval_algorithm, eval_trackers):
         """
         Args:
             eval_trackers: list of tracker
@@ -209,9 +209,11 @@ class OfflineBenchmark:
             res: dict of results
         """
 
-        feedback_diff = {}
+        regret_gt = {}
+        regret_offline = {}
         for tracker_name in eval_trackers:
-            feedback_diff_ = {}
+            regret_gt_ = {}
+            regret_offline_ = {}
             for seq in self.dataset:
                 gt_traj = np.array(seq.ground_truth_rect)
 
@@ -235,15 +237,19 @@ class OfflineBenchmark:
                 base_results_path = "{}/{}".format(results_dir, seq.name)
                 results_path = "{}.txt".format(base_results_path)
                 tracker_traj = np.loadtxt(results_path, delimiter="\t")
-                valid_gt = gt_traj[: len(offline_results)]
+
+                regret_gt_[seq.name] = calc_overlap(gt_traj, tracker_traj) / len(
+                    tracker_traj
+                )
+
                 valid_results = tracker_traj[: len(offline_results)]
-
                 if len(offline_results) > 0:
-                    feedback_diff_[seq.name] = calc_overlap(
-                        valid_gt, valid_results
-                    ) - calc_overlap(offline_results, valid_results)
+                    regret_offline_[seq.name] = calc_overlap(
+                        offline_results, valid_results
+                    ) / len(offline_results)
                 else:
-                    feedback_diff_[seq.name] = np.nan
-            feedback_diff[tracker_name] = feedback_diff_
+                    regret_offline_[seq.name] = np.nan
+            regret_gt[tracker_name] = regret_gt_
+            regret_offline[tracker_name] = regret_offline_
 
-        return feedback_diff
+        return regret_gt, regret_offline

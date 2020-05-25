@@ -14,6 +14,7 @@ from datasets.uavdataset import UAVDataset
 from datasets.nfsdataset import NFSDataset
 from datasets.lasotdataset import LaSOTDataset
 from algorithms.aaa_util import calc_overlap
+from visualize_eval import calc_rank
 
 sys.path.append("external/pytracking")
 
@@ -21,6 +22,10 @@ from pytracking.evaluation.environment import env_settings
 
 sns.set()
 sns.set_style("whitegrid")
+
+BOX_WIDTH = 10
+ANNO_SIZE = 15
+LINE_WIDTH = 3
 
 
 def draw_groudtruth(dataset, result_dir):
@@ -44,7 +49,7 @@ def draw_groudtruth(dataset, result_dir):
                 (box[0], box[1]),
                 box[2],
                 box[3],
-                linewidth=4,
+                linewidth=BOX_WIDTH,
                 edgecolor="r",
                 facecolor="none",
                 alpha=1,
@@ -95,7 +100,7 @@ def draw_offline_tracking(dataset, algorithm, result_dir):
                 (box[0], box[1]),
                 box[2],
                 box[3],
-                linewidth=2,
+                linewidth=BOX_WIDTH,
                 edgecolor=color,
                 facecolor="none",
                 alpha=1,
@@ -107,7 +112,7 @@ def draw_offline_tracking(dataset, algorithm, result_dir):
                 xycoords="data",
                 xytext=(-50, 10),
                 textcoords="offset points",
-                size=10,
+                size=ANNO_SIZE,
                 color=color,
                 arrowprops=dict(arrowstyle="->", color=color),
             )
@@ -117,7 +122,7 @@ def draw_offline_tracking(dataset, algorithm, result_dir):
                 (box[0], box[1]),
                 box[2],
                 box[3],
-                linewidth=2,
+                linewidth=BOX_WIDTH,
                 edgecolor="b",
                 facecolor="none",
                 alpha=1,
@@ -129,7 +134,7 @@ def draw_offline_tracking(dataset, algorithm, result_dir):
                 xycoords="data",
                 xytext=(-50, 10),
                 textcoords="offset points",
-                size=10,
+                size=ANNO_SIZE,
                 color="b",
                 arrowprops=dict(arrowstyle="->", color="b"),
             )
@@ -142,9 +147,221 @@ def draw_offline_tracking(dataset, algorithm, result_dir):
             plt.close()
 
 
-def draw_result(dataset, algorithm, experts, colors, result_dir):
+def draw_result(
+    dataset,
+    algorithm,
+    experts,
+    colors,
+    result_dir,
+    target_seqs=None,
+    show=["legend", "error", "weight", "frame"],
+    gt=True,
+):
+    trackers = experts if algorithm is None else experts + [algorithm]
+    for seq in dataset:
+        if (target_seqs is not None) and (seq.name not in target_seqs):
+            continue
+        gt_traj = np.array(seq.ground_truth_rect)
+        tracker_trajs = []
+
+        for tracker in trackers:
+            results_dir = "{}/{}".format(env_settings().results_path, tracker)
+            base_results_path = "{}/{}".format(results_dir, seq.name)
+            results_path = "{}.txt".format(base_results_path)
+            tracker_traj = np.loadtxt(results_path, delimiter="\t")
+            tracker_trajs.append(tracker_traj)
+        tracker_trajs = np.array(tracker_trajs)
+
+        if algorithm is None:
+            save_dir = result_dir / "Experts" / seq.name
+        else:
+            results_dir = "{}/{}".format(env_settings().results_path, algorithm)
+            base_results_path = "{}/{}".format(results_dir, seq.name)
+            weights_path = "{}_weight.txt".format(base_results_path)
+            tracker_weight = np.loadtxt(weights_path, delimiter="\t")
+
+            offline_path = "{}_offline.pkl".format(base_results_path)
+            with open(offline_path, "rb") as fp:
+                offline_bb = pickle.load(fp)
+
+            save_dir = result_dir / f"{algorithm.split('_')[0]}" / seq.name
+        os.makedirs(save_dir, exist_ok=True)
+
+        for frame in range(len(gt_traj)):
+            filename = os.path.basename(seq.frames[frame])
+            im = Image.open(seq.frames[frame]).convert("RGB")
+
+            cond = [drawing in show for drawing in ["error", "weight", "frame"]]
+            ratios = [1 if i != 2 else 3 for i in range(len(cond)) if cond[i]]
+
+            fig, axes = plt.subplots(
+                nrows=sum(cond), ncols=1, gridspec_kw={"height_ratios": ratios}
+            )
+            fig.add_subplot(111, frameon=False)
+
+            i = 0
+            if cond[0]:
+                error_ax = axes[i] if len(ratios) > 1 else axes
+                i += 1
+            if cond[1]:
+                weight_ax = axes[i] if len(ratios) > 1 else axes
+                i += 1
+            if cond[2]:
+                sample_ax = axes[i] if len(ratios) > 1 else axes
+
+            # draw error graph
+            if cond[0]:
+                for i in range(len(trackers)):
+                    box = tracker_trajs[i, :frame]
+                    gt = gt_traj[:frame]
+                    error = 1 - calc_overlap(gt, box)
+                    error_ax.plot(
+                        range(len(error)),
+                        error,
+                        color=colors[i],
+                        label=trackers[i].split("_")[0]
+                        if i == len(trackers) - 1
+                        else trackers[i],
+                        linewidth=2 if i == len(trackers) - 1 else 1,
+                    )
+                    error_ax.set(
+                        ylabel="Error", xlim=(0, len(gt_traj)), ylim=(-0.05, 1.05)
+                    )
+                error_ax.set_xticks([])
+                if "legend" in show:
+                    error_ax.legend(ncol=4, frameon=False, bbox_to_anchor=(1.02, 1.8))
+
+            # draw weight graph
+            if cond[1]:
+                for i in range(tracker_weight.shape[1]):
+                    weight = tracker_weight[:frame, i]
+                    weight_ax.plot(
+                        range(len(weight)), weight, color=colors[i]  # label=experts[i]
+                    )
+                    weight_ax.set(
+                        ylabel="Weight",
+                        xlim=(0, len(tracker_weight)),
+                        ylim=(
+                            np.min(tracker_weight) - 0.05,
+                            np.max(tracker_weight) + 0.05,
+                        ),
+                    )
+                weight_ax.set_xticks([])
+
+                if algorithm.startswith("AAA"):
+                    # draw anchor line
+                    for i in range(frame):
+                        if offline_bb[i - 1] is not None:
+                            weight_ax.axvline(
+                                x=i, color="gray", linestyle="--", linewidth=0.1
+                            )
+
+            # draw frame
+            if cond[2]:
+                sample_ax.imshow(np.asarray(im), aspect="auto")
+
+                if frame == 0:
+                    box = gt_traj[frame]
+                    rect = patches.Rectangle(
+                        (box[0], box[1]),
+                        box[2],
+                        box[3],
+                        linewidth=BOX_WIDTH,
+                        edgecolor="black",
+                        facecolor="none",
+                        alpha=1,
+                    )
+                    sample_ax.add_patch(rect)
+                else:
+                    # draw tracking bbox
+                    for i in range(len(trackers)):
+                        box = tracker_trajs[i, frame]
+                        rect = patches.Rectangle(
+                            (box[0], box[1]),
+                            box[2],
+                            box[3],
+                            linewidth=BOX_WIDTH,
+                            edgecolor=colors[i],
+                            facecolor="none",
+                            alpha=1,
+                        )
+                        sample_ax.add_patch(rect)
+
+                        if algorithm is not None:
+                            if (frame > 0) and (
+                                np.argmax(tracker_weight[frame - 1]) == i
+                            ):
+                                sample_ax.annotate(
+                                    trackers[i],
+                                    xy=(box[0], box[1]),
+                                    xycoords="data",
+                                    weight="bold",
+                                    xytext=(-50, 10),
+                                    textcoords="offset points",
+                                    size=ANNO_SIZE,
+                                    color=colors[i],
+                                    arrowprops=dict(arrowstyle="->", color=colors[i]),
+                                )
+                            elif trackers[i] == algorithm:
+                                sample_ax.annotate(
+                                    trackers[i].split("_")[0],
+                                    xy=(box[0] + box[2], box[1]),
+                                    xycoords="data",
+                                    weight="bold",
+                                    xytext=(10, 10),
+                                    textcoords="offset points",
+                                    size=ANNO_SIZE,
+                                    color=colors[i],
+                                    arrowprops=dict(arrowstyle="->", color=colors[i]),
+                                )
+
+                    if gt:
+                        box = gt_traj[frame]
+                        rect = patches.Rectangle(
+                            (box[0], box[1]),
+                            box[2],
+                            box[3],
+                            linewidth=BOX_WIDTH,
+                            edgecolor="black",
+                            facecolor="none",
+                            alpha=1,
+                        )
+                        sample_ax.add_patch(rect)
+                        sample_ax.annotate(
+                            "Ground Truth",
+                            xy=(box[0], box[1] + box[3]),
+                            xycoords="data",
+                            weight="bold",
+                            xytext=(-50, -20),
+                            textcoords="offset points",
+                            size=ANNO_SIZE,
+                            color="black",
+                            arrowprops=dict(arrowstyle="->", color="black"),
+                        )
+                sample_ax.axis("off")
+
+            # hide tick and tick label of the big axes
+            plt.axis("off")
+            plt.grid(False)
+            plt.subplots_adjust(wspace=0, hspace=0.1 if len(ratios) > 1 else 0)
+            plt.savefig(save_dir / filename, bbox_inches="tight")
+            plt.close()
+
+
+def draw_graph(
+    dataset,
+    algorithm,
+    experts,
+    colors,
+    result_dir,
+    target_seqs=None,
+    iserror=False,
+    legend=False,
+):
     trackers = experts + [algorithm]
     for seq in dataset:
+        if (target_seqs is not None) and (seq.name not in target_seqs):
+            continue
         gt_traj = np.array(seq.ground_truth_rect)
         tracker_trajs = []
 
@@ -168,114 +385,71 @@ def draw_result(dataset, algorithm, experts, colors, result_dir):
         save_dir = result_dir / f"{algorithm.split('_')[0]}" / seq.name
         os.makedirs(save_dir, exist_ok=True)
 
-        for frame in range(len(gt_traj)):
-            filename = os.path.basename(seq.frames[frame])
-            im = Image.open(seq.frames[frame]).convert("RGB")
+        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(20, 1))
+        fig.add_subplot(111, frameon=False)
 
-            fig, axes = plt.subplots(
-                nrows=3, ncols=1, gridspec_kw={"height_ratios": [1, 1, 3]}
-            )
-            fig.add_subplot(111, frameon=False)
-
-            error_ax = axes[0]
-            weight_ax = axes[1]
-            sample_ax = axes[2]
-
-            # draw error graph
+        # draw error graph
+        if iserror:
             for i in range(len(trackers)):
-                box = tracker_trajs[i, :frame]
-                gt = gt_traj[:frame]
-                error = 1 - calc_overlap(gt, box)
-                error_ax.plot(
+                box = tracker_trajs[i, :]
+                error = 1 - calc_overlap(gt_traj, box)
+                ax.plot(
                     range(len(error)),
                     error,
                     color=colors[i],
-                    label=trackers[i],
-                    linewidth=2 if trackers[i].startswith("AAA") else 1,
+                    label=trackers[i].split("_")[0]
+                    if trackers[i].startswith("AAA")
+                    else trackers[i],
+                    linewidth=LINE_WIDTH * 2
+                    if trackers[i].startswith("AAA")
+                    else LINE_WIDTH,
                 )
-                error_ax.set(ylabel="Error", xlim=(0, len(gt_traj)), ylim=(-0.05, 1.05))
-            error_ax.set_xticks([])
-            error_ax.legend(ncol=4, frameon=False, bbox_to_anchor=(1.02, 1.4))
+                ax.set(ylabel="Error", xlim=(0, len(gt_traj)), ylim=(-0.05, 1.05))
+            ax.set_xticks([])
+            if legend:
+                ax.legend(ncol=len(trackers), frameon=False, bbox_to_anchor=(0.2, 1.0))
 
-            # draw weight graph
-            for i in range(len(tracker_weight)):
-                weight = tracker_weight[i]
-                print(weight)
-                print(len(colors))
-                print(len(experts))
-                weight_ax.plot(
-                    range(len(weight)), weight, color=colors[i], label=experts[i]
-                )
-                weight_ax.set(
-                    ylabel="Weight", xlim=(0, len(tracker_weight)), ylim=(-0.05, 1.05)
-                )
-            weight_ax.set_xticks([])
-
-            if algorithm.startswith("AAA"):
-                # draw anchor line
-                for i in range(frame):
-                    if offline_bb[i - 1] is not None:
-                        weight_ax.axvline(x=i, color="gray", linestyle="--", linewidth=0.1)
-
-            # draw frame
-            sample_ax.imshow(np.asarray(im), aspect="auto")
-
-            # draw tracking bbox
-            for i in range(len(trackers)):
-                box = tracker_trajs[i, frame]
-                rect = patches.Rectangle(
-                    (box[0], box[1]),
-                    box[2],
-                    box[3],
-                    linewidth=2,
-                    edgecolor=colors[i],
-                    facecolor="none",
-                    alpha=1,
-                )
-                sample_ax.add_patch(rect)
-                sample_ax.annotate(
-                    "AAA" if trackers[i].startswith("AAA") else trackers[i],
-                    xy=(box[0], box[1]),
-                    xycoords="data",
-                    xytext=(-50, 10),
-                    textcoords="offset points",
-                    size=10,
+        # draw weight graph
+        else:
+            for i in range(tracker_weight.shape[1]):
+                weight = tracker_weight[:, i]
+                ax.plot(
+                    range(len(weight)),
+                    weight,
                     color=colors[i],
-                    arrowprops=dict(arrowstyle="->", color=colors[i]),
+                    linewidth=LINE_WIDTH,  # label=experts[i]
                 )
+                ax.set(
+                    ylabel="Weight",
+                    xlim=(0, len(tracker_weight)),
+                    ylim=(np.min(tracker_weight) - 0.05, np.max(tracker_weight) + 0.05),
+                )
+            ax.set_xticks([])
 
-            box = gt_traj[frame]
-            rect = patches.Rectangle(
-                (box[0], box[1]),
-                box[2],
-                box[3],
-                linewidth=2,
-                edgecolor="b",
-                facecolor="none",
-                alpha=1,
-            )
-            sample_ax.add_patch(rect)
-            sample_ax.annotate(
-                "Ground Truth",
-                xy=(box[0], box[1]),
-                xycoords="data",
-                xytext=(-50, 10),
-                textcoords="offset points",
-                size=10,
-                color="b",
-                arrowprops=dict(arrowstyle="->", color="b"),
-            )
-            sample_ax.axis("off")
+        if algorithm.startswith("AAA"):
+            # draw anchor line
+            for i in range(len(gt_traj)):
+                if offline_bb[i - 1] is not None:
+                    ax.axvline(
+                        x=i, color="gray", linestyle="--", linewidth=0.1, alpha=0.3
+                    )
 
-            # hide tick and tick label of the big axes
-            plt.axis("off")
-            plt.grid(False)
-            plt.savefig(save_dir / filename)
-            plt.close()
+        filename = "error" if iserror else "weight"
+        if legend:
+            filename += "_legend"
+        filename += ".pdf"
+
+        # hide tick and tick label of the big axes
+        plt.axis("off")
+        plt.grid(False)
+        plt.savefig(save_dir / filename, bbox_inches="tight")
+        plt.close()
 
 
 def draw_algorithms(dataset, algorithms, colors, result_dir):
     for seq in dataset:
+        if seq.name != "Tiger1":
+            continue
         gt_traj = np.array(seq.ground_truth_rect)
         tracker_trajs = []
 
@@ -294,9 +468,7 @@ def draw_algorithms(dataset, algorithms, colors, result_dir):
             filename = os.path.basename(seq.frames[frame])
             im = Image.open(seq.frames[frame]).convert("RGB")
 
-            fig, ax = plt.subplots(
-                nrows=1, ncols=1
-            )
+            fig, ax = plt.subplots(nrows=1, ncols=1)
             fig.add_subplot(111, frameon=False)
             # draw frame
             ax.imshow(np.asarray(im), aspect="auto")
@@ -308,7 +480,7 @@ def draw_algorithms(dataset, algorithms, colors, result_dir):
                     (box[0], box[1]),
                     box[2],
                     box[3],
-                    linewidth=2,
+                    linewidth=BOX_WIDTH,
                     edgecolor=colors[i],
                     facecolor="none",
                     alpha=1,
@@ -320,7 +492,7 @@ def draw_algorithms(dataset, algorithms, colors, result_dir):
                     xycoords="data",
                     xytext=(-50, 10),
                     textcoords="offset points",
-                    size=10,
+                    size=ANNO_SIZE,
                     color=colors[i],
                     arrowprops=dict(arrowstyle="->", color=colors[i]),
                 )
@@ -330,8 +502,8 @@ def draw_algorithms(dataset, algorithms, colors, result_dir):
                 (box[0], box[1]),
                 box[2],
                 box[3],
-                linewidth=2,
-                edgecolor="b",
+                linewidth=BOX_WIDTH,
+                edgecolor="black",
                 facecolor="none",
                 alpha=1,
             )
@@ -340,11 +512,11 @@ def draw_algorithms(dataset, algorithms, colors, result_dir):
                 "Ground Truth",
                 xy=(box[0], box[1]),
                 xycoords="data",
-                xytext=(-50, 10),
+                xytext=(-50, -20),
                 textcoords="offset points",
-                size=10,
-                color="b",
-                arrowprops=dict(arrowstyle="->", color="b"),
+                size=ANNO_SIZE,
+                color="black",
+                arrowprops=dict(arrowstyle="->", color="black"),
             )
             ax.axis("off")
 
@@ -355,7 +527,7 @@ def draw_algorithms(dataset, algorithms, colors, result_dir):
             plt.close()
 
 
-def main(experts, baselines, algorithm, result_dir):
+def main(experts, baselines, algorithm, eval_dir, result_dir):
     otb = OTBDataset()
     nfs = NFSDataset()
     uav = UAVDataset()
@@ -363,23 +535,56 @@ def main(experts, baselines, algorithm, result_dir):
     vot = VOTDataset()
     lasot = LaSOTDataset()
 
-    datasets = [otb, nfs, uav, tpl, vot, lasot]
+    datasets = [otb, tpl, vot, nfs, uav, lasot]
+    datasets_name = ["OTB", "TPL", "VOT", "NFS", "UAV", "LaSOT"]
     eval_trackers = experts + baselines + [algorithm]
     algorithms = baselines + [algorithm]
 
-    for dataset in datasets:
-        # draw_offline_tracking(dataset, algorithm, result_dir)
+    eval_save = eval_dir / "eval.pkl"
+    successes, precisions, anchor_frames, anchor_successes, anchor_precisions, offline_successes, offline_precisions = pickle.loads(
+        eval_save.read_bytes()
+    )
+
+    for dataset, dataset_name in zip(datasets, datasets_name):
+        seq_names = sorted(successes[dataset_name][experts[0]].keys())
+
+        dataset_dir = result_dir / dataset_name
+        # draw_offline_tracking(dataset, algorithm, dataset_dir)
 
         colors = sns.color_palette("hls", len(eval_trackers) + 1).as_hex()[::-1][1:]
 
-        # aaa_colors = colors[:len(experts)] + [colors[-1]]
-        # draw_result(dataset, algorithm, experts, aaa_colors, result_dir)
+        # draw_result(dataset, None, experts, colors, dataset_dir, None, show=["frame"], gt=False)
 
-        mcct_colors = colors[:len(experts)] + [colors[len(experts)]]
-        draw_result(dataset, baselines[0], experts, mcct_colors, result_dir)
+        for color, algorithm_name in zip(
+            [colors[-1], colors[-2], colors[len(experts)]],
+            [algorithm, baselines[-1], baselines[0]],
+        ):
+            rank = calc_rank(
+                successes, experts + [algorithm_name], dataset_name, seq_names
+            )[:, -1]
+            first = [seq for seq, cond in zip(seq_names, rank == 1) if cond]
+            last = [
+                seq for seq, cond in zip(seq_names, rank == len(experts) + 1) if cond
+            ]
+            target_seqs = first + last
+            if len(target_seqs) == 0:
+                continue
+            algorithm_colors = colors[: len(experts)] + [color]
+            # draw_graph(dataset, algorithm_name, experts, algorithm_colors, dataset_dir, target_seqs, iserror=True, legend=True)
+            # draw_graph(dataset, algorithm_name, experts, algorithm_colors, dataset_dir, target_seqs, iserror=True)
+            # draw_graph(dataset, algorithm_name, experts, algorithm_colors, dataset_dir, target_seqs, iserror=False)
+            draw_result(
+                dataset,
+                algorithm_name,
+                experts,
+                algorithm_colors,
+                dataset_dir,
+                target_seqs,
+                show=["frame"],
+            )
 
         # colors = sns.color_palette("hls", len(eval_trackers) + 1).as_hex()[::-1][1:][-len(algorithms):]
-        # draw_algorithms(dataset, algorithms, colors, result_dir)
+        # draw_algorithms(dataset, algorithms, colors, dataset_dir)
 
 
 if __name__ == "__main__":
@@ -395,4 +600,6 @@ if __name__ == "__main__":
     result_dir = Path(f"./visualize_results/{args.dir}")
     os.makedirs(result_dir, exist_ok=True)
 
-    main(args.experts, args.baselines, args.algorithm, result_dir)
+    eval_dir = Path(f"./evaluation_results/{args.dir}")
+
+    main(args.experts, args.baselines, args.algorithm, eval_dir, result_dir)

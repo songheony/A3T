@@ -3,7 +3,8 @@ import numpy as np
 from base_tracker import BaseTracker
 
 sys.path.append("external/pyCFTrackers")
-from cftracker.mccth_staple import cal_ious
+sys.path.append("external/pysot-toolkit/pysot")
+from utils import overlap_ratio
 from cftracker.config.mccth_staple_config import MCCTHOTBConfig
 
 
@@ -12,33 +13,27 @@ class Expert:
         self.rect_positions = []
         self.centers = []
         self.smooth_scores = []
-        self.rob_scores = []
 
 
 class MCCT(BaseTracker):
-    def __init__(self, n_experts, mode):
-        super(MCCT, self).__init__(f"MCCT_{mode}")
+    def __init__(self, n_experts, mode, mu):
+        super(MCCT, self).__init__(f"MCCT_{mode}_{mu:.2f}")
 
         self.period = MCCTHOTBConfig().period
         self.expert_num = n_experts
+        self.mu = mu
 
     def initialize(self, image_file, box):
         weight_num = np.arange(self.period)
         self.weight = 1.1 ** weight_num
         self.psr_score = [0]
-        self.id_ensemble = []
+        self.id_ensemble = np.ones(self.expert_num)
         self.frame_idx = 0
-        self.experts = []
-        for i in range(self.expert_num):
-            self.experts.append(Expert())
-            self.id_ensemble.append(1)
+        self.experts = [Expert() for _ in range(self.expert_num)]
 
-        x, y, w, h = tuple(box)
-        center = (x + w / 2, y + h / 2)
-
+        center = box[:2] + box[2:] / 2
         for i in range(self.expert_num):
             self.experts[i].rect_positions.append(box)
-            self.experts[i].rob_scores.append(1)
             self.experts[i].smooth_scores.append(1)
             self.experts[i].centers.append(center)
 
@@ -46,56 +41,50 @@ class MCCT(BaseTracker):
         self.frame_idx += 1
 
         for i in range(self.expert_num):
-            x, y, w, h = tuple(boxes[i])
-            center = (x + w / 2, y + h / 2)
+            center = boxes[i][:2] + boxes[i][2:] / 2
+            pre_center = self.experts[i].centers[-1]
             self.experts[i].rect_positions.append(boxes[i])
             self.experts[i].centers.append(center)
 
-            pre_center = self.experts[i].centers[-2]
-            smooth = np.sqrt(
-                (center[0] - pre_center[0]) ** 2 + (center[1] - pre_center[1]) ** 2
-            )
-            avg_dim = (w + h) / 2
-            self.experts[i].smooth_scores.append(
-                np.exp(-smooth ** 2 / (2 * avg_dim ** 2))
-            )
+            smooth = np.linalg.norm(center - pre_center)
+            avg_dim = np.sum(boxes[i][2:]) / 2
+            self.experts[i].smooth_scores.append(np.exp(-(smooth / avg_dim) ** 2 / 2))
 
         if self.frame_idx >= self.period - 1:
             for i in range(self.expert_num):
-                rob_score = self.robustness_eva(
-                    self.experts, i, self.period, self.weight, self.expert_num
-                )
-                self.experts[i].rob_scores.append(rob_score)
-                self.id_ensemble[i] = rob_score
+                self.id_ensemble[i] = self.robustness_eva(i)
 
-            idx = np.argmax(np.array(self.id_ensemble))
-            self.box = self.experts[idx].rect_positions[-1]
+            idx = np.argmax(self.id_ensemble)
+            self.box = boxes[idx]
         else:
-            for i in range(self.expert_num):
-                self.experts[i].rob_scores.append(1)
-            self.box = self.experts[0].rect_positions[-1]
+            self.box = boxes[0]
 
-        return (self.box, [self.box], np.array(self.id_ensemble))
+        return (self.box, [self.box], self.id_ensemble)
 
-    def robustness_eva(self, experts, num, period, weight, expert_num):
-        overlap_score = np.zeros((period, expert_num))
-        for i in range(expert_num):
-            bboxes1 = np.array(experts[i].rect_positions)[-period:]
-            bboxes2 = np.array(experts[num].rect_positions)[-period:]
-            overlaps = cal_ious(bboxes1, bboxes2)
-            overlap_score[:, i] = np.exp(-(1 - overlaps) ** 2 / 2)
-        avg_overlap = np.sum(overlap_score, axis=1) / expert_num
-        expert_avg_overlap = np.sum(overlap_score, axis=0) / period
+    def robustness_eva(self, num):
+        overlap_score = np.zeros((self.period, self.expert_num))
+        src_bboxes = np.array(self.experts[num].rect_positions[-self.period :])
+        for i in range(self.expert_num):
+            target_bboxes = np.array(self.experts[i].rect_positions[-self.period :])
+            overlaps = overlap_ratio(src_bboxes, target_bboxes)
+            overlap_score[:, i] = np.exp(-(1 - overlaps) ** 2)
+        avg_overlap = np.mean(overlap_score, axis=1)
+        expert_avg_overlap = np.mean(overlap_score, axis=0)
         var_overlap = np.sqrt(
-            np.sum((overlap_score - expert_avg_overlap[np.newaxis, :]) ** 2, axis=1)
-            / expert_num
+            np.mean((overlap_score - expert_avg_overlap[np.newaxis, :]) ** 2, axis=1)
         )
-        norm_factor = 1 / np.sum(np.array(weight))
-        weight_avg_overlap = norm_factor * (weight.dot(avg_overlap))
-        weight_var_overlap = norm_factor * (weight.dot(var_overlap))
+        norm_factor = 1 / np.sum(self.weight)
+        weight_avg_overlap = norm_factor * (self.weight.dot(avg_overlap))
+        weight_var_overlap = norm_factor * (self.weight.dot(var_overlap))
         pair_score = weight_avg_overlap / (weight_var_overlap + 0.008)
-        smooth_score = experts[num].smooth_scores[-period:]
-        self_score = norm_factor * np.sum(np.array(smooth_score) * weight)
-        eta = 0.1
-        reliability = eta * pair_score + (1 - eta) * self_score
+        # if self.frame_idx == 122:
+        #     print(f"{num}/overlap/{overlap_score}")
+        #     print(f"{num}/expert/{expert_avg_overlap}")
+        #     print(f"{num}/avg/{avg_overlap}")
+        #     print(f"{num}/var/{var_overlap}")
+
+        smooth_score = self.experts[num].smooth_scores[-self.period :]
+        self_score = norm_factor * self.weight.dot(smooth_score)
+
+        reliability = self.mu * pair_score + (1 - self.mu) * self_score
         return reliability
