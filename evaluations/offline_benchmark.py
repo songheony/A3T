@@ -142,9 +142,8 @@ class OfflineBenchmark:
             offline_path = "{}_offline.pkl".format(base_results_path)
             with open(offline_path, "rb") as fp:
                 offline_bb = pickle.load(fp)
-            offline_bb.insert(0, None)
 
-            results = []
+            results = [gt_traj[0]]
             for box in offline_bb:
                 if box is not None:
                     results += box.tolist()
@@ -201,7 +200,7 @@ class OfflineBenchmark:
 
         return success_ret, precision_ret
 
-    def eval_regret(self, eval_algorithm, eval_trackers):
+    def eval_regret(self, eval_algorithm, eval_trackers, experts):
         """
         Args:
             eval_trackers: list of tracker
@@ -225,8 +224,7 @@ class OfflineBenchmark:
                 offline_path = "{}_offline.pkl".format(base_results_path)
                 with open(offline_path, "rb") as fp:
                     offline_bb = pickle.load(fp)
-                offline_bb.insert(0, None)
-                offline_results = []
+                offline_results = [gt_traj[0]]
                 for box in offline_bb:
                     if box is not None:
                         offline_results += box.tolist()
@@ -238,18 +236,22 @@ class OfflineBenchmark:
                 results_path = "{}.txt".format(base_results_path)
                 tracker_traj = np.loadtxt(results_path, delimiter="\t")
 
-                regret_gt_[seq.name] = calc_overlap(gt_traj, tracker_traj) / len(
-                    tracker_traj
-                )
+                regret_gt_[seq.name] = np.sum(1 - calc_overlap(gt_traj, tracker_traj))
 
                 valid_results = tracker_traj[: len(offline_results)]
                 if len(offline_results) > 0:
-                    regret_offline_[seq.name] = calc_overlap(
-                        offline_results, valid_results
-                    ) / len(offline_results)
+                    regret_offline_[seq.name] = np.sum(1 - calc_overlap(offline_results, valid_results))
                 else:
                     regret_offline_[seq.name] = np.nan
             regret_gt[tracker_name] = regret_gt_
             regret_offline[tracker_name] = regret_offline_
+
+        for seq in self.dataset:
+            min_gt = np.min([regret_gt[expert_name][seq.name] for expert_name in experts])
+            min_offline = np.min([regret_offline[expert_name][seq.name] for expert_name in experts])
+
+            for tracker_name in eval_trackers:
+                regret_gt[tracker_name][seq.name] -= min_gt
+                regret_offline[tracker_name][seq.name] -= min_offline
 
         return regret_gt, regret_offline
