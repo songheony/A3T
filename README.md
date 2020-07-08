@@ -7,7 +7,7 @@
 * [GradNet](https://arxiv.org/abs/1909.06800)[<https://github.com/LPXTT/GradNet-Tensorflow>]
 * [MemTrack](https://arxiv.org/abs/1803.07268)[<https://github.com/skyoung/MemTrack>]
 * [SiamDW](https://arxiv.org/abs/1901.01660)[<https://github.com/researchmm/SiamDW>]
-* [SiamFC](https://arxiv.org/abs/1606.09549)[<https://github.com/huanglianghua/siamfc-pytorch>]
+* [SiamFC](https://arxiv.org/abs/1606.09549)[<https://github.com/got-10k/siamfc>]
 * [SiamMCF](https://link.springer.com/chapter/10.1007/978-3-030-11009-3_6)[<https://github.com/hmorimitsu/siam-mcf>]
 * [SiamRPN](http://openaccess.thecvf.com/content_cvpr_2018/papers/Li_High_Performance_Visual_CVPR_2018_paper.pdf)[<https://github.com/huanglianghua/siamrpn-pytorch>]
 * [SiamRPN++](https://arxiv.org/abs/1812.11703)[<https://github.com/STVIR/pysot>]
@@ -74,6 +74,95 @@ python visualize_figure.py
 
 [3] Depending on the expert, you may need to install additional subparty libraries such as tensorflow.  
 [4] The code is supposed to run algorithms after running experts for test. However, it is easy to modify the code to do both simultaneously.
+
+## Reproduce our results
+
+You can reproduce our results by using created environment and results.  
+Download [AAA+Experts Tracking results](https://drive.google.com/file/d/1M4mk1zh4tp8vnCQ5gk4-pN-jvrkZSX1w/view?usp=sharing) and [Evaluation results](https://drive.google.com/file/d/1mNMy_4w7BchUF4skS9PK391pWA9KI2LC/view?usp=sharing).  
+Then, run the followind commands.  
+
+```sh
+git clone https://github.com/songheony/AAA-journal
+mkdir AAA-journal/external
+cd AAA-journal/external
+
+# clone frameworks
+git clone https://github.com/visionml/pytracking
+git clone https://github.com/StrangerZhang/pysot-toolkit
+
+# clone experts
+git clone https://github.com/songheony/DaSiamRPN
+git clone https://github.com/LPXTT/GradNet-Tensorflow
+git clone https://github.com/skyoung/MemTrack
+git clone https://github.com/researchmm/SiamDW
+git clone https://github.com/got-10k/siamfc
+git clone https://github.com/hmorimitsu/siam-mcf
+git clone https://github.com/huanglianghua/siamrpn-pytorch
+git clone https://github.com/STVIR/pysot
+git clone https://github.com/microsoft/SPM-Tracker
+git clone https://github.com/wwdguu/pyCFTrackers
+git clone https://github.com/xl-sr/THOR
+
+# create anaconda environment
+conda env create -f environment.yml
+
+# run experts. if you download AAA+Experts Tracking results, you can skip this command
+bash run_experts.sh
+
+# tune the hyperparameter. if you download AAA+Experts Tracking results, you can skip this command
+bash run_tuning.sh
+
+# run AAA. if you download AAA+Experts Tracking results, you can skip this command
+bash run_algorithm.sh
+
+# evaluate experts and AAA. if you download Evaluation results Tracking results, you can skip this command
+bash run_eval.sh
+
+# visualize results
+python visualize_figure.py
+```
+
+## Simple using
+
+If you want AAA to your own project, simply use the following code:
+
+```python
+from algorithms.aaa import AAA
+
+img_paths = []  # list of image file paths
+initial_bbox = [x, y, w, h]  # left x, top y, width, height of the initial target bbox
+n_experts = 6  # the number of experts you are using
+
+# define AAA
+theta = 0.69  # you can tune this hyperparameter by running run_tuning.sh
+algorithm = AAA(n_experts, mode="LOG_DIR", feature_threshold=theta)
+
+# initialize AAA
+algorith.initialize(img_paths[0], initial_bbox)
+
+# track the target
+for img_path in img_paths[1:]:
+    experts_result = np.zeros((n_experts, 4))  # the matrix of experts' estimation
+
+    # state is the prediction of target bbox.
+    # if the frame is not anchor frame, offline is None. else offline will be offline tracking results.
+    # weight is the weight of the experts.
+    state, offline, weight = self.track(img_path, experts_result)  
+```
+
+## Citation
+
+If you find AAA useful in your work, please cite our paper:  
+
+```none
+@inproceedings{song2020adaptive,
+title={Adaptive Aggregation of Arbitrary Online Trackers with a Regret Bound},
+author={Song, Heon and Suehiro, Daiki and Uchida, Seiichi},
+booktitle={The IEEE Winter Conference on Applications of Computer Vision},
+pages={681--689},
+year={2020}
+}
+```
 
 ## Author
 
