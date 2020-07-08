@@ -1,19 +1,14 @@
-goods=("ATOM" "DaSiamRPN" "SiamMCF" "SiamRPN++" "SPM" "THOR")
-python ./track_tuning.py -e ${goods[@]} -n Good
-# python ./track_tuning.py -e ${goods[@]} -n Good -a MCCT
+high_experts=("ATOM" "DaSiamRPN" "SiamMCF" "SiamRPN++" "SPM" "THOR")
+python ./track_tuning.py -e ${high_experts[@]} -n High
 
-bads=("GradNet" "MemTrack" "SiamDW" "SiamFC" "SiamRPN" "Staple")
-python ./track_tuning.py -e ${bads[@]} -n Bad
-# python ./track_tuning.py -e ${bads[@]} -n Bad -a MCCT
+low_experts=("GradNet" "MemTrack" "SiamDW" "SiamFC" "SiamRPN" "Staple")
+python ./track_tuning.py -e ${low_experts[@]} -n Low
 
-mixs=("ATOM" "SiamRPN++" "SPM" "MemTrack" "SiamFC" "Staple")
-python ./track_tuning.py -e ${mixs[@]} -n Mix
-# python ./track_tuning.py -e ${mixs[@]} -n Mix -a MCCT
+mix_experts=("ATOM" "SiamRPN++" "SPM" "MemTrack" "SiamFC" "Staple")
+python ./track_tuning.py -e ${mix_experts[@]} -n Mix
 
-siamdws=("SiamDW_SiamFCRes22" "SiamDW_SiamFCIncep22" "SiamDW_SiamFCNext22" "SiamDW_SiamRPNRes22" "SiamDW_SiamFCRes22_VOT" "SiamDW_SiamFCIncep22_VOT" "SiamDW_SiamFCNext22_VOT" "SiamDW_SiamRPNRes22_VOT")
-python ./track_tuning.py -e ${siamdws[@]} -n SiamDW
-# python ./track_tuning.py -e ${siamdws[@]} -n SiamDW -a MCCT
+siamdw_experts=("SiamDW_SiamFCRes22" "SiamDW_SiamFCIncep22" "SiamDW_SiamFCNext22" "SiamDW_SiamRPNRes22" "SiamDW_SiamFCRes22_VOT" "SiamDW_SiamFCIncep22_VOT" "SiamDW_SiamFCNext22_VOT" "SiamDW_SiamRPNRes22_VOT")
+python ./track_tuning.py -e ${siamdw_experts[@]} -n SiamDW
 
-siamrpnpps=("SiamRPN++_AlexNet" "SiamRPN++_AlexNet_OTB" "SiamRPN++_ResNet-50" "SiamRPN++_ResNet-50_OTB" "SiamRPN++_ResNet-50_LT" "SiamRPN++_MobileNetV2" "SiamRPN++_SiamMask")
-python ./track_tuning.py -e ${siamrpnpps[@]} -n SiamRPN++
-# python ./track_tuning.py -e ${siamrpnpps[@]} -n SiamRPN++ -a MCCT
+siamrpn_experts=("SiamRPN++_AlexNet" "SiamRPN++_AlexNet_OTB" "SiamRPN++_ResNet-50" "SiamRPN++_ResNet-50_OTB" "SiamRPN++_ResNet-50_LT" "SiamRPN++_MobileNetV2" "SiamRPN++_SiamMask")
+python ./track_tuning.py -e ${siamrpn_experts[@]} -n SiamRPN++

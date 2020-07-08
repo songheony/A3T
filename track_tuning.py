@@ -8,95 +8,6 @@ from options import select_algorithms
 from datasets.got10kdataset import GOT10KDatasetVal
 from evaluations.ope_benchmark import OPEBenchmark
 from evaluations.offline_benchmark import OfflineBenchmark
-from visualize_eval import make_ratio_table, draw_score_with_ratio
-
-
-def vis_all(algorithm_name, eval_dir):
-    dataset_name = "GOT10K"
-    modes = ["Good", "Bad", "Mix", "SiamDW", "SiamRPN++"]
-    mode_names = ["High", "Low", "Mix", "SiamDW", "SiamRPN++"]
-
-    threshold_successes = {mode: {} for mode in modes}
-    threshold_precisions = {mode: {} for mode in modes}
-    threshold_anchor_successes = {mode: {} for mode in modes}
-    threshold_anchor_precisions = {mode: {} for mode in modes}
-    threshold_offline_successes = {mode: {} for mode in modes}
-    threshold_offline_precisions = {mode: {} for mode in modes}
-    threshold_anchors = {mode: {} for mode in modes}
-
-    for mode in modes:
-        eval_save = eval_dir / mode / "eval.pkl"
-        successes, precisions, anchor_frames, anchor_successes, anchor_precisions, offline_successes, offline_precisions = pickle.loads(
-            eval_save.read_bytes()
-        )
-
-        for algorithm in successes[dataset_name].keys():
-            if algorithm_name.startswith("AAA"):
-                algorithm_split_name = algorithm.split("_")[3]
-            elif algorithm_name.startswith("MCCT"):
-                algorithm_split_name = algorithm.split("_")[2]
-
-            threshold_successes[mode][algorithm_split_name] = successes[dataset_name][
-                algorithm
-            ]
-            threshold_precisions[mode][algorithm_split_name] = precisions[dataset_name][
-                algorithm
-            ]
-            if algorithm_name.startswith("AAA"):
-                threshold_anchor_successes[mode][
-                    algorithm_split_name
-                ] = anchor_successes[dataset_name][algorithm]
-                threshold_anchor_precisions[mode][
-                    algorithm_split_name
-                ] = anchor_precisions[dataset_name][algorithm]
-                threshold_offline_successes[mode][
-                    algorithm_split_name
-                ] = offline_successes[dataset_name][algorithm]
-                threshold_offline_precisions[mode][
-                    algorithm_split_name
-                ] = offline_precisions[dataset_name][algorithm]
-                threshold_anchors[mode][algorithm_split_name] = anchor_frames[
-                    dataset_name
-                ][algorithm]
-
-    figsize = (20, 5)
-
-    names = sorted(threshold_successes[mode].keys())
-    if algorithm_name.startswith("AAA"):
-        make_ratio_table(
-            modes, names, threshold_successes, threshold_anchors, eval_dir, "score"
-        )
-        draw_score_with_ratio(
-            modes,
-            mode_names,
-            names,
-            threshold_successes,
-            threshold_anchors,
-            figsize,
-            eval_dir,
-        )
-        make_ratio_table(
-            modes,
-            names,
-            threshold_anchor_successes,
-            threshold_anchors,
-            eval_dir,
-            "anchor",
-        )
-
-        make_ratio_table(
-            modes,
-            names,
-            threshold_offline_successes,
-            threshold_anchors,
-            eval_dir,
-            "offline",
-        )
-    elif algorithm_name.startswith("MCCT"):
-        make_ratio_table(modes, names, threshold_successes, None, eval_dir, "score")
-        draw_score_with_ratio(
-            modes, names, threshold_successes, None, figsize, eval_dir
-        )
 
 
 def main(eval_dir, algorithm_name, experts, thresholds, **kwargs):
@@ -183,18 +94,9 @@ if __name__ == "__main__":
     parser.add_argument("-z", "--cost_score", action="store_false")
     args = parser.parse_args()
 
-    vis_all("AAA", Path(f"./tuning_results/AAA/"))
-    exit()
-
-    if args.algorithm.startswith("AAA"):
-        start_point = 0.6
-        end_point = 0.9
-        thresholds = np.arange(start_point, end_point, 0.01)
-    elif args.algorithm.startswith("MCCT"):
-        # start_point = 0.01
-        # end_point = 0.11
-        # thresholds = np.arange(start_point, end_point, 0.01)
-        thresholds = [0.0001, 0.001, 0.01, 0.1, 1.0]
+    start_point = 0.6
+    end_point = 0.9
+    thresholds = np.arange(start_point, end_point, 0.01)
 
     eval_dir = Path(f"./tuning_results/{args.algorithm}/{args.mode}")
     os.makedirs(eval_dir, exist_ok=True)

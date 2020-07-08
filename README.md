@@ -52,8 +52,10 @@ git clone [FRAMEWORK_GIT]
 git clone [EXPERT_GIT]
 conda activate [ENV_NAME]
 bash run_experts.sh
+bash run_tuning.sh
 bash run_algorithm.sh
 bash run_eval.sh
+python visualize_figure.py
 ```
 
 1. Clone this repository and make external directory.
@@ -62,9 +64,13 @@ bash run_eval.sh
 
 3. Edit run_expert.sh file and run experts.
 
-4. Edit run_algorithm.sh file and run algorithm.<sup>[4]</sup>
+4. Edit run_tuning.sh file and tune hyperparamter theta.
 
-5. Edit run_eval.sh and evaluate the trackers.
+5. Edit run_algorithm.sh file and run algorithm.<sup>[4]</sup>
+
+6. Edit run_eval.sh and evaluate the trackers.
+
+7. Edit visualize_figure.py and create figures used in our paper.
 
 [3] Depending on the expert, you may need to install additional subparty libraries such as tensorflow.  
 [4] The code is supposed to run algorithms after running experts for test. However, it is easy to modify the code to do both simultaneously.

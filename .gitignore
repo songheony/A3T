@@ -112,7 +112,6 @@ external/
 # result and report
 *_results*/
 
-
 # backup
 *.zip
-*_backup.py
+backup/

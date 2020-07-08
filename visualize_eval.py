@@ -168,7 +168,9 @@ def draw_curves(datasets, trackers, success_rets, precision_rets, figsize, eval_
     plt.close()
 
 
-def draw_rank_both(datasets, trackers, success_rets, figsize, eval_dir, legend=False):
+def draw_rank_both(
+    datasets, trackers, success_rets, figsize, eval_dir, legend=False, file_name=None
+):
     fig, axes = plt.subplots(nrows=2, ncols=len(datasets), figsize=figsize)
     fig.add_subplot(111, frameon=False)
 
@@ -251,16 +253,25 @@ def draw_rank_both(datasets, trackers, success_rets, figsize, eval_dir, legend=F
             loc="upper center",
             ncol=len(trackers),  # ncol=(len(trackers) + 1) // 2
         )
-        filename = "rank_both_legend.pdf"
-    else:
-        filename = "rank_both.pdf"
 
     plt.subplots_adjust(wspace=0.2, hspace=0.1)
-    plt.savefig(eval_dir / filename, bbox_inches="tight")
+
+    if file_name is None:
+        file_name = "rank_both_legend" if legend else "rank_both"
+    plt.savefig(eval_dir / f"{file_name}.pdf", bbox_inches="tight")
     plt.close()
 
 
-def draw_pie(datasets, trackers, success_rets, figsize, eval_dir, legend=False):
+def draw_pie(
+    datasets,
+    trackers,
+    trackers_name,
+    success_rets,
+    figsize,
+    save_dir,
+    legend=False,
+    file_name=None,
+):
     fig, axes = plt.subplots(
         nrows=2,
         ncols=len(datasets) // 2,
@@ -303,28 +314,25 @@ def draw_pie(datasets, trackers, success_rets, figsize, eval_dir, legend=False):
     plt.grid(False)
 
     if legend:
-        changed_trackers = [
-            tracker_name.split("_")[0] if isalgorithm(tracker_name) else tracker_name
-            for tracker_name in trackers
-        ]
         fig.legend(
             lines,
-            changed_trackers,
+            trackers_name,
             frameon=False,
-            loc="center right",
+            loc="center left",
+            bbox_to_anchor=(0.0, 0.5)
             # ncol=len(trackers) // 3
         )
-        filename = "rank_legend.pdf"
-    else:
-        filename = "rank.pdf"
+
+    if file_name is None:
+        file_name = "rank_legend" if legend else "rank"
 
     plt.subplots_adjust(wspace=-0.2, hspace=0.2)
-    plt.savefig(eval_dir / filename, bbox_inches="tight")
+    plt.savefig(save_dir / f"{file_name}.pdf", bbox_inches="tight")
     plt.close()
 
 
 def draw_score_with_ratio(
-    modes, names, thresholds, success_rets, anchor_frames, figsize, eval_dir
+    modes, thresholds, success_rets, anchor_frames, figsize, eval_dir, file_name=None
 ):
     fig, axes = plt.subplots(nrows=2, ncols=1, figsize=figsize, sharex=True)
     fig.add_subplot(111, frameon=False)
@@ -352,7 +360,7 @@ def draw_score_with_ratio(
             else:
                 mean_ratio[i, j] = 1
 
-    for i, mode_name in enumerate(names):
+    for i, mode_name in enumerate(modes):
         # draw success plot
         ax = axes[0]
 
@@ -398,10 +406,13 @@ def draw_score_with_ratio(
     plt.grid(False)
     plt.xlabel("Threshold")
 
-    fig.legend(lines, names, frameon=False, loc="upper center", ncol=len(names))
+    fig.legend(lines, modes, frameon=False, loc="upper center", ncol=len(modes))
 
     plt.subplots_adjust(wspace=0, hspace=0.1)
-    plt.savefig(eval_dir / "score_ratio.pdf", bbox_inches="tight")
+
+    if file_name is None:
+        file_name = "score_ratio"
+    plt.savefig(eval_dir / f"{file_name}.pdf", bbox_inches="tight")
     plt.close()
 
 
@@ -454,8 +465,8 @@ def make_score_table(
             mean_prec[i, j] = np.mean(prec, axis=0)[20]
 
     latex = "\\begin{table*}\n"
-    latex += "\\begin{center}\n"
-    latex += "\\begin{small}\n"
+    latex += "\\centering\n"
+    latex += "\\begin{threeparttable}\n"
 
     header = "c"
     for i in range(len(datasets) * 2 - 1 if isvot else len(datasets) * 2):
@@ -467,11 +478,11 @@ def make_score_table(
     columns = "\\multirow{2}{*}{Tracker}"
 
     for i in range(len(datasets) - 1):
-        columns += f" & \\multicolumn{{2}}{{c}}{{{datasets[i]}}}"
+        columns += f" & \\multicolumn{{2}}{{c|}}{{{datasets[i]}}}"
     if isvot:
         columns += f" & {datasets[-1]}"
     else:
-        columns += f" & \\multicolumn{{2}}{{c}}{{{datasets[-1]}}}"
+        columns += f" & \\multicolumn{{2}}{{c|}}{{{datasets[-1]}}}"
     latex += f"{columns} \\\\\n"
 
     small_columns = " "
@@ -532,8 +543,7 @@ def make_score_table(
 
     latex += "\\hline\n"
     latex += "\\end{tabular}\n"
-    latex += "\\end{small}\n"
-    latex += "\\end{center}\n"
+    latex += "\\end{threeparttable}\n"
     latex += "\\end{table*}\n"
 
     if filename is None:
@@ -545,30 +555,16 @@ def make_score_table(
         latex,
         viewer="file",
         filename=eval_dir / f"{filename}.png",
-        packages=("multirow", "xcolor", "arydshln"),
+        packages=("multirow", "xcolor", "arydshln", "threeparttable"),
     )
 
 
 def make_regret_table(
-    datasets,
-    trackers,
-    nexperts,
-    regret_gts,
-    regret_offlines,
-    eval_dir,
-    filename=None,
-    isvot=False,
+    datasets, trackers, nexperts, regret_offlines, eval_dir, filename=None
 ):
-    mean_gt = np.zeros((len(trackers), len(datasets)))
     mean_offline = np.zeros((len(trackers), len(datasets)))
     for i, tracker_name in enumerate(trackers):
         for j, dataset_name in enumerate(datasets):
-            regret_gt = [
-                v
-                for v in regret_gts[dataset_name][tracker_name].values()
-                if not np.any(np.isnan(v))
-            ]
-            mean_gt[i, j] = np.mean(regret_gt)
             regret_offline = [
                 v
                 for v in regret_offlines[dataset_name][tracker_name].values()
@@ -577,26 +573,21 @@ def make_regret_table(
             mean_offline[i, j] = np.mean(regret_offline)
 
     latex = "\\begin{table*}\n"
-    latex += "\\begin{center}\n"
-    latex += "\\begin{small}\n"
+    latex += "\\centering\n"
+    latex += "\\begin{threeparttable}\n"
 
     header = "c"
-    for i in range(len(datasets) * 2):
+    for i in range(len(datasets)):
         header += "|c"
 
     latex += f"\\begin{{tabular}}{{{header}}}\n"
     latex += "\\hline\n"
 
-    columns = "\\multirow{2}{*}{Tracker}"
+    columns = "Tracker"
 
     for i in range(len(datasets)):
-        columns += f" & \\multicolumn{{2}}{{c}}{{{datasets[i]}}}"
+        columns += f" & {datasets[i]}"
     latex += f"{columns} \\\\\n"
-
-    small_columns = " "
-    for i in range(len(datasets)):
-        small_columns += " & R\\_{GT} & R\\_{Offline}"
-    latex += f"{small_columns} \\\\\n"
     latex += "\\hline\\hline\n"
 
     for i in range(len(trackers)):
@@ -609,22 +600,20 @@ def make_regret_table(
             line = trackers[i].replace("_", "\\_")
 
         for j in range(len(datasets)):
-            for value in [mean_gt, mean_offline]:
-                sorted_idx = np.argsort(value[:, j])[::-1]
-                if i == sorted_idx[-1]:
-                    line += f' & {{\\color{{red}} \\textbf{{{value[i, j]:0.2f}}}}}'
-                elif i == sorted_idx[-2]:
-                    line += f' & {{\\color{{blue}} \\textit{{{value[i, j]:0.2f}}}}}'
-                else:
-                    line += f" & {value[i, j]:0.2f}"
+            sorted_idx = np.argsort(mean_offline[:, j])[::-1]
+            if i == sorted_idx[-1]:
+                line += f' & {{\\color{{red}} \\textbf{{{mean_offline[i, j]:0.2f}}}}}'
+            elif i == sorted_idx[-2]:
+                line += f' & {{\\color{{blue}} \\textit{{{mean_offline[i, j]:0.2f}}}}}'
+            else:
+                line += f" & {mean_offline[i, j]:0.2f}"
         line += " \\\\\n"
 
         latex += f"{line}"
 
     latex += "\\hline\n"
     latex += "\\end{tabular}\n"
-    latex += "\\end{small}\n"
-    latex += "\\end{center}\n"
+    latex += "\\end{threeparttable}\n"
     latex += "\\end{table*}\n"
 
     if filename is None:
@@ -636,7 +625,170 @@ def make_regret_table(
         latex,
         viewer="file",
         filename=eval_dir / f"{filename}.png",
-        packages=("multirow", "xcolor", "arydshln"),
+        packages=("xcolor", "arydshln", "threeparttable"),
+    )
+
+
+def make_score_regret_table(
+    datasets,
+    trackers,
+    nexperts,
+    success_rets,
+    precision_rets,
+    regret_offlines,
+    eval_dir,
+    filename=None,
+    isvot=False,
+):
+    mean_succ = np.zeros((len(trackers), len(datasets)))
+    mean_prec = np.zeros((len(trackers), len(datasets)))
+    mean_offline = np.zeros((len(trackers), len(datasets)))
+    for i, tracker_name in enumerate(trackers):
+        for j, dataset_name in enumerate(datasets):
+            succ = [
+                v
+                for v in success_rets[dataset_name][tracker_name].values()
+                if not np.any(np.isnan(v))
+            ]
+            mean_succ[i, j] = np.mean(succ)
+            prec = [
+                v
+                for v in precision_rets[dataset_name][tracker_name].values()
+                if not np.any(np.isnan(v))
+            ]
+            mean_prec[i, j] = np.mean(prec, axis=0)[20]
+            regret_offline = [
+                v
+                for v in regret_offlines[dataset_name][tracker_name].values()
+                if not np.any(np.isnan(v))
+            ]
+            mean_offline[i, j] = np.mean(regret_offline)
+
+    latex = "\\begin{table*}\n"
+    latex += "\\centering\n"
+    latex += "\\begin{threeparttable}\n"
+
+    header = "c"
+    for i in range(len(datasets) * 3 - 1 if isvot else len(datasets) * 3):
+        header += "|c"
+
+    latex += f"\\begin{{tabular}}{{{header}}}\n"
+    latex += "\\hline\n"
+
+    columns = "\\multirow{2}{*}{Tracker}"
+
+    for i in range(len(datasets) - 1):
+        columns += f" & \\multicolumn{{3}}{{c}}{{{datasets[i]}}}"
+    if isvot:
+        columns += f" & \\multicolumn{{2}}{{c}}{{{datasets[-1]}}}"
+    else:
+        columns += f" & \\multicolumn{{3}}{{c}}{{{datasets[-1]}}}"
+    latex += f"{columns} \\\\\n"
+
+    small_columns = " "
+    for i in range(len(datasets) - 1):
+        small_columns += " & AUC & DP & R"
+    if isvot:
+        small_columns += " & AO & R"
+    else:
+        small_columns += " & AUC & DP & R"
+    latex += f"{small_columns} \\\\\n"
+    latex += "\\hline\\hline\n"
+
+    for i in range(len(trackers)):
+        if i == nexperts:
+            latex += "\\hdashline\n"
+
+        if (i >= nexperts) and ("_" in trackers[i]):
+            line = trackers[i][: trackers[i].index("_")]
+        else:
+            line = trackers[i].replace("_", "\\_")
+
+        if isvot:
+            for j in range(len(datasets) - 1):
+                for value in [mean_succ, mean_prec]:
+                    sorted_idx = np.argsort(value[:, j])
+                    if i == sorted_idx[-1]:
+                        line += f' & {{\\color{{red}} \\textbf{{{value[i, j]:0.2f}}}}}'
+                    elif i == sorted_idx[-2]:
+                        line += f' & {{\\color{{blue}} \\textit{{{value[i, j]:0.2f}}}}}'
+                    else:
+                        line += f" & {value[i, j]:0.2f}"
+                sorted_idx = np.argsort(mean_offline[:, j])[::-1]
+                if i == sorted_idx[-1]:
+                    line += (
+                        f' & {{\\color{{red}} \\textbf{{{mean_offline[i, j]:0.2f}}}}}'
+                    )
+                elif i == sorted_idx[-2]:
+                    line += (
+                        f' & {{\\color{{blue}} \\textit{{{mean_offline[i, j]:0.2f}}}}}'
+                    )
+                else:
+                    line += f" & {mean_offline[i, j]:0.2f}"
+
+            vot_idx = len(datasets) - 1
+            sorted_idx = np.argsort(mean_succ[:, vot_idx])
+            if i == sorted_idx[-1]:
+                line += (
+                    f' & {{\\color{{red}} \\textbf{{{mean_succ[i, vot_idx]:0.2f}}}}}'
+                )
+            elif i == sorted_idx[-2]:
+                line += (
+                    f' & {{\\color{{blue}} \\textit{{{mean_succ[i, vot_idx]:0.2f}}}}}'
+                )
+            else:
+                line += f" & {mean_succ[i, vot_idx]:0.2f}"
+
+            sorted_idx = np.argsort(mean_offline[:, vot_idx])[::-1]
+            if i == sorted_idx[-1]:
+                line += (
+                    f' & {{\\color{{red}} \\textbf{{{mean_offline[i, vot_idx]:0.2f}}}}}'
+                )
+            elif i == sorted_idx[-2]:
+                line += f' & {{\\color{{blue}} \\textit{{{mean_offline[i, vot_idx]:0.2f}}}}}'
+            else:
+                line += f" & {mean_offline[i, vot_idx]:0.2f}"
+        else:
+            for j in range(len(datasets)):
+                for value in [mean_succ, mean_prec]:
+                    sorted_idx = np.argsort(value[:, j])
+                    if i == sorted_idx[-1]:
+                        line += f' & {{\\color{{red}} \\textbf{{{value[i, j]:0.2f}}}}}'
+                    elif i == sorted_idx[-2]:
+                        line += f' & {{\\color{{blue}} \\textit{{{value[i, j]:0.2f}}}}}'
+                    else:
+                        line += f" & {value[i, j]:0.2f}"
+
+                sorted_idx = np.argsort(mean_offline[:, j])[::-1]
+                if i == sorted_idx[-1]:
+                    line += (
+                        f' & {{\\color{{red}} \\textbf{{{mean_offline[i, j]:0.2f}}}}}'
+                    )
+                elif i == sorted_idx[-2]:
+                    line += (
+                        f' & {{\\color{{blue}} \\textit{{{mean_offline[i, j]:0.2f}}}}}'
+                    )
+                else:
+                    line += f" & {mean_offline[i, j]:0.2f}"
+        line += " \\\\\n"
+
+        latex += f"{line}"
+
+    latex += "\\hline\n"
+    latex += "\\end{tabular}\n"
+    latex += "\\end{threeparttable}\n"
+    latex += "\\end{table*}\n"
+
+    if filename is None:
+        filename = "table"
+    txt_file = eval_dir / f"{filename}.txt"
+    txt_file.write_text(latex)
+
+    preview(
+        latex,
+        viewer="file",
+        filename=eval_dir / f"{filename}.png",
+        packages=("multirow", "xcolor", "arydshln", "threeparttable"),
     )
 
 
@@ -665,8 +817,8 @@ def make_ratio_table(
                 mean_ratio[i, j] = 1
 
     latex = "\\begin{table*}\n"
-    latex += "\\begin{center}\n"
-    latex += "\\begin{small}\n"
+    latex += "\\centering\n"
+    latex += "\\begin{threeparttable}\n"
 
     header = "c"
     for i in range(len(datasets) * 2):
@@ -705,8 +857,7 @@ def make_ratio_table(
 
     latex += "\\hline\n"
     latex += "\\end{tabular}\n"
-    latex += "\\end{small}\n"
-    latex += "\\end{center}\n"
+    latex += "\\end{threeparttable}\n"
     latex += "\\end{table*}\n"
 
     if filename is None:
@@ -718,7 +869,7 @@ def make_ratio_table(
         latex,
         viewer="file",
         filename=eval_dir / f"{filename}.png",
-        packages=("multirow", "xcolor", "arydshln"),
+        packages=("multirow", "xcolor", "arydshln", "threeparttable"),
     )
 
 
@@ -734,10 +885,10 @@ def main(experts, baselines, algorithm, eval_dir):
     datasets_name = ["OTB2015", "TColor128", "UAV123", "NFS", "LaSOT", "VOT2018"]
     if algorithm is not None:
         eval_trackers = experts + baselines + [algorithm]
-        viz_trackers = experts + [algorithm]
+        # viz_trackers = experts + [algorithm]
     else:
         eval_trackers = experts
-        viz_trackers = experts
+        # viz_trackers = experts
 
     eval_save = eval_dir / "eval.pkl"
     if eval_save.exists():
@@ -771,7 +922,9 @@ def main(experts, baselines, algorithm, eval_dir):
                 offline_success, offline_precision = offline.eval_offline_tracker(
                     algorithm, experts
                 )
-                regret_gt, regret_offline = offline.eval_regret(algorithm, experts)
+                regret_gt, regret_offline = offline.eval_regret(
+                    algorithm, eval_trackers, experts
+                )
 
                 anchor_frames[name] = anchor_frame
                 anchor_successes[name] = anchor_success
@@ -797,63 +950,62 @@ def main(experts, baselines, algorithm, eval_dir):
             )
         )
 
-    colors = name2color(eval_trackers)
-    sns.set_palette(colors)
+    # colors = name2color(eval_trackers)
+    # sns.set_palette(colors)
 
-    make_score_table(
-        datasets_name,
-        eval_trackers,
-        len(experts),
-        successes,
-        precisions,
-        eval_dir,
-        "Score",
-        isvot=True,
-    )
-    figsize = (20, 5)
-    draw_curves(datasets_name, viz_trackers, successes, precisions, figsize, eval_dir)
-    draw_rank_both(datasets_name, viz_trackers, successes, figsize, eval_dir)
-    draw_rank_both(
-        datasets_name, viz_trackers, successes, figsize, eval_dir, legend=True
-    )
+    # make_score_table(
+    #     datasets_name,
+    #     eval_trackers,
+    #     len(experts),
+    #     successes,
+    #     precisions,
+    #     eval_dir,
+    #     "Score",
+    #     isvot=True,
+    # )
+    # figsize = (20, 5)
+    # draw_curves(datasets_name, viz_trackers, successes, precisions, figsize, eval_dir)
+    # draw_rank_both(datasets_name, viz_trackers, successes, figsize, eval_dir)
+    # draw_rank_both(
+    #     datasets_name, viz_trackers, successes, figsize, eval_dir, legend=True
+    # )
 
-    if algorithm is not None:
-        find_rank(datasets_name, baselines + [algorithm], experts, successes, eval_dir)
+    # if algorithm is not None:
+    #     find_rank(datasets_name, baselines + [algorithm], experts, successes, eval_dir)
 
-        make_score_table(
-            datasets_name,
-            viz_trackers,
-            len(experts),
-            anchor_successes,
-            anchor_precisions,
-            eval_dir,
-            "Anchor",
-            isvot=True,
-        )
+    #     make_score_table(
+    #         datasets_name,
+    #         viz_trackers,
+    #         len(experts),
+    #         anchor_successes,
+    #         anchor_precisions,
+    #         eval_dir,
+    #         "Anchor",
+    #         isvot=True,
+    #     )
 
-        make_score_table(
-            datasets_name,
-            viz_trackers,
-            len(experts),
-            offline_successes,
-            offline_precisions,
-            eval_dir,
-            "Offline",
-            isvot=True,
-        )
+    #     make_score_table(
+    #         datasets_name,
+    #         viz_trackers,
+    #         len(experts),
+    #         offline_successes,
+    #         offline_precisions,
+    #         eval_dir,
+    #         "Offline",
+    #         isvot=True,
+    #     )
 
-        make_regret_table(
-            datasets_name,
-            eval_trackers,
-            len(experts),
-            regret_gts,
-            regret_offlines,
-            eval_dir,
-            "Regret",
-        )
-    else:
-        figsize = (10, 5)
-        draw_pie(datasets_name, viz_trackers, successes, figsize, eval_dir, legend=True)
+    #     make_regret_table(
+    #         datasets_name,
+    #         viz_trackers,
+    #         len(experts),
+    #         regret_offlines,
+    #         eval_dir,
+    #         "Regret",
+    #     )
+    # else:
+    #     figsize = (10, 5)
+    #     draw_pie(datasets_name, viz_trackers, successes, figsize, eval_dir, legend=True)
 
 
 if __name__ == "__main__":

@@ -22,7 +22,7 @@ if __name__ == "__main__":
     parser.add_argument("-a", "--algorithm", default="AAA", type=str)
     parser.add_argument("-e", "--experts", default=list(), nargs="+")
     parser.add_argument("-d", "--dataset", default="OTB", type=str)
-    parser.add_argument("-n", "--mode", default="Expert", type=str)
+    parser.add_argument("-n", "--mode", default="High", type=str)
     parser.add_argument("-t", "--iou_threshold", default=0.0, type=float)
     parser.add_argument("-r", "--feature_threshold", default=0.0, type=float)
     parser.add_argument("-s", "--reset_target", action="store_true")

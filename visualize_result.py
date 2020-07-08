@@ -1,20 +1,12 @@
 import sys
 import os
-from pathlib import Path
 import pickle
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import seaborn as sns
-from datasets.otbdataset import OTBDataset
-from datasets.votdataset import VOTDataset
-from datasets.tpldataset import TPLDataset
-from datasets.uavdataset import UAVDataset
-from datasets.nfsdataset import NFSDataset
-from datasets.lasotdataset import LaSOTDataset
 from algorithms.aaa_util import calc_overlap
-from visualize_eval import calc_rank
 
 sys.path.append("external/pytracking")
 
@@ -22,6 +14,8 @@ from pytracking.evaluation.environment import env_settings
 
 sns.set()
 sns.set_style("whitegrid")
+
+plt.rcParams.update({"font.size": 30})
 
 BOX_WIDTH = 10
 ANNO_SIZE = 15
@@ -156,6 +150,7 @@ def draw_result(
     target_seqs=None,
     show=["legend", "error", "weight", "frame"],
     gt=True,
+    best=False,
 ):
     trackers = experts if algorithm is None else experts + [algorithm]
     for seq in dataset:
@@ -213,8 +208,7 @@ def draw_result(
             if cond[0]:
                 for i in range(len(trackers)):
                     box = tracker_trajs[i, :frame]
-                    gt = gt_traj[:frame]
-                    error = 1 - calc_overlap(gt, box)
+                    error = 1 - calc_overlap(gt_traj[:frame], box)
                     error_ax.plot(
                         range(len(error)),
                         error,
@@ -314,6 +308,22 @@ def draw_result(
                                     color=colors[i],
                                     arrowprops=dict(arrowstyle="->", color=colors[i]),
                                 )
+                        elif best:
+                            scores = calc_overlap(
+                                gt_traj[frame], tracker_trajs[:, frame]
+                            )
+                            if np.argmax(scores) == i:
+                                sample_ax.annotate(
+                                    trackers[i],
+                                    xy=(box[0], box[1]),
+                                    xycoords="data",
+                                    weight="bold",
+                                    xytext=(-50, 10),
+                                    textcoords="offset points",
+                                    size=ANNO_SIZE,
+                                    color=colors[i],
+                                    arrowprops=dict(arrowstyle="->", color=colors[i]),
+                                )
 
                     if gt:
                         box = gt_traj[frame]
@@ -385,7 +395,7 @@ def draw_graph(
         save_dir = result_dir / f"{algorithm.split('_')[0]}" / seq.name
         os.makedirs(save_dir, exist_ok=True)
 
-        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(20, 1))
+        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10, 1))
         fig.add_subplot(111, frameon=False)
 
         # draw error graph
@@ -403,6 +413,7 @@ def draw_graph(
                     linewidth=LINE_WIDTH * 2
                     if trackers[i].startswith("AAA")
                     else LINE_WIDTH,
+                    alpha=0.8 if trackers[i].startswith("AAA") else 1,
                 )
                 ax.set(ylabel="Error", xlim=(0, len(gt_traj)), ylim=(-0.05, 1.05))
             ax.set_xticks([])
@@ -431,7 +442,7 @@ def draw_graph(
             for i in range(len(gt_traj)):
                 if offline_bb[i - 1] is not None:
                     ax.axvline(
-                        x=i, color="gray", linestyle="--", linewidth=0.1, alpha=0.3
+                        x=i, color="gray", linestyle="--", linewidth=0.1, alpha=0.1
                     )
 
         filename = "error" if iserror else "weight"
@@ -448,8 +459,6 @@ def draw_graph(
 
 def draw_algorithms(dataset, algorithms, colors, result_dir):
     for seq in dataset:
-        if seq.name != "Tiger1":
-            continue
         gt_traj = np.array(seq.ground_truth_rect)
         tracker_trajs = []
 
@@ -525,81 +534,3 @@ def draw_algorithms(dataset, algorithms, colors, result_dir):
             plt.grid(False)
             plt.savefig(save_dir / filename)
             plt.close()
-
-
-def main(experts, baselines, algorithm, eval_dir, result_dir):
-    otb = OTBDataset()
-    nfs = NFSDataset()
-    uav = UAVDataset()
-    tpl = TPLDataset()
-    vot = VOTDataset()
-    lasot = LaSOTDataset()
-
-    datasets = [otb, tpl, vot, nfs, uav, lasot]
-    datasets_name = ["OTB", "TPL", "VOT", "NFS", "UAV", "LaSOT"]
-    eval_trackers = experts + baselines + [algorithm]
-    algorithms = baselines + [algorithm]
-
-    eval_save = eval_dir / "eval.pkl"
-    successes, precisions, anchor_frames, anchor_successes, anchor_precisions, offline_successes, offline_precisions = pickle.loads(
-        eval_save.read_bytes()
-    )
-
-    for dataset, dataset_name in zip(datasets, datasets_name):
-        seq_names = sorted(successes[dataset_name][experts[0]].keys())
-
-        dataset_dir = result_dir / dataset_name
-        # draw_offline_tracking(dataset, algorithm, dataset_dir)
-
-        colors = sns.color_palette("hls", len(eval_trackers) + 1).as_hex()[::-1][1:]
-
-        # draw_result(dataset, None, experts, colors, dataset_dir, None, show=["frame"], gt=False)
-
-        for color, algorithm_name in zip(
-            [colors[-1], colors[-2], colors[len(experts)]],
-            [algorithm, baselines[-1], baselines[0]],
-        ):
-            rank = calc_rank(
-                successes, experts + [algorithm_name], dataset_name, seq_names
-            )[:, -1]
-            first = [seq for seq, cond in zip(seq_names, rank == 1) if cond]
-            last = [
-                seq for seq, cond in zip(seq_names, rank == len(experts) + 1) if cond
-            ]
-            target_seqs = first + last
-            if len(target_seqs) == 0:
-                continue
-            algorithm_colors = colors[: len(experts)] + [color]
-            # draw_graph(dataset, algorithm_name, experts, algorithm_colors, dataset_dir, target_seqs, iserror=True, legend=True)
-            # draw_graph(dataset, algorithm_name, experts, algorithm_colors, dataset_dir, target_seqs, iserror=True)
-            # draw_graph(dataset, algorithm_name, experts, algorithm_colors, dataset_dir, target_seqs, iserror=False)
-            draw_result(
-                dataset,
-                algorithm_name,
-                experts,
-                algorithm_colors,
-                dataset_dir,
-                target_seqs,
-                show=["frame"],
-            )
-
-        # colors = sns.color_palette("hls", len(eval_trackers) + 1).as_hex()[::-1][1:][-len(algorithms):]
-        # draw_algorithms(dataset, algorithms, colors, dataset_dir)
-
-
-if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--algorithm", default="AAA", type=str)
-    parser.add_argument("-e", "--experts", default=list(), nargs="+")
-    parser.add_argument("-b", "--baselines", default=list(), nargs="+")
-    parser.add_argument("-d", "--dir", default="Expert", type=str)
-    args = parser.parse_args()
-
-    result_dir = Path(f"./visualize_results/{args.dir}")
-    os.makedirs(result_dir, exist_ok=True)
-
-    eval_dir = Path(f"./evaluation_results/{args.dir}")
-
-    main(args.experts, args.baselines, args.algorithm, eval_dir, result_dir)

@@ -240,15 +240,21 @@ class OfflineBenchmark:
 
                 valid_results = tracker_traj[: len(offline_results)]
                 if len(offline_results) > 0:
-                    regret_offline_[seq.name] = np.sum(1 - calc_overlap(offline_results, valid_results))
+                    regret_offline_[seq.name] = np.sum(
+                        1 - calc_overlap(offline_results, valid_results)
+                    )
                 else:
                     regret_offline_[seq.name] = np.nan
             regret_gt[tracker_name] = regret_gt_
             regret_offline[tracker_name] = regret_offline_
 
         for seq in self.dataset:
-            min_gt = np.min([regret_gt[expert_name][seq.name] for expert_name in experts])
-            min_offline = np.min([regret_offline[expert_name][seq.name] for expert_name in experts])
+            min_gt = np.min(
+                [regret_gt[expert_name][seq.name] for expert_name in experts]
+            )
+            min_offline = np.min(
+                [regret_offline[expert_name][seq.name] for expert_name in experts]
+            )
 
             for tracker_name in eval_trackers:
                 regret_gt[tracker_name][seq.name] -= min_gt
