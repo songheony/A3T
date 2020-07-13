@@ -442,7 +442,7 @@ def draw_graph(
             for i in range(len(gt_traj)):
                 if offline_bb[i - 1] is not None:
                     ax.axvline(
-                        x=i, color="gray", linestyle="--", linewidth=0.1, alpha=0.1
+                        x=i, color="gray", linestyle="--", linewidth=0.1, alpha=0.3
                     )
 
         filename = "error" if iserror else "weight"

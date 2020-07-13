@@ -13,6 +13,7 @@ from visualize_eval import (
     draw_score_with_ratio,
     make_score_table,
     make_regret_table,
+    draw_scores
 )
 
 
@@ -130,7 +131,7 @@ def figure5(otb_dataset, tpl_dataset, high_algorithm, high_experts, save_dir):
         save_dir / "Figure5",
         otb_seqs,
         iserror=True,
-        legend=True,
+        legend=False,
     )
     draw_graph(
         otb_dataset,
@@ -372,6 +373,18 @@ def table8(
     )
 
 
+def figure_appedix(datasets_name, high_algorithm, high_experts, high_success_rets, save_dir):
+    eval_trackers = high_experts + [high_algorithm]
+    colors = name2color(eval_trackers[::-1])
+    sns.set_palette(colors)
+    draw_scores(datasets_name, eval_trackers[::-1], high_success_rets, save_dir, "score")
+
+    eval_trackers = high_experts
+    colors = name2color(eval_trackers[::-1])
+    sns.set_palette(colors)
+    draw_scores(datasets_name, eval_trackers[::-1], high_success_rets, save_dir, "score_part")
+
+
 def main(experiments, all_experts, all_experts_name, save_dir, eval_dir, tune_dir):
     otb = OTBDataset()
     tpl = TPLDataset()
@@ -390,6 +403,7 @@ def main(experiments, all_experts, all_experts_name, save_dir, eval_dir, tune_di
     high_successes, high_precisions, high_anchor_frames, high_anchor_successes, high_anchor_precisions, high_offline_successes, high_offline_precisions, high_regret_gts, high_regret_offlines = pickle.loads(
         eval_save.read_bytes()
     )
+    figure_appedix(datasets_name, high_algorithm, high_experts, high_successes, save_dir)
     table1(
         datasets_name,
         high_algorithm,

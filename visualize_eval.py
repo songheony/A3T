@@ -873,6 +873,66 @@ def make_ratio_table(
     )
 
 
+def draw_scores(datasets, trackers, success_rets, eval_dir, filename=None):
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10, 3))
+
+    ind = np.arange(len(datasets)) * 2
+    width = 0.25
+
+    fig.add_subplot(111, frameon=False)
+
+    # hide tick and tick label of the big axes
+    plt.tick_params(labelcolor="none", top="off", bottom="off", left="off", right="off")
+    plt.grid(False)
+
+    mean_succ = np.zeros((len(trackers), len(datasets)))
+    for i, tracker_name in enumerate(trackers):
+        for j, dataset_name in enumerate(datasets):
+            succ = [
+                v
+                for v in success_rets[dataset_name][tracker_name].values()
+                if not np.any(np.isnan(v))
+            ]
+            mean_succ[i, j] = np.mean(succ)
+
+    lines = []
+    for idx, tracker_name in enumerate(trackers):
+        value = mean_succ[idx]
+        label = "Ours" if "AAA" in tracker_name else tracker_name
+        line = ax.bar(
+            ind + (idx - (len(trackers) - 1) / 2.0) * width,
+            value,
+            width,
+            label=label,
+        )
+        lines.append(line)
+
+    ax.set_ylabel("AUC")
+    ax.set_xticks(ind)
+    ax.set_xticklabels(datasets)
+    ax.set_ylim([0.3, 0.75])
+
+    # hide tick and tick label of the big axes
+    plt.tick_params(
+        labelcolor="none",
+        which="both",
+        top=False,
+        bottom=False,
+        left=False,
+        right=False,
+    )
+    plt.grid(False)
+    plt.xlabel("Dataset")
+
+    fig.legend(frameon=False, loc="upper center", ncol=len(trackers))
+
+    if filename is None:
+        filename = "score"
+
+    plt.savefig(eval_dir / f"{filename}.pdf", bbox_inches="tight")
+    plt.close()
+
+
 def main(experts, baselines, algorithm, eval_dir):
     otb = OTBDataset()
     nfs = NFSDataset()
