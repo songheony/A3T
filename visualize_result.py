@@ -18,7 +18,7 @@ sns.set_style("whitegrid")
 plt.rcParams.update({"font.size": 30})
 
 BOX_WIDTH = 10
-ANNO_SIZE = 15
+ANNO_SIZE = 20
 LINE_WIDTH = 3
 
 
@@ -367,6 +367,7 @@ def draw_graph(
     target_seqs=None,
     iserror=False,
     legend=False,
+    sframes=[],
 ):
     trackers = experts + [algorithm]
     for seq in dataset:
@@ -395,7 +396,7 @@ def draw_graph(
         save_dir = result_dir / f"{algorithm.split('_')[0]}" / seq.name
         os.makedirs(save_dir, exist_ok=True)
 
-        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10, 1))
+        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(20, 1))
         fig.add_subplot(111, frameon=False)
 
         # draw error graph
@@ -418,7 +419,7 @@ def draw_graph(
                 ax.set(ylabel="Error", xlim=(0, len(gt_traj)), ylim=(-0.05, 1.05))
             ax.set_xticks([])
             if legend:
-                ax.legend(ncol=len(trackers), frameon=False, bbox_to_anchor=(0.2, 1.0))
+                ax.legend(ncol=len(trackers), frameon=False, bbox_to_anchor=(0.2, 1.1))
 
         # draw weight graph
         else:
@@ -444,6 +445,14 @@ def draw_graph(
                     ax.axvline(
                         x=i, color="gray", linestyle="--", linewidth=0.1, alpha=0.3
                     )
+
+        for sframe, text in sframes:
+            # draw text
+            ax.axvline(
+                x=sframe, color="black", linestyle="-", linewidth=1.0
+            )
+            if iserror:
+                ax.annotate(text, xy=(sframe, 1), xytext=(0, 10), color="black", textcoords="offset points", size=12, ha='center', va='center')
 
         filename = "error" if iserror else "weight"
         if legend:

@@ -234,6 +234,10 @@ def select_algorithms(algorithm_name, experts, **kwargs):
         from algorithms.random import Random
 
         algorithm = Random(n_experts, mode)
+    elif algorithm_name == "HDT":
+        from algorithms.hdt import HDT
+
+        algorithm = HDT(n_experts, mode, beta=kwargs["feature_threshold"])
     else:
         raise ValueError("Unknown algorithm name")
 

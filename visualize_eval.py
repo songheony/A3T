@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 from matplotlib.ticker import MultipleLocator
+import matplotlib.transforms as mtrans
 from sympy import preview
 
 from datasets.lasotdataset import LaSOTDataset
@@ -34,7 +35,7 @@ EXPERTS = [
     "Staple",
     "THOR",
 ]
-ALGORITHMS = ["MCCT", "Random", "Max", "AAA"]
+ALGORITHMS = ["HDT", "MCCT", "Random", "Max", "AAA"]
 COLORS = sns.color_palette("hls", len(EXPERTS) + 2).as_hex()[::-1][1:]
 LINE_WIDTH = 4
 
@@ -80,7 +81,49 @@ def calc_rank(rets, trackers, dataset_name, seq_names):
     return ranks
 
 
-def draw_curves(datasets, trackers, success_rets, precision_rets, figsize, eval_dir):
+def draw_score_anchor(datasets, algorithm_name, success_rets, anchor_frames, figsize, eval_dir):
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=figsize)
+    fig.add_subplot(111, frameon=False)
+
+    for i, dataset_name in enumerate(datasets):
+        seq_names = sorted(success_rets[dataset_name][algorithm_name].keys())
+
+        # draw curve of trackers
+        ratio = [
+            sum(anchor_frames[dataset_name][seq_name]) / len(anchor_frames[dataset_name][seq_name]) if not np.any(np.isnan(anchor_frames[dataset_name][seq_name])) else 0 for seq_name in seq_names
+        ]
+        value = [
+            np.mean(success_rets[dataset_name][algorithm_name][seq_name]) if not any(np.isnan(success_rets[dataset_name][algorithm_name][seq_name])) else 0
+            for seq_name in seq_names
+        ]
+        ax.scatter(
+            ratio,
+            value,
+            label=dataset_name,
+        )
+    ax.set_ylabel("AUC")
+    ax.set_xlabel("Anchor ratio")
+
+    # hide tick and tick label of the big axes
+    plt.tick_params(
+        labelcolor="none",
+        which="both",
+        top=False,
+        bottom=False,
+        left=False,
+        right=False,
+    )
+    plt.grid(False)
+    fig.legend(
+        frameon=False,
+        loc="upper center",
+        ncol=len(datasets)
+    )
+    plt.savefig(eval_dir / "auc_ratio.pdf", bbox_inches="tight")
+    plt.close()
+
+
+def draw_curves(datasets, trackers, success_rets, precision_rets, figsize, eval_dir, file_name=None):
     fig, axes = plt.subplots(nrows=2, ncols=len(datasets), figsize=figsize)
     fig.add_subplot(111, frameon=False)
 
@@ -149,7 +192,8 @@ def draw_curves(datasets, trackers, success_rets, precision_rets, figsize, eval_
         right=False,
     )
     plt.grid(False)
-    plt.xlabel("Threshold")
+    fig.text(0.5125, 0.47, 'Threshold for IoU', ha='center', va='center')
+    plt.xlabel("Threshold for distance")
 
     changed_trackers = [
         tracker_name if "AAA" not in tracker_name else "AAA"
@@ -163,8 +207,170 @@ def draw_curves(datasets, trackers, success_rets, precision_rets, figsize, eval_
         ncol=len(trackers),  # ncol=(len(trackers) + 1) // 2
     )
 
-    plt.subplots_adjust(wspace=0.2, hspace=0.2)
-    plt.savefig(eval_dir / "curves.pdf", bbox_inches="tight")
+    plt.subplots_adjust(wspace=0.2, hspace=0.4)
+    if file_name is None:
+        file_name = "curves"
+    plt.savefig(eval_dir / f"{file_name}.pdf", bbox_inches="tight")
+    plt.close()
+    plt.close()
+
+
+def draw_rank(
+    datasets, trackers, success_rets, figsize, eval_dir, legend=False, file_name=None
+):
+    fig, axes = plt.subplots(nrows=1, ncols=len(datasets), figsize=figsize)
+    fig.add_subplot(111, frameon=False)
+
+    lines = []
+    xs = list(range(1, len(trackers) + 1))
+
+    for i, dataset_name in enumerate(datasets):
+        # draw success plot
+        ax = axes[i]
+
+        seq_names = sorted(success_rets[dataset_name][trackers[0]].keys())
+        ranks = calc_rank(success_rets, trackers, dataset_name, seq_names)
+
+        for tracker_name, rank in zip(trackers, ranks.T):
+            line = ax.plot(
+                xs,
+                [np.sum(rank == x) / len(seq_names) for x in xs],
+                # c=color,
+                label=tracker_name.split("_")[0]
+                if isalgorithm(tracker_name)
+                else tracker_name,
+                linewidth=LINE_WIDTH * 2 if isalgorithm(tracker_name) else LINE_WIDTH,
+            )[0]
+            if i == 0:
+                lines.append(line)
+
+        # ax.yaxis.set_major_formatter(FormatStrFormatter("%.1f"))
+        ax.yaxis.set_major_locator(MultipleLocator(0.1))
+        ax.set_xticks([1, len(trackers) // 2 + 1, len(trackers)])
+        ax.set_xticklabels(["1(Best)", str(len(trackers) // 2 + 1), f"{len(trackers)}(Worst)"])
+        if i == 0:
+            ax.set_ylabel("Frequency of rank")
+        ax.set_title(dataset_name)
+
+    # hide tick and tick label of the big axes
+    plt.tick_params(
+        labelcolor="none",
+        which="both",
+        top=False,
+        bottom=False,
+        left=False,
+        right=False,
+    )
+    plt.grid(False)
+    plt.xlabel("Rank")
+
+    if legend:
+        changed_trackers = [
+            tracker_name.split("_")[0] if isalgorithm(tracker_name) else tracker_name
+            for tracker_name in trackers
+        ]
+        fig.legend(
+            lines,
+            changed_trackers,
+            frameon=False,
+            loc="upper center",
+            ncol=len(trackers),
+            # bbox_to_anchor=[0.4, 1.4],
+        )
+
+    plt.subplots_adjust(wspace=0.2, top=0.8)
+
+    if file_name is None:
+        file_name = "rank_legend" if legend else "rank"
+    plt.savefig(eval_dir / f"{file_name}.pdf", bbox_inches="tight")
+    plt.close()
+
+
+def draw_rank_all(
+    datasets, group_names, group_trackers, group_success_rets, all_trackers, figsize, eval_dir, legend=False, file_name=None
+):
+    fig, axes = plt.subplots(nrows=len(group_names), ncols=len(datasets), figsize=figsize)
+    fig.add_subplot(111, frameon=False)
+
+    xs = list(range(1, len(group_trackers[0]) + 1))
+
+    alphabets = ["a", "b", "c"]
+
+    for g in range(len(group_names)):
+        for i, dataset_name in enumerate(datasets):
+            ax = axes[g, i]
+
+            seq_names = sorted(group_success_rets[g][dataset_name][group_trackers[g][0]].keys())
+            ranks = calc_rank(group_success_rets[g], group_trackers[g], dataset_name, seq_names)
+
+            for tracker_name, rank in zip(group_trackers[g], ranks.T):
+                ax.plot(
+                    xs,
+                    [np.sum(rank == x) / len(seq_names) for x in xs],
+                    c=name2color([tracker_name])[0],
+                    label=tracker_name.split("_")[0]
+                    if isalgorithm(tracker_name)
+                    else tracker_name,
+                    linewidth=LINE_WIDTH * 2 if isalgorithm(tracker_name) else LINE_WIDTH,
+                )
+
+            if i == len(datasets) // 2 and legend:
+                ax.legend(
+                    frameon=False,
+                    loc="upper center",
+                    ncol=len(group_trackers[g]),
+                    bbox_to_anchor=(0.0, 1.2)
+                )
+
+            # ax.yaxis.set_major_formatter(FormatStrFormatter("%.1f"))
+            ax.yaxis.set_major_locator(MultipleLocator(0.1))
+            ax.set_xticks([1, len(group_trackers[g]) // 2 + 1, len(group_trackers[g])])
+            if g == len(group_names) - 1:
+                ax.set_xticklabels(["1(Best)", str(len(group_trackers[g]) // 2 + 1), f"{len(group_trackers[g])}(Worst)"])
+            else:
+                ax.set_xticklabels([])
+            if g == 0:
+                ax.set_title(dataset_name, y=1.2)
+            # if i == len(datasets) - 1:
+            #     ax.yaxis.set_label_position("right")
+            #     ax.set_ylabel(f"({alphabets[g]}) In {group_names[g]} group")
+            if i == 0:
+                # ax.yaxis.set_label_position("right")
+                ax.set_ylabel(f"({alphabets[g]}) {group_names[g]} group")
+
+    # hide tick and tick label of the big axes
+    plt.tick_params(
+        labelcolor="none",
+        which="both",
+        top=False,
+        bottom=False,
+        left=False,
+        right=False,
+    )
+    plt.grid(False)
+    plt.xlabel("Rank")
+    plt.ylabel("Frequency of rank", labelpad=30)
+
+    plt.subplots_adjust(hspace=0.2)
+
+    # Get the bounding boxes of the axes including text decorations
+    r = fig.canvas.get_renderer()
+    get_bbox = lambda ax: ax.get_tightbbox(r).transformed(fig.transFigure.inverted())
+    bboxes = np.array(list(map(get_bbox, axes.flat)), mtrans.Bbox).reshape(axes.shape)
+
+    # Get the minimum and maximum extent, get the coordinate half-way between those
+    ymax = np.array(list(map(lambda b: b.y1, bboxes.flat))).reshape(axes.shape).max(axis=1)
+    ymin = np.array(list(map(lambda b: b.y0, bboxes.flat))).reshape(axes.shape).min(axis=1)
+    ys = np.c_[ymax[1:], ymin[:-1]].mean(axis=1)
+
+    # Draw a horizontal lines at those coordinates
+    for y in ys:
+        line = plt.Line2D([0.13, 0.9], [y, y], transform=fig.transFigure, color="black")
+        fig.add_artist(line)
+
+    if file_name is None:
+        file_name = "rank_legend" if legend else "rank"
+    plt.savefig(eval_dir / f"{file_name}.pdf", bbox_inches="tight")
     plt.close()
 
 
@@ -381,18 +587,19 @@ def draw_score_with_ratio(
 
     axes[0].set_ylabel("Normalized AUC")
 
-    for i, mode_name in enumerate(modes):
-        # draw precision plot
-        ax = axes[1]
+    if anchor_frames is not None:
+        for i, mode_name in enumerate(modes):
+            # draw precision plot
+            ax = axes[1]
 
-        ax.plot(
-            thresholds,
-            mean_ratio[:, i],
-            c=lines[i].get_color(),
-            label=mode_name,
-            linewidth=LINE_WIDTH,
-        )
-    axes[1].set_ylabel("Anchor ratio")
+            ax.plot(
+                thresholds,
+                mean_ratio[:, i],
+                c=lines[i].get_color(),
+                label=mode_name,
+                linewidth=LINE_WIDTH,
+            )
+        axes[1].set_ylabel("Anchor ratio")
 
     # hide tick and tick label of the big axes
     plt.tick_params(
@@ -874,7 +1081,7 @@ def make_ratio_table(
 
 
 def draw_scores(datasets, trackers, success_rets, eval_dir, filename=None):
-    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10, 3))
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(20, 3))
 
     ind = np.arange(len(datasets)) * 2
     width = 0.25
@@ -1009,6 +1216,8 @@ def main(experts, baselines, algorithm, eval_dir):
                 )
             )
         )
+
+    find_rank(datasets_name, baselines + [algorithm], experts, successes, eval_dir)
 
     # colors = name2color(eval_trackers)
     # sns.set_palette(colors)

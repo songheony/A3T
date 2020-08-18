@@ -94,9 +94,14 @@ if __name__ == "__main__":
     parser.add_argument("-z", "--cost_score", action="store_false")
     args = parser.parse_args()
 
-    start_point = 0.6
-    end_point = 0.9
-    thresholds = np.arange(start_point, end_point, 0.01)
+    if "AAA" in args.algorithm:
+        start_point = 0.6
+        end_point = 0.9
+        thresholds = np.arange(start_point, end_point, 0.01)
+    else:
+        start_point = 0.1
+        end_point = 1.0
+        thresholds = np.arange(start_point, end_point, 0.02)
 
     eval_dir = Path(f"./tuning_results/{args.algorithm}/{args.mode}")
     os.makedirs(eval_dir, exist_ok=True)
