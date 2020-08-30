@@ -37,7 +37,7 @@ EXPERTS = [
 ]
 ALGORITHMS = ["HDT", "MCCT", "Random", "Max", "AAA"]
 COLORS = sns.color_palette("hls", len(EXPERTS) + 2).as_hex()[::-1][1:]
-LINE_WIDTH = 4
+LINE_WIDTH = 2
 
 
 def isalgorithm(tracker):
@@ -50,14 +50,17 @@ def isalgorithm(tracker):
 
 def name2color(trackers):
     color = []
+    expert_idx = 0
     for tracker in trackers:
         if isalgorithm(tracker):
             color += [COLORS[-1]]
         else:
-            if tracker not in EXPERTS:
-                return sns.color_palette("hls", len(trackers) - 2).as_hex()[::-1][1:]
-            idx = EXPERTS.index(tracker)
-            color += [COLORS[idx]]
+            if "_" in tracker:
+                color += [COLORS[expert_idx]]
+                expert_idx += 1
+            else:
+                idx = EXPERTS.index(tracker)
+                color += [COLORS[idx]]
     return color
 
 
@@ -537,7 +540,7 @@ def draw_pie(
     plt.close()
 
 
-def draw_score_with_ratio(
+def draw_succ_with_thresholds(
     modes, thresholds, success_rets, anchor_frames, figsize, eval_dir, file_name=None
 ):
     fig, axes = plt.subplots(nrows=2, ncols=1, figsize=figsize, sharex=True)
@@ -589,7 +592,93 @@ def draw_score_with_ratio(
 
     if anchor_frames is not None:
         for i, mode_name in enumerate(modes):
-            # draw precision plot
+            # draw highest score
+            ax = axes[1]
+
+            ax.plot(
+                thresholds,
+                mean_ratio[:, i],
+                c=lines[i].get_color(),
+                label=mode_name,
+                linewidth=LINE_WIDTH,
+            )
+        axes[1].set_ylabel("Anchor ratio")
+
+    # hide tick and tick label of the big axes
+    plt.tick_params(
+        labelcolor="none",
+        which="both",
+        top=False,
+        bottom=False,
+        left=False,
+        right=False,
+    )
+    plt.grid(False)
+    plt.xlabel("Threshold")
+
+    fig.legend(lines, modes, frameon=False, loc="upper center", ncol=len(modes))
+
+    plt.subplots_adjust(wspace=0, hspace=0.1)
+
+    if file_name is None:
+        file_name = "score_ratio"
+    plt.savefig(eval_dir / f"{file_name}.pdf", bbox_inches="tight")
+    plt.close()
+
+
+def draw_prec_with_thresholds(
+    modes, thresholds, precision_rets, anchor_frames, figsize, eval_dir, file_name=None
+):
+    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=figsize, sharex=True)
+    fig.add_subplot(111, frameon=False)
+
+    lines = []
+
+    mean_prec = np.zeros((len(thresholds), len(modes)))
+    mean_ratio = np.zeros((len(thresholds), len(modes)))
+    for i, tracker_name in enumerate(thresholds):
+        for j, dataset_name in enumerate(modes):
+            prec = [
+                v
+                for v in precision_rets[dataset_name][tracker_name].values()
+                if not np.any(np.isnan(v))
+            ]
+            mean_prec[i, j] = np.mean(prec, axis=0)[20]
+
+            if anchor_frames is not None:
+                ratio = [
+                    sum(v) / len(v)
+                    for v in anchor_frames[dataset_name][tracker_name].values()
+                    if not np.any(np.isnan(v))
+                ]
+                mean_ratio[i, j] = np.mean(ratio)
+            else:
+                mean_ratio[i, j] = 1
+
+    for i, mode_name in enumerate(modes):
+        # draw success plot
+        ax = axes[0]
+
+        line = ax.plot(
+            thresholds, minmax(mean_prec[:, i]), label=mode_name, linewidth=LINE_WIDTH
+        )[0]
+        lines.append(line)
+
+        ax.plot(
+            thresholds[np.argmax(mean_prec[:, i])],
+            1,
+            "o",
+            ms=10,
+            mec=line.get_color(),
+            mfc="none",
+            mew=2,
+        )
+
+    axes[0].set_ylabel("Normalized DP")
+
+    if anchor_frames is not None:
+        for i, mode_name in enumerate(modes):
+            # draw highest score
             ax = axes[1]
 
             ax.plot(

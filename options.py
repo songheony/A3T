@@ -238,6 +238,10 @@ def select_algorithms(algorithm_name, experts, **kwargs):
         from algorithms.hdt import HDT
 
         algorithm = HDT(n_experts, mode, beta=kwargs["feature_threshold"])
+    elif algorithm_name == "HDTC":
+        from algorithms.hdtc import HDTC
+
+        algorithm = HDTC(n_experts, mode, beta=kwargs["feature_threshold"])
     else:
         raise ValueError("Unknown algorithm name")
 

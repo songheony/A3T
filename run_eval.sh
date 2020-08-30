@@ -2,7 +2,7 @@
 # python ./visualize_eval.py -e ${all_experts[@]} -d All
 
 high_algorithm=("AAA_High_0.00_0.69_False_False_False_True_True_True_True")
-high_baseline=("MCCT_High_0.10" "HDT_High_0.88" "Random_High" "Max_High")
+high_baseline=("MCCT_High_0.10" "HDT_High_0.98" "Random_High" "Max_High")
 high_experts=("ATOM" "DaSiamRPN" "SiamMCF" "SiamRPN++" "SPM" "THOR")
 python ./visualize_eval.py -e ${high_experts[@]} -d High -a ${high_algorithm[@]} -b ${high_baseline[@]}
 
@@ -22,6 +22,6 @@ siamdw_experts=("SiamDW_SiamFCRes22" "SiamDW_SiamFCIncep22" "SiamDW_SiamFCNext22
 python ./visualize_eval.py -e ${siamdw_experts[@]} -d SiamDW -a ${siamdw_algorithm[@]} -b ${siamdw_baseline[@]}
 
 siamrpn_algorithm=("AAA_SiamRPN++_0.00_0.61_False_False_False_True_True_True_True")
-siamrpn_baseline=("MCCT_SiamRPN++_0.10" "HDT_SiamRPN++_0.94" "Random_SiamRPN++" "Max_SiamRPN++")
+siamrpn_baseline=("MCCT_SiamRPN++_0.10" "HDT_SiamRPN++_0.74" "Random_SiamRPN++" "Max_SiamRPN++")
 siamrpn_experts=("SiamRPN++_AlexNet" "SiamRPN++_AlexNet_OTB" "SiamRPN++_ResNet-50" "SiamRPN++_ResNet-50_OTB" "SiamRPN++_ResNet-50_LT" "SiamRPN++_MobileNetV2" "SiamRPN++_SiamMask")
 python ./visualize_eval.py -e ${siamrpn_experts[@]} -d SiamRPN++ -a ${siamrpn_algorithm[@]} -b ${siamrpn_baseline[@]}

@@ -8,15 +8,16 @@ from datasets.tpldataset import TPLDataset
 from visualize_result import draw_graph, draw_result
 from visualize_eval import (
     name2color,
-    draw_rank,
     draw_rank_all,
     draw_pie,
-    draw_score_with_ratio,
+    draw_succ_with_thresholds,
+    # draw_prec_with_thresholds,
     make_score_table,
-    make_regret_table,
-    draw_scores,
     draw_curves,
-    draw_score_anchor
+    # draw_score_anchor,
+    # make_regret_table,
+    # draw_rank,
+    # draw_scores,
 )
 
 
@@ -165,7 +166,7 @@ def figure5(
         figsize,
         save_dir,
         legend=True,
-        file_name="Figure_rank_all",
+        file_name="Figure5",
     )
 
 
@@ -243,7 +244,7 @@ def figure7(threshold_successes, threshold_anchors, save_dir):
     figsize = (20, 5)
     thresholds = sorted(list(threshold_successes.values())[0].keys())
     modes = threshold_successes.keys()
-    draw_score_with_ratio(
+    draw_succ_with_thresholds(
         modes,
         thresholds,
         threshold_successes,
@@ -387,7 +388,7 @@ def table4(
         siamdw_successes,
         siamdw_precisions,
         save_dir,
-        "Table6",
+        "Table4",
         isvot=True,
     )
 
@@ -409,7 +410,7 @@ def table5(
         siamrpn_successes,
         siamrpn_precisions,
         save_dir,
-        "Table7",
+        "Table5",
         isvot=True,
     )
 
@@ -430,7 +431,7 @@ def table6(
         high_anchor_successes,
         high_anchor_precisions,
         save_dir,
-        "Table8",
+        "Table6",
         isvot=True,
     )
 
@@ -444,7 +445,7 @@ def table6(
 #     eval_trackers = high_experts
 #     colors = name2color(eval_trackers[::-1])
 #     sns.set_palette(colors)
-#     draw_scores(datasets_name, eval_trackers[::-1], high_success_rets, save_dir, "score_part")
+#     draw_scores(datasets_name, eval_trackers[::-1], high_success_rets, save_dir, "score_expert_only")
 
 
 # def figure_rank_high(datasets_name, high_algorithm, high_experts, high_successes, save_dir):
@@ -459,7 +460,7 @@ def table6(
 #         figsize,
 #         save_dir,
 #         legend=True,
-#         file_name="Figure5",
+#         file_name="Figure_rank_high",
 #     )
 
 
@@ -527,7 +528,7 @@ def table6(
 #         mix_offline_successes,
 #         mix_offline_precisions,
 #         save_dir,
-#         "Table4",
+#         "Table_mix_offline",
 #         isvot=True,
 #     )
 
@@ -535,7 +536,22 @@ def table6(
 # def table_mix_regret(datasets_name, mix_algorithm, mix_experts, mix_regrets, save_dir):
 #     eval_trackers = mix_experts + [mix_algorithm]
 #     make_regret_table(
-#         datasets_name, eval_trackers, len(mix_experts), mix_regrets, save_dir, "Table5"
+#         datasets_name, eval_trackers, len(mix_experts), mix_regrets, save_dir, "Table_mix_regret"
+#     )
+
+
+# def figure_hdt_threshold(threshold_precisions, threshold_anchors, save_dir):
+#     figsize = (20, 5)
+#     thresholds = sorted(list(threshold_precisions.values())[0].keys())
+#     modes = threshold_precisions.keys()
+#     draw_prec_with_thresholds(
+#         modes,
+#         thresholds,
+#         threshold_precisions,
+#         threshold_anchors,
+#         figsize,
+#         save_dir,
+#         "Figure_HDT",
 #     )
 
 
@@ -549,7 +565,7 @@ def main(experiments, all_experts, all_experts_name, save_dir, eval_dir, tune_di
     # All
     eval_save = eval_dir / "All" / "eval.pkl"
     all_successes, _, _, _, _, _, _, _, _ = pickle.loads(eval_save.read_bytes())
-    # figure1(datasets_name, all_experts, all_experts_name, all_successes, save_dir)
+    figure1(datasets_name, all_experts, all_experts_name, all_successes, save_dir)
 
     # High
     high_algorithm, high_baselines, high_experts = experiments["High"]
@@ -575,11 +591,11 @@ def main(experiments, all_experts, all_experts_name, save_dir, eval_dir, tune_di
         high_anchor_precisions,
         save_dir,
     )
-    # figure2(vot, high_algorithm, high_experts, save_dir)
+    figure2(vot, high_algorithm, high_experts, save_dir)
     figure4(datasets_name, high_algorithm, high_experts, high_successes, high_precisions, save_dir)
-    # figure6(otb, tpl, high_algorithm, high_experts, save_dir)
+    figure6(otb, tpl, high_algorithm, high_experts, save_dir)
     figure8(otb, high_algorithm, high_baselines[1], high_experts, save_dir)
-    # figure9(otb, high_algorithm, high_baselines[0], high_experts, save_dir)
+    figure9(otb, high_algorithm, high_baselines[0], high_experts, save_dir)
 
     # Low
     low_algorithm, low_baselines, low_experts = experiments["Low"]
@@ -679,11 +695,11 @@ if __name__ == "__main__":
     siamdw_algorithm = "AAA_SiamDW_0.00_0.67_False_False_False_True_True_True_True"
     siamrpn_algorithm = "AAA_SiamRPN++_0.00_0.61_False_False_False_True_True_True_True"
 
-    high_baselines = ["HDT_High_0.88", "MCCT_High_0.10", "Random_High", "Max_High"]
+    high_baselines = ["HDT_High_0.98", "MCCT_High_0.10", "Random_High", "Max_High"]
     low_baselines = ["HDT_Low_0.32", "MCCT_Low_0.10", "Random_Low", "Max_Low"]
     mix_baselines = ["HDT_Mix_0.94", "MCCT_Mix_0.10", "Random_Mix", "Max_Mix"]
     siamdw_baselines = ["HDT_SiamDW_0.98", "MCCT_SiamDW_0.10", "Random_SiamDW", "Max_SiamDW"]
-    siamrpn_baselines = ["HDT_SiamRPN++_0.94", "MCCT_SiamRPN++_0.10", "Random_SiamRPN++", "Max_SiamRPN++"]
+    siamrpn_baselines = ["HDT_SiamRPN++_0.74", "MCCT_SiamRPN++_0.10", "Random_SiamRPN++", "Max_SiamRPN++"]
 
     all_experts = [
         "ATOM",

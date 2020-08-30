@@ -1,8 +1,10 @@
 import sys
 import os
+import json
 import pickle
 from PIL import Image
 import numpy as np
+import skvideo.io
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import seaborn as sns
@@ -543,3 +545,20 @@ def draw_algorithms(dataset, algorithms, colors, result_dir):
             plt.grid(False)
             plt.savefig(save_dir / filename)
             plt.close()
+
+
+def img2video(dataset, seq_name, trackers):
+    boxes, weights, anchors, img_files, anno_rects = get_video(dataset, seq_name, trackers)
+    save_dir = os.path.join(dataset.report_dir, seq_name+ '_error')
+
+    writer = skvideo.io.FFmpegWriter(os.path.join(save_dir, "%s.mp4" % seq_name), outputdict={'-c:v': 'libx264', '-pix_fmt': 'yuv420p', '-q:v': "1", '-filter:v': "setpts=4.0*PTS"}, verbosity=1) #,outputdict={'-filter:v': "setpts=4.0*PTS"}  outputdict={'-c:v': 'libx264', '-pix_fmt': 'yuv420p', '-filter:v': "setpts=4.0*PTS"}
+
+    for frame in range(len(img_files)):
+        img = Image.open(frame).convert("RGB")
+        img = np.asarray(img)
+        writer.writeFrame(img)
+
+    writer.close()
+
+    metadata = skvideo.io.ffprobe(os.path.join(save_dir, "%s.mp4" % seq_name))
+    json.dump(metadata["video"], open(os.path.join(save_dir, "%s.json" % seq_name), 'w'), indent=4)

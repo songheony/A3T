@@ -177,7 +177,7 @@ class AnchorDetector:
 
 class WAADelayed:
     def __init__(self):
-        pass
+        self.init_w = True
 
     def init(self, n):
         self.w = np.ones(n) / n
@@ -196,6 +196,8 @@ class WAADelayed:
             self.real_D += i
             if self.est_D < self.real_D:
                 self.est_D *= 2
+                if self.init_w:
+                    self.w = np.ones(len(self.w)) / len(self.w)
 
         lr = np.sqrt(self.est_D * np.log(len(self.w)))
 

@@ -44,7 +44,7 @@ def find_nh_scale(regrets):
     return cmid
 
 
-def nnhedge_weights(r, scale):
+def nnhedge_weights(r, scale, is_tpami):
     n = r.size
     w = np.zeros((n))
 
@@ -52,8 +52,10 @@ def nnhedge_weights(r, scale):
         if r[i] <= 0:
             w[i] = 2.2204e-16
         else:
-            w[i] = np.exp(r[i] / scale) / scale
-
+            if is_tpami:
+                w[i] = np.exp(r[i] / scale) / scale
+            else:
+                w[i] = r[i] / scale * np.exp(r[i] * r[i] / scale / 2)
     return w
 
 
@@ -70,13 +72,13 @@ class HDT(BaseTracker):
 
         self.delta_t = 5
         self.scale_gamma = 0.25
+        self.is_tpami = True
 
     def initialize(self, image_file, box):
         self.frame_idx = -1
         image = Image.open(image_file).convert("RGB")
         self.target_feature = self.extractor.extract(image, [box])[0]
 
-        self.experts_center = np.zeros((self.n_experts, 2))
         self.experts_loss = np.zeros((self.n_experts, self.delta_t))
         self.experts_regret = np.zeros((self.n_experts))
         self.weights = np.ones((1, self.n_experts)) / self.n_experts
@@ -86,15 +88,15 @@ class HDT(BaseTracker):
     def track(self, image_file, boxes):
         self.frame_idx += 1
 
-        self.experts_center = boxes[:, :2] + boxes[:, 2:] / 2
+        experts_center = boxes[:, :2] + boxes[:, 2:] / 2
 
         if self.frame_idx > 0:
-            self.center = self.weights.dot(self.experts_center)
+            self.center = self.weights.dot(experts_center)
 
         image = Image.open(image_file).convert("RGB")
         features = self.extractor.extract(image, boxes)
 
-        distance = np.linalg.norm(self.center - self.experts_center, axis=1)
+        distance = np.linalg.norm(self.center - experts_center, axis=1)
         distance_loss = distance / np.sum(distance)
 
         similarity_loss = np.zeros((self.n_experts))
@@ -114,7 +116,7 @@ class HDT(BaseTracker):
         self.experts_regret += expected_loss - np.tanh(self.scale_gamma * s) * self.experts_loss[:, loss_idx]
 
         c = find_nh_scale(self.experts_regret)
-        self.weights = nnhedge_weights(self.experts_regret, c)
+        self.weights = nnhedge_weights(self.experts_regret, c, self.is_tpami)
         self.weights /= np.sum(self.weights)
 
         box = np.zeros((4))

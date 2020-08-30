@@ -77,11 +77,6 @@ class MCCT(BaseTracker):
         weight_avg_overlap = norm_factor * (self.weight.dot(avg_overlap))
         weight_var_overlap = norm_factor * (self.weight.dot(var_overlap))
         pair_score = weight_avg_overlap / (weight_var_overlap + 0.008)
-        # if self.frame_idx == 122:
-        #     print(f"{num}/overlap/{overlap_score}")
-        #     print(f"{num}/expert/{expert_avg_overlap}")
-        #     print(f"{num}/avg/{avg_overlap}")
-        #     print(f"{num}/var/{var_overlap}")
 
         smooth_score = self.experts[num].smooth_scores[-self.period :]
         self_score = norm_factor * self.weight.dot(smooth_score)
