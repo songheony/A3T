@@ -115,6 +115,15 @@ bash run_tuning.sh
 # run AAA. if you download AAA+Experts Tracking results, you can skip this command
 bash run_algorithm.sh
 
+# run HDT. if you download AAA+Experts Tracking results, you can skip this command
+bash run_hdt.sh
+
+# run MCCT. if you download AAA+Experts Tracking results, you can skip this command
+bash run_mcct.sh
+
+# run Max and Random. if you download AAA+Experts Tracking results, you can skip this command
+bash run_baselines.sh
+
 # evaluate experts and AAA. if you download Evaluation results Tracking results, you can skip this command
 bash run_eval.sh
 
