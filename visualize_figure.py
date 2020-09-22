@@ -716,18 +716,18 @@ if __name__ == "__main__":
         "THOR",
     ]
     all_experts_name = [
-        "ATOM[26]",
-        "DaSiamRPN[27]",
-        "GradNet[34]",
-        "MemTrack[35]",
-        "SiamDW[32]",
-        "SiamFC[36]",
-        "SiamMCF[28]",
-        "SiamRPN[33]",
-        "SiamRPN++[29]",
-        "SPM[30]",
-        "Staple[37]",
-        "THOR[31]",
+        "ATOM [29]",
+        "DaSiamRPN [30]",
+        "GradNet [36]",
+        "MemTrack [37]",
+        "SiamDW [38]",
+        "SiamFC [39]",
+        "SiamMCF [31]",
+        "SiamRPN [40]",
+        "SiamRPN++ [32]",
+        "SPM [33]",
+        "Staple [41]",
+        "THOR [34]",
     ]
     high_experts = ["ATOM", "DaSiamRPN", "SiamMCF", "SiamRPN++", "SPM", "THOR"]
     low_experts = ["GradNet", "MemTrack", "SiamDW", "SiamFC", "SiamRPN", "Staple"]
