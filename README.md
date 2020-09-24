@@ -86,8 +86,8 @@ python visualize_figure.py
 ## Reproduce our results
 
 You can reproduce our results by using created environment and results.  
-Download [AAA+Experts Tracking results](https://drive.google.com/file/d/1M4mk1zh4tp8vnCQ5gk4-pN-jvrkZSX1w/view?usp=sharing) and [Evaluation results](https://drive.google.com/file/d/1mNMy_4w7BchUF4skS9PK391pWA9KI2LC/view?usp=sharing).  
-Then, run the followind commands.  
+If you don't want to run experts or AAA, you can download [AAA+Experts Tracking results](https://drive.google.com/file/d/1Vw8KuF-4_1Dc7XHa6lAyHxjKve-UlE5B/view?usp=sharing) and [Evaluation results](https://drive.google.com/file/d/1nqQk8fZIef1hFIRM_RW425ti6stKwxJA/view?usp=sharing). Moreover, you can download figures in our paper from [here](https://drive.google.com/file/d/12O2saVFQD9e01GuTkKHWi79ohqjQR3eQ/view?usp=sharing).  
+Or, if you want to reproduce our results by yourself, run the following commands.  
 
 ```sh
 git clone https://github.com/songheony/AAA-journal
