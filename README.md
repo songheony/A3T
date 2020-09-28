@@ -172,12 +172,11 @@ for img_path in img_paths[1:]:
 If you find AAA useful in your work, please cite our paper:  
 
 ```none
-@inproceedings{song2020adaptive,
-title={Adaptive Aggregation of Arbitrary Online Trackers with a Regret Bound},
-author={Song, Heon and Suehiro, Daiki and Uchida, Seiichi},
-booktitle={The IEEE Winter Conference on Applications of Computer Vision},
-pages={681--689},
-year={2020}
+@article{song2020aaa,
+  title={AAA: Adaptive Aggregation of Arbitrary Online Trackers with Theoretical Performance Guarantee},
+  author={Song, Heon and Suehiro, Daiki and Uchida, Seiichi},
+  journal={arXiv preprint arXiv:2009.09237},
+  year={2020}
 }
 ```
 
