@@ -69,6 +69,10 @@ cd AAA-journal/external
 # clone frameworks
 git clone https://github.com/visionml/pytracking
 git clone https://github.com/StrangerZhang/pysot-toolkit
+
+# install region
+cd pysot-toolkit/pysot/utils/
+python setup.py build_ext --inplace
 ```
 
 After that, you need to install the following libraries.
