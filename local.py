@@ -8,7 +8,7 @@ def local_env_settings():
 
     settings.got10k_path = ""
     settings.lasot_path = ""
-    settings.network_path = "/home/heonsong/Desktop/AAA-journal/weights/pytracking"  # Where tracking networks are stored.
+    settings.network_path = "/workspace/AAA-journal/weights/pytracking"  # Where tracking networks are stored.
     settings.nfs_path = ""
     settings.otb_path = ""
     settings.results_path = ""  # Where to store tracking results

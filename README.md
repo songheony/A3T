@@ -125,12 +125,14 @@ We offer three options to make it easy to run experts:
 
 ```sh
 conda create -f environment.yml
+conda activate aaa
 ```
 
 ### Install pre-built Docker environment
 
 ```sh
 docker pull songheony/aaa
+docker run --gpus all -it -v "${PWD}:/workspace" --ipc=host songheony/aaa bash
 ```
 
 ### Install python libraries manually
@@ -149,16 +151,20 @@ After installing the libraries, some libraries need to be compiled manually.
 
 ```sh
 # For SiamBAN
-python external/siamban/setup.py build_ext --inplace
+cd external/siamban
+python setup.py build_ext --inplace
 
 # For SiamRPN++
-python external/pysot/setup.py build_ext --inplace
+cd external/pysot
+python setup.py build_ext --inplace
 
 # For SPM
-bash external/SPM-Tracker/compile.sh
+cd external/SPM-Tracker
+bash compile.sh
 
 # For Staple
-python external/pyCFTrackers/lib/pysot/utils/setup.py build_ext --inplace
+cd external/pyCFTrackers/lib/pysot/utils
+python setup.py build_ext --inplace
 ```
 
 ## Reproduce our results
@@ -169,7 +175,7 @@ Or, if you want to reproduce our results by yourself, run the following commands
 
 ```sh
 # edit network path of ATOM, DiMP, PrDiMP, KYS
-cp ../local.py pytracking/pytracking/evaluation/local.py
+cp local.py external/pytracking/pytracking/evaluation/local.py
 
 # clone experts
 git clone https://github.com/songheony/DaSiamRPN
