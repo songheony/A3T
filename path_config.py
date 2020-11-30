@@ -1,87 +1,79 @@
-RESULTS_PATH = ""
+RESULTS_PATH = "tracking_results"
+EVALUATION_PATH = "evaluation_results"
 
 # Dataset
-GOT10K_PATH = "/home/heonsong/Disk2/Dataset/Got10K"
-LASOT_PATH = "/home/heonsong/Disk2/Dataset/LaSOT"
-NFS_PATH = "/home/heonsong/Disk2/Dataset/NFS"
-OTB_PATH = "/home/heonsong/Disk2/Dataset/OTB"
-TPL_PATH = "/home/heonsong/Disk2/Dataset/TColor128"
+GOT10K_PATH = "/workspace/dataset/Got10K"
+LASOT_PATH = "/workspace/dataset/LaSOT"
+NFS_PATH = "/workspace/dataset/NFS"
+OTB_PATH = "/workspace/dataset/OTB"
+TPL_PATH = "/workspace/dataset/TColor128"
 TRACKINGNET_PATH = ""
-UAV_PATH = "/home/heonsong/Disk2/Dataset/UAV123"
-VOT_PATH = "/home/heonsong/Disk2/Dataset/VOT2018"
+UAV_PATH = "/workspace/dataset/UAV123"
+VOT_PATH = "/workspace/dataset/VOT2018"
 
 # DaSiamRPN
-DASIAMRPN_MODEL = (
-    "/home/heonsong/Desktop/AAA/AAA-journal/external/DaSiamRPN/SiamRPNOTB.model"
-)
+DASIAMRPN_MODEL = "weights/DaSiamRPN/SiamRPNOTB.model"
 
 # GradNet
-GRADNET_MODEL = "/home/heonsong/Desktop/AAA/AAA-journal/external/GradNet-Tensorflow/ckpt/base_l5_1t_49/model_epoch49.ckpt"
+GRADNET_MODEL = "weights/GradNet/ckpt/base_l5_1t_49/model_epoch49.ckpt"
 
 # MemTrack
-MEMTRACK_MODEL = (
-    "/home/heonsong/Desktop/AAA/AAA-journal/external/MemTrack/output/models"
-)
+MEMTRACK_MODEL = "weights/MemTrack/models"
 
 # SiamBAN
-SIAMBAN_CONFIG = ""
-SIAMBAN_SNAPSHOT = ""
+SIAMBAN_CONFIG = "weights/siamban_r50_l234_otb/config.yaml"
+SIAMBAN_SNAPSHOT = "weights/siamban_r50_l234_otb/model.pth"
 
 # SiamDW
-SIAMDW_MODEL = (
-    "/home/heonsong/Desktop/AAA/AAA-journal/external/SiamDW/CIResNet22_RPN.pth"
-)
-SIAMDW_CIRINCEP22_MODEL = (
-    "/home/heonsong/Desktop/AAA/AAA-weights/external/SiamDW/CIRIncep22.pth"
-)
-SIAMDW_CIRNEXT22_MODEL = (
-    "/home/heonsong/Desktop/AAA/AAA-weights/external/SiamDW/CIRNext22.pth"
-)
-SIAMDW_CIRESNET22FC_G_MODEL = (
-    "/home/heonsong/Desktop/AAA/AAA-weights/external/SiamDW/CIResNet22FC_G.pth"
-)
-SIAMDW_CIRESNET22_MODEL = (
-    "/home/heonsong/Desktop/AAA/AAA-weights/external/SiamDW/CIResNet22.pth"
-)
-SIAMDW_SIAMFCRES22W_MODEL = (
-    "/home/heonsong/Desktop/AAA/AAA-weights/external/SiamDW/SiamFCRes22W.pth"
-)
-SIAMDW_CIRESNET22_RPN_MODEL = (
-    "/home/heonsong/Desktop/AAA/AAA-journal/external/SiamDW/CIResNet22_RPN.pth"
-)
+SIAMDW_MODEL = "weights/SiamDW/CIResNet22_RPN.pth"
+SIAMDW_CIRINCEP22_MODEL = "weights/SiamDW/CIRIncep22.pth"
+SIAMDW_CIRNEXT22_MODEL = "weights/SiamDW/CIRNext22.pth"
+SIAMDW_CIRESNET22FC_G_MODEL = "weights/SiamDW/CIResNet22FC_G.pth"
+SIAMDW_CIRESNET22_MODEL = "weights/SiamDW/CIResNet22.pth"
+SIAMDW_SIAMFCRES22W_MODEL = "weights/SiamDW/SiamFCRes22W.pth"
+SIAMDW_CIRESNET22_RPN_MODEL = "weights/SiamDW/CIResNet22_RPN.pth"
 
 # SiamFC
-SIAMFC_MODEL = "/home/heonsong/Desktop/AAA/AAA-journal/external/siamfc/model.pth"
+SIAMFC_MODEL = "weights/SiamFC/model.pth"
 
 # SiamMFC
-SIAMMCF_ROOT_DIR = "/home/heonsong/Desktop/AAA/AAA-journal/external/siam-mcf/"
-SIAMMCF_MODEL = "/home/heonsong/Desktop/AAA/AAA-journal/external/siam-mcf/pretrained/siam_mcf.ckpt-50000"
+SIAMMCF_ROOT_DIR = "external/siam-mcf/"
+SIAMMCF_MODEL = "weights/SiamMCF/pretrained/siam_mcf.ckpt-50000"
 
 # SiamRPN
-SIAMRPN_MODEL = (
-    "/home/heonsong/Desktop/AAA/AAA-journal/external/siamrpn_pytorch/model.pth"
-)
+SIAMRPN_MODEL = "weights/SiamRPN/model.pth"
 
 # SiamRPN++
-SIAMRPNPP_CONFIG = "/home/heonsong/Desktop/AAA/AAA-weights/external/pysot/experiments/siamrpn_r50_l234_dwxcorr_otb/config.yaml"
-SIAMRPNPP_SNAPSHOT = "/home/heonsong/Desktop/AAA/AAA-weights/external/pysot/experiments/siamrpn_r50_l234_dwxcorr_otb/model.pth"
-SIAMRPNPP_ALEXNET_OTB_CONFIG = "/home/heonsong/Desktop/AAA/AAA-weights/external/pysot/experiments/siamrpn_alex_dwxcorr_otb/config.yaml"
-SIAMRPNPP_ALEXNET_OTB_SNAPSHOT = "/home/heonsong/Desktop/AAA/AAA-weights/external/pysot/experiments/siamrpn_alex_dwxcorr_otb/model.pth"
-SIAMRPNPP_ALEXNET_CONFIG = "/home/heonsong/Desktop/AAA/AAA-weights/external/pysot/experiments/siamrpn_alex_dwxcorr/config.yaml"
-SIAMRPNPP_ALEXNET_SNAPSHOT = "/home/heonsong/Desktop/AAA/AAA-weights/external/pysot/experiments/siamrpn_alex_dwxcorr/model.pth"
-SIAMRPNPP_MOBILENET_CONFIG = "/home/heonsong/Desktop/AAA/AAA-weights/external/pysot/experiments/siamrpn_mobilev2_l234_dwxcorr/config.yaml"
-SIAMRPNPP_MOBILENET_SNAPSHOT = "/home/heonsong/Desktop/AAA/AAA-weights/external/pysot/experiments/siamrpn_mobilev2_l234_dwxcorr/model.pth"
-SIAMRPNPP_RESNET_LT_CONFIG = "/home/heonsong/Desktop/AAA/AAA-weights/external/pysot/experiments/siamrpn_r50_l234_dwxcorr_lt/config.yaml"
-SIAMRPNPP_RESNET_LT_SNAPSHOT = "/home/heonsong/Desktop/AAA/AAA-weights/external/pysot/experiments/siamrpn_r50_l234_dwxcorr_lt/model.pth"
-SIAMRPNPP_RESNET_OTB_CONFIG = "/home/heonsong/Desktop/AAA/AAA-weights/external/pysot/experiments/siamrpn_r50_l234_dwxcorr_otb/config.yaml"
-SIAMRPNPP_RESNET_OTB_SNAPSHOT = "/home/heonsong/Desktop/AAA/AAA-weights/external/pysot/experiments/siamrpn_r50_l234_dwxcorr_otb/model.pth"
-SIAMRPNPP_RESNET_CONFIG = "/home/heonsong/Desktop/AAA/AAA-weights/external/pysot/experiments/siamrpn_r50_l234_dwxcorr/config.yaml"
-SIAMRPNPP_RESNET_SNAPSHOT = "/home/heonsong/Desktop/AAA/AAA-weights/external/pysot/experiments/siamrpn_r50_l234_dwxcorr/model.pth"
-SIAMPRNPP_SIAMMASK_CONFIG = "/home/heonsong/Desktop/AAA/AAA-weights/external/pysot/experiments/siammask_r50_l3/config.yaml"
-SIAMPRNPP_SIAMMASK_SNAPSHOT = "/home/heonsong/Desktop/AAA/AAA-weights/external/pysot/experiments/siammask_r50_l3/model.pth"
+SIAMRPNPP_CONFIG = "weights/SiamRPN++/siamrpn_r50_l234_dwxcorr_otb/config.yaml"
+SIAMRPNPP_SNAPSHOT = "weights/SiamRPN++/siamrpn_r50_l234_dwxcorr_otb/model.pth"
+SIAMRPNPP_ALEXNET_OTB_CONFIG = "weights/SiamRPN++/siamrpn_alex_dwxcorr_otb/config.yaml"
+SIAMRPNPP_ALEXNET_OTB_SNAPSHOT = "weights/SiamRPN++/siamrpn_alex_dwxcorr_otb/model.pth"
+SIAMRPNPP_ALEXNET_CONFIG = "weights/SiamRPN++/siamrpn_alex_dwxcorr/config.yaml"
+SIAMRPNPP_ALEXNET_SNAPSHOT = "weights/SiamRPN++/siamrpn_alex_dwxcorr/model.pth"
+SIAMRPNPP_MOBILENET_CONFIG = (
+    "weights/SiamRPN++/siamrpn_mobilev2_l234_dwxcorr/config.yaml"
+)
+SIAMRPNPP_MOBILENET_SNAPSHOT = (
+    "weights/SiamRPN++/siamrpn_mobilev2_l234_dwxcorr/model.pth"
+)
+SIAMRPNPP_RESNET_LT_CONFIG = "weights/SiamRPN++/siamrpn_r50_l234_dwxcorr_lt/config.yaml"
+SIAMRPNPP_RESNET_LT_SNAPSHOT = "weights/SiamRPN++/siamrpn_r50_l234_dwxcorr_lt/model.pth"
+SIAMRPNPP_RESNET_OTB_CONFIG = (
+    "weights/SiamRPN++/siamrpn_r50_l234_dwxcorr_otb/config.yaml"
+)
+SIAMRPNPP_RESNET_OTB_SNAPSHOT = (
+    "weights/SiamRPN++/siamrpn_r50_l234_dwxcorr_otb/model.pth"
+)
+SIAMRPNPP_RESNET_CONFIG = "weights/SiamRPN++/siamrpn_r50_l234_dwxcorr/config.yaml"
+SIAMRPNPP_RESNET_SNAPSHOT = "weights/SiamRPN++/siamrpn_r50_l234_dwxcorr/model.pth"
+SIAMPRNPP_SIAMMASK_CONFIG = "weights/SiamRPN++/siammask_r50_l3/config.yaml"
+SIAMPRNPP_SIAMMASK_SNAPSHOT = "weights/SiamRPN++/siammask_r50_l3/model.pth"
 
 # SPM
-SPM_CONFIG = "/home/heonsong/Desktop/AAA/AAA-journal/external/SPM-Tracker/configs/spm_tracker/alexnet_c42_otb.yaml"
+SPM_CONFIG = "weights/SPM/alexnet_c42_otb.yaml"
 
 # THOR
-THOR_CONFIG = "/home/heonsong/Desktop/AAA/AAA-journal/external/THOR/configs"
+THOR_CONFIG = "weights/THOR"
+
+# TRAS
+TRAS_MODEL = "weights/TRAS/Student.weights"

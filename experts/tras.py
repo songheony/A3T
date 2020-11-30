@@ -1,6 +1,7 @@
 import sys
 from PIL import Image
 from base_tracker import BaseTracker
+import path_config
 
 sys.path.append("external/vot-kd-rl/")
 from track.Trackers import TRAS, TRAST, TRASFUST
@@ -11,6 +12,7 @@ class ETRAS(BaseTracker):
     def __init__(self):
         super(ETRAS, self).__init__("TRAS")
         self.cfg = Configuration()
+        self.cfg.CKPT_PATH = path_config.TRAS_MODEL
 
     def initialize(self, image_file, box):
         image = Image.open(image_file).convert("RGB")
@@ -26,6 +28,7 @@ class ETRAST(BaseTracker):
     def __init__(self):
         super(ETRAST, self).__init__("TRAST")
         self.cfg = Configuration()
+        self.cfg.CKPT_PATH = path_config.TRAS_MODEL
 
     def initialize(self, image_file, box):
         image = Image.open(image_file).convert("RGB")
@@ -41,6 +44,7 @@ class ETRASFUST(BaseTracker):
     def __init__(self):
         super(ETRASFUST, self).__init__("TRASFUST")
         self.cfg = Configuration()
+        self.cfg.CKPT_PATH = path_config.TRAS_MODEL
 
     def initialize(self, image_file, box):
         image = Image.open(image_file).convert("RGB")

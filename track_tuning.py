@@ -8,6 +8,7 @@ from options import select_algorithms
 from datasets.got10kdataset import GOT10KDatasetVal
 from evaluations.ope_benchmark import OPEBenchmark
 from evaluations.offline_benchmark import OfflineBenchmark
+import path_config
 
 
 def main(eval_dir, algorithm_name, experts, thresholds, **kwargs):
@@ -95,15 +96,15 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if "AAA" in args.algorithm:
-        start_point = 0.6
-        end_point = 0.9
+        start_point = 0.5
+        end_point = 1.0
         thresholds = np.arange(start_point, end_point, 0.01)
     else:
         start_point = 0.1
         end_point = 1.0
         thresholds = np.arange(start_point, end_point, 0.02)
 
-    eval_dir = Path(f"./tuning_results/{args.algorithm}/{args.mode}")
+    eval_dir = Path(f"./{path_config.EVALUATION_PATH}/{args.algorithm}/{args.mode}")
     os.makedirs(eval_dir, exist_ok=True)
 
     main(

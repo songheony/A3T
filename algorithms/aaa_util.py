@@ -192,6 +192,8 @@ class WAADelayed:
         # check the number of element
         assert gradient_losses.shape[0] == len(self.w)
 
+        self.real_D += len(gradient_losses.shape[1])
+
         for i in range(1, gradient_losses.shape[1] + 1):
             self.real_D += i
             if self.est_D < self.real_D:

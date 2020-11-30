@@ -103,15 +103,13 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# external
-external/
-
 # vscode
 .vscode/
 
-# result and report
+# do not need
+external/
 *_results*/
-
-# backup
 *.zip
 backup/
+weights/
+train_log/

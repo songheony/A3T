@@ -10,11 +10,12 @@ Heon Song, Daiki Suehiro, Seiichi Uchida
 
 ## Experts
 
+In this repository, we implemented or edited the following trackers to use as experts.
+
 * [ATOM](https://arxiv.org/abs/1811.07628)[<https://github.com/visionml/pytracking>]
 * [DaSiamRPN](https://arxiv.org/abs/1808.06048)[<https://github.com/foolwood/DaSiamRPN>,<https://github.com/songheony/DaSiamRPN>]<sup>[1]</sup>
 * [DiMP](https://arxiv.org/abs/2003.06761)[<https://github.com/visionml/pytracking>]
 * [GradNet](https://arxiv.org/abs/1909.06800)[<https://github.com/LPXTT/GradNet-Tensorflow>]
-* [KYS](https://arxiv.org/pdf/2003.11014.pdf)[<https://github.com/visionml/pytracking>]
 * [MemTrack](https://arxiv.org/abs/1803.07268)[<https://github.com/skyoung/MemTrack>]
 * [PrDiMP](https://arxiv.org/pdf/2003.12565.pdf)[<https://github.com/visionml/pytracking>]
 * [SiamBAN](https://arxiv.org/abs/2003.06761)[<https://github.com/hqucv/siamban>]
@@ -33,6 +34,8 @@ Heon Song, Daiki Suehiro, Seiichi Uchida
 
 ## Datasets
 
+We evaluated the performance of the experts and AAA on the following datasets.
+
 * [OTB2015](https://ieeexplore.ieee.org/document/7001050)[<http://cvlab.hanyang.ac.kr/tracker_benchmark/index.html>]
 * [NFS](https://arxiv.org/abs/1703.05884)[<http://ci2cv.net/nfs/index.html>]
 * [UAV123](https://ivul.kaust.edu.sa/Pages/pub-benchmark-simulator-uav.aspx)[<https://uav123.org/>]
@@ -46,49 +49,117 @@ Heon Song, Daiki Suehiro, Seiichi Uchida
 
 ## Frameworks
 
+The following frameworks were used to conveniently track videos and evaluate trackers.
+
 * pytracking[<https://github.com/visionml/pytracking>] for tracking datasets.
 * pysot-toolkit[<https://github.com/StrangerZhang/pysot-toolkit>] for evaluating trackers.
 
 ## Requirements
 
+First, you need to download this repository and the frameworks.
+
+```sh
+# clone this repository
+git clone https://github.com/songheony/AAA-journal
+
+# make directory for external libraries
+mkdir AAA-journal/external
+cd AAA-journal/external
+
+# clone frameworks
+git clone https://github.com/visionml/pytracking
+git clone https://github.com/StrangerZhang/pysot-toolkit
+```
+
+After that, you need to install the following libraries.
+
+* pytorch
+* python-graph
+* opencv-python
+
+We strongly recommend using a virtual environment like Anaconda or Docker.  
+The following is how to build the virtual environment for AAA when using anaconda.
+
 ```sh
 conda create -n [ENV_NAME] python=[PYTHON_VERSION>=3.6]
+conda activate [ENV_NAME]
 conda install pytorch torchvision cudatoolkit=[CUDA_VERSION] -c pytorch
 pip install python-igraph opencv-python opencv-contrib-python
 ```
 
 ## How to run
 
-```sh
-git clone https://github.com/songheony/AAA-journal
-mkdir AAA-journal/external
-cd AAA-journal/external
-git clone [FRAMEWORK_GIT]
-git clone [EXPERT_GIT]
-conda activate [ENV_NAME]
-bash run_experts.sh
-bash run_tuning.sh
-bash run_algorithm.sh
-bash run_eval.sh
-python visualize_figure.py
+If you want to apply AAA to your own project,  
+simply make the following python script:
+
+```python
+from algorithms.aaa import AAA
+
+img_paths = []  # list of image file paths
+initial_bbox = [x, y, w, h]  # left x, top y, width, height of the initial target bbox
+n_experts = 6  # the number of experts you are using
+
+# define AAA
+theta = 0.69  # you can tune this hyperparameter by running run_tuning.sh
+algorithm = AAA(n_experts, mode="LOG_DIR", feature_threshold=theta)
+
+# initialize AAA
+algorith.initialize(img_paths[0], initial_bbox)
+
+# track the target
+for img_path in img_paths[1:]:
+    experts_result = np.zeros((n_experts, 4))  # the matrix of experts' estimation
+
+    # state is the prediction of target bbox.
+    # if the frame is not anchor frame, offline is None. else offline will be offline tracking results.
+    # weight is the weight of the experts.
+    state, offline, weight = self.track(img_path, experts_result)  
 ```
 
-1. Clone this repository and make external directory.
+## Requirements for experts
 
-2. Clone experts who you want to hire.<sup>[3]</sup>
+In order to run experts, you need to install additional libraries.  
+We offer three options to make it easy to run experts:
 
-3. Edit run_expert.sh file and run experts.
+### Install pre-built Anaconda environment
 
-4. Edit run_tuning.sh file and tune hyperparamter theta.
+```sh
+conda create -f environment.yml
+```
 
-5. Edit run_algorithm.sh file and run algorithm.<sup>[4]</sup>
+### Install pre-built Docker environment
 
-6. Edit run_eval.sh and evaluate the trackers.
+```sh
+docker pull songheony/aaa
+```
 
-7. Edit visualize_figure.py and create figures used in our paper.
+### Install python libraries manually
 
-[3] Depending on the expert, you may need to install additional subparty libraries such as tensorflow.  
-[4] The code is supposed to run algorithms after running experts for test. However, it is easy to modify the code to do both simultaneously.
+```sh
+# For mpi4py
+sudo apt install libopenmpi-dev
+
+pip install tensorflow-gpu==1.15 matplotlib pandas tqdm cython visdom scikit-image tikzplotlib pycocotools lvis jpeg4py pyyaml yacs colorama tensorboard future optuna shapely scipy easydict tensorboardX mpi4py==2.0.0 gaft torchvision hyperopt ray==0.6.3 requests pillow msgpack msgpack_numpy tabulate xmltodict zmq annoy wget protobuf cupy-cuda101 mxnet-cu101 h5py pyzmq
+
+pip install --upgrade git+https://github.com/got-10k/toolkit.git@master
+pip install --upgrade git+https://github.com/tensorpack/tensorpack.git
+```
+
+After installing the libraries, some libraries need to be compiled manually.
+
+```sh
+# For SiamBAN
+python external/siamban/setup.py build_ext --inplace
+
+# For SiamRPN++
+python external/pysot/setup.py build_ext --inplace
+
+# For SPM
+bash external/SPM-Tracker/compile.sh
+
+# For Staple
+python external/pyCFTrackers/lib/pysot/utils/setup.py build_ext --inplace
+```
 
 ## Reproduce our results
 
@@ -97,29 +168,24 @@ If you don't want to run experts or AAA, you can download [AAA+Experts Tracking 
 Or, if you want to reproduce our results by yourself, run the following commands.  
 
 ```sh
-git clone https://github.com/songheony/AAA-journal
-mkdir AAA-journal/external
-cd AAA-journal/external
-
-# clone frameworks
-git clone https://github.com/visionml/pytracking
-git clone https://github.com/StrangerZhang/pysot-toolkit
+# edit network path of ATOM, DiMP, PrDiMP, KYS
+cp ../local.py pytracking/pytracking/evaluation/local.py
 
 # clone experts
 git clone https://github.com/songheony/DaSiamRPN
 git clone https://github.com/LPXTT/GradNet-Tensorflow
 git clone https://github.com/skyoung/MemTrack
+git clone https://github.com/hqucv/siamban
 git clone https://github.com/researchmm/SiamDW
 git clone https://github.com/got-10k/siamfc
 git clone https://github.com/hmorimitsu/siam-mcf
+git clone https://github.com/VisualComputingInstitute/SiamR-CNN
 git clone https://github.com/huanglianghua/siamrpn-pytorch
 git clone https://github.com/STVIR/pysot
 git clone https://github.com/microsoft/SPM-Tracker
 git clone https://github.com/wwdguu/pyCFTrackers
 git clone https://github.com/xl-sr/THOR
-
-# create anaconda environment
-conda env create -f environment.yml
+git clone https://github.com/dontfollowmeimcrazy/vot-kd-rl
 
 # run experts. if you download AAA+Experts Tracking results, you can skip this command
 bash run_experts.sh
@@ -146,33 +212,21 @@ bash run_eval.sh
 python visualize_figure.py
 ```
 
-## Simple using
+The above command proceeds in the following order.
 
-If you want AAA to your own project, simply use the following code:
+1. Clone experts who you want to hire.
 
-```python
-from algorithms.aaa import AAA
+2. Edit run_expert.sh file and run experts.
 
-img_paths = []  # list of image file paths
-initial_bbox = [x, y, w, h]  # left x, top y, width, height of the initial target bbox
-n_experts = 6  # the number of experts you are using
+3. Edit run_tuning.sh file and tune hyperparamter theta.
 
-# define AAA
-theta = 0.69  # you can tune this hyperparameter by running run_tuning.sh
-algorithm = AAA(n_experts, mode="LOG_DIR", feature_threshold=theta)
+4. Edit run_algorithm.sh file and run algorithm.<sup>[3]</sup>
 
-# initialize AAA
-algorith.initialize(img_paths[0], initial_bbox)
+5. Edit run_eval.sh and evaluate the trackers.
 
-# track the target
-for img_path in img_paths[1:]:
-    experts_result = np.zeros((n_experts, 4))  # the matrix of experts' estimation
+6. Edit visualize_figure.py and create figures used in our paper.
 
-    # state is the prediction of target bbox.
-    # if the frame is not anchor frame, offline is None. else offline will be offline tracking results.
-    # weight is the weight of the experts.
-    state, offline, weight = self.track(img_path, experts_result)  
-```
+[3] The code is supposed to run algorithms after running experts for test. However, it is easy to modify the code to do both simultaneously.
 
 ## Citation
 
