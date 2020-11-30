@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 from easydict import EasyDict as edict
 from base_tracker import BaseTracker
+import path_config
 
 sys.path.append("external/SiamDW/lib")
 from tracker.siamfc import SiamFC
@@ -13,10 +14,7 @@ from utils.utils import load_pretrain
 class SiamDW(BaseTracker):
     def __init__(self):
         super().__init__("SiamDW_SiamFCIncep22_VOT")
-        # TODO: edit this path
-        net_file = (
-            "/home/heonsong/Desktop/AAA/AAA-weights/external/SiamDW/CIRIncep22.pth"
-        )
+        net_file = path_config.SIAMDW_CIRINCEP22_MODEL
         info = edict()
         info.arch = "SiamFCIncep22"
         info.dataset = "VOT2017"

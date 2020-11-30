@@ -2,10 +2,7 @@ from PIL import Image
 import numpy as np
 import torch
 from base_tracker import BaseTracker
-from .aaa_util import (
-    FeatureExtractor,
-    calc_similarity
-)
+from .aaa_util import FeatureExtractor, calc_similarity
 
 
 def avgnh(r, c):
@@ -104,7 +101,9 @@ class HDT(BaseTracker):
             similarity_loss[i] = 1 - calc_similarity(features[i], self.target_feature)
 
         loss_idx = self.frame_idx % self.delta_t
-        self.experts_loss[:, loss_idx] = (1 - self.beta) * similarity_loss + self.beta * distance_loss
+        self.experts_loss[:, loss_idx] = (
+            1 - self.beta
+        ) * similarity_loss + self.beta * distance_loss
         expected_loss = self.weights.dot(self.experts_loss[:, loss_idx])
 
         mu = np.mean(self.experts_loss, axis=1)
@@ -113,7 +112,10 @@ class HDT(BaseTracker):
         sigma[sigma < 1e-4] = 0
 
         s = (self.experts_loss[:, loss_idx] - mu) / (sigma + 2.2204e-16)
-        self.experts_regret += expected_loss - np.tanh(self.scale_gamma * s) * self.experts_loss[:, loss_idx]
+        self.experts_regret += (
+            expected_loss
+            - np.tanh(self.scale_gamma * s) * self.experts_loss[:, loss_idx]
+        )
 
         c = find_nh_scale(self.experts_regret)
         self.weights = nnhedge_weights(self.experts_regret, c, self.is_tpami)

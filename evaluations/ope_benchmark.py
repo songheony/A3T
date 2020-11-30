@@ -1,10 +1,8 @@
 import numpy as np
 import sys
+import path_config
 
 sys.path.append("external/pysot-toolkit/pysot")
-sys.path.append("external/pytracking")
-
-from pytracking.evaluation.environment import env_settings
 from utils import success_overlap, success_error
 
 
@@ -29,9 +27,33 @@ class OPEBenchmark:
     def convert_bb_to_norm_center(self, bboxes, gt_wh):
         return self.convert_bb_to_center(bboxes) / (gt_wh + 1e-16)
 
+    def eval_times(self, eval_trackers=None):
+        """
+        Args:
+            eval_trackers: list of tracker name or single tracker name
+        Return:
+            res: dict of results
+        """
+        if eval_trackers is None:
+            eval_trackers = self.dataset.tracker_names
+        if isinstance(eval_trackers, str):
+            eval_trackers = [eval_trackers]
+
+        time_ret = {}
+        for tracker_name in eval_trackers:
+            time_ret_ = {}
+            for seq in self.dataset:
+                results_dir = "{}/{}".format(path_config.RESULTS_PATH, tracker_name)
+                base_results_path = "{}/{}".format(results_dir, seq.name)
+                times_path = "{}_time.txt".format(base_results_path)
+                tracker_time = np.loadtxt(times_path, delimiter="\t", dtype=float)
+                time_ret_[seq.name] = np.mean(tracker_time[1:])
+            time_ret[tracker_name] = time_ret_
+        return time_ret
+
     def eval_success(self, eval_trackers=None):
         """
-        Args: 
+        Args:
             eval_trackers: list of tracker name or single tracker name
         Return:
             res: dict of results
@@ -46,7 +68,7 @@ class OPEBenchmark:
             success_ret_ = {}
             for seq in self.dataset:
                 gt_traj = np.array(seq.ground_truth_rect)
-                results_dir = "{}/{}".format(env_settings().results_path, tracker_name)
+                results_dir = "{}/{}".format(path_config.RESULTS_PATH, tracker_name)
                 base_results_path = "{}/{}".format(results_dir, seq.name)
                 results_path = "{}.txt".format(base_results_path)
                 tracker_traj = np.loadtxt(results_path, delimiter="\t")
@@ -72,7 +94,7 @@ class OPEBenchmark:
             precision_ret_ = {}
             for seq in self.dataset:
                 gt_traj = np.array(seq.ground_truth_rect)
-                results_dir = "{}/{}".format(env_settings().results_path, tracker_name)
+                results_dir = "{}/{}".format(path_config.RESULTS_PATH, tracker_name)
                 base_results_path = "{}/{}".format(results_dir, seq.name)
                 results_path = "{}.txt".format(base_results_path)
                 tracker_traj = np.loadtxt(results_path, delimiter="\t")
@@ -103,7 +125,7 @@ class OPEBenchmark:
             norm_precision_ret_ = {}
             for seq in self.dataset:
                 gt_traj = np.array(seq.ground_truth_rect)
-                results_dir = "{}/{}".format(env_settings().results_path, tracker_name)
+                results_dir = "{}/{}".format(path_config.RESULTS_PATH, tracker_name)
                 base_results_path = "{}/{}".format(results_dir, seq.name)
                 results_path = "{}.txt".format(base_results_path)
                 tracker_traj = np.loadtxt(results_path, delimiter="\t")

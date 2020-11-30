@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import sys
+import path_config
 
 sys.path.append("external/pytracking")
 from pytracking.evaluation.data import Sequence, BaseDataset, SequenceList
@@ -24,7 +25,7 @@ class OTBDatasetClass(BaseDataset):
 
     def __init__(self):
         super().__init__()
-        self.base_path = self.env_settings.otb_path
+        self.base_path = path_config.OTB_PATH
         self.sequence_info_list = self._get_sequence_info_list()
 
     def get_sequence_list(self):

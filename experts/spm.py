@@ -3,6 +3,7 @@ import cv2
 import torch
 import numpy as np
 from base_tracker import BaseTracker
+import path_config
 
 sys.path.append("external/SPM-Tracker/")
 from siam_tracker.core.inference import SiamTracker
@@ -19,7 +20,7 @@ def img2tensor(img, device):
 class SPM(BaseTracker):
     def __init__(self):
         super(SPM, self).__init__("SPM")
-        cfg_path = "/home/heonsong/Desktop/AAA/AAA-journal/external/SPM-Tracker/configs/spm_tracker/alexnet_c42_otb.yaml"
+        cfg_path = path_config.SPM_CONFIG
         gpu_id = 0
         merge_cfg_from_file(cfg_path)
         self.device = torch.device("cuda:{}".format(gpu_id))

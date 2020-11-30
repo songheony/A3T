@@ -84,7 +84,9 @@ def calc_rank(rets, trackers, dataset_name, seq_names):
     return ranks
 
 
-def draw_score_anchor(datasets, algorithm_name, success_rets, anchor_frames, figsize, eval_dir):
+def draw_score_anchor(
+    datasets, algorithm_name, success_rets, anchor_frames, figsize, eval_dir
+):
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=figsize)
     fig.add_subplot(111, frameon=False)
 
@@ -93,17 +95,19 @@ def draw_score_anchor(datasets, algorithm_name, success_rets, anchor_frames, fig
 
         # draw curve of trackers
         ratio = [
-            sum(anchor_frames[dataset_name][seq_name]) / len(anchor_frames[dataset_name][seq_name]) if not np.any(np.isnan(anchor_frames[dataset_name][seq_name])) else 0 for seq_name in seq_names
-        ]
-        value = [
-            np.mean(success_rets[dataset_name][algorithm_name][seq_name]) if not any(np.isnan(success_rets[dataset_name][algorithm_name][seq_name])) else 0
+            sum(anchor_frames[dataset_name][seq_name])
+            / len(anchor_frames[dataset_name][seq_name])
+            if not np.any(np.isnan(anchor_frames[dataset_name][seq_name]))
+            else 0
             for seq_name in seq_names
         ]
-        ax.scatter(
-            ratio,
-            value,
-            label=dataset_name,
-        )
+        value = [
+            np.mean(success_rets[dataset_name][algorithm_name][seq_name])
+            if not any(np.isnan(success_rets[dataset_name][algorithm_name][seq_name]))
+            else 0
+            for seq_name in seq_names
+        ]
+        ax.scatter(ratio, value, label=dataset_name)
     ax.set_ylabel("AUC")
     ax.set_xlabel("Anchor ratio")
 
@@ -117,16 +121,14 @@ def draw_score_anchor(datasets, algorithm_name, success_rets, anchor_frames, fig
         right=False,
     )
     plt.grid(False)
-    fig.legend(
-        frameon=False,
-        loc="upper center",
-        ncol=len(datasets)
-    )
+    fig.legend(frameon=False, loc="upper center", ncol=len(datasets))
     plt.savefig(eval_dir / "auc_ratio.pdf", bbox_inches="tight")
     plt.close()
 
 
-def draw_curves(datasets, trackers, success_rets, precision_rets, figsize, eval_dir, file_name=None):
+def draw_curves(
+    datasets, trackers, success_rets, precision_rets, figsize, eval_dir, file_name=None
+):
     fig, axes = plt.subplots(nrows=2, ncols=len(datasets), figsize=figsize)
     fig.add_subplot(111, frameon=False)
 
@@ -195,7 +197,7 @@ def draw_curves(datasets, trackers, success_rets, precision_rets, figsize, eval_
         right=False,
     )
     plt.grid(False)
-    fig.text(0.5125, 0.47, 'Threshold for IoU', ha='center', va='center')
+    fig.text(0.5125, 0.47, "Threshold for IoU", ha="center", va="center")
     plt.xlabel("Threshold for distance")
 
     changed_trackers = [
@@ -250,7 +252,9 @@ def draw_rank(
         # ax.yaxis.set_major_formatter(FormatStrFormatter("%.1f"))
         ax.yaxis.set_major_locator(MultipleLocator(0.1))
         ax.set_xticks([1, len(trackers) // 2 + 1, len(trackers)])
-        ax.set_xticklabels(["1(Best)", str(len(trackers) // 2 + 1), f"{len(trackers)}(Worst)"])
+        ax.set_xticklabels(
+            ["1(Best)", str(len(trackers) // 2 + 1), f"{len(trackers)}(Worst)"]
+        )
         if i == 0:
             ax.set_ylabel("Frequency of rank")
         ax.set_title(dataset_name)
@@ -290,9 +294,19 @@ def draw_rank(
 
 
 def draw_rank_all(
-    datasets, group_names, group_trackers, group_success_rets, all_trackers, figsize, eval_dir, legend=False, file_name=None
+    datasets,
+    group_names,
+    group_trackers,
+    group_success_rets,
+    all_trackers,
+    figsize,
+    eval_dir,
+    legend=False,
+    file_name=None,
 ):
-    fig, axes = plt.subplots(nrows=len(group_names), ncols=len(datasets), figsize=figsize)
+    fig, axes = plt.subplots(
+        nrows=len(group_names), ncols=len(datasets), figsize=figsize
+    )
     fig.add_subplot(111, frameon=False)
 
     xs = list(range(1, len(group_trackers[0]) + 1))
@@ -303,8 +317,12 @@ def draw_rank_all(
         for i, dataset_name in enumerate(datasets):
             ax = axes[g, i]
 
-            seq_names = sorted(group_success_rets[g][dataset_name][group_trackers[g][0]].keys())
-            ranks = calc_rank(group_success_rets[g], group_trackers[g], dataset_name, seq_names)
+            seq_names = sorted(
+                group_success_rets[g][dataset_name][group_trackers[g][0]].keys()
+            )
+            ranks = calc_rank(
+                group_success_rets[g], group_trackers[g], dataset_name, seq_names
+            )
 
             for tracker_name, rank in zip(group_trackers[g], ranks.T):
                 ax.plot(
@@ -314,7 +332,9 @@ def draw_rank_all(
                     label=tracker_name.split("_")[0]
                     if isalgorithm(tracker_name)
                     else tracker_name,
-                    linewidth=LINE_WIDTH * 2 if isalgorithm(tracker_name) else LINE_WIDTH,
+                    linewidth=LINE_WIDTH * 2
+                    if isalgorithm(tracker_name)
+                    else LINE_WIDTH,
                 )
 
             if i == len(datasets) // 2 and legend:
@@ -322,14 +342,20 @@ def draw_rank_all(
                     frameon=False,
                     loc="upper center",
                     ncol=len(group_trackers[g]),
-                    bbox_to_anchor=(0.0, 1.2)
+                    bbox_to_anchor=(0.0, 1.2),
                 )
 
             # ax.yaxis.set_major_formatter(FormatStrFormatter("%.1f"))
             ax.yaxis.set_major_locator(MultipleLocator(0.1))
             ax.set_xticks([1, len(group_trackers[g]) // 2 + 1, len(group_trackers[g])])
             if g == len(group_names) - 1:
-                ax.set_xticklabels(["1(Best)", str(len(group_trackers[g]) // 2 + 1), f"{len(group_trackers[g])}(Worst)"])
+                ax.set_xticklabels(
+                    [
+                        "1(Best)",
+                        str(len(group_trackers[g]) // 2 + 1),
+                        f"{len(group_trackers[g])}(Worst)",
+                    ]
+                )
             else:
                 ax.set_xticklabels([])
             if g == 0:
@@ -362,8 +388,12 @@ def draw_rank_all(
     bboxes = np.array(list(map(get_bbox, axes.flat)), mtrans.Bbox).reshape(axes.shape)
 
     # Get the minimum and maximum extent, get the coordinate half-way between those
-    ymax = np.array(list(map(lambda b: b.y1, bboxes.flat))).reshape(axes.shape).max(axis=1)
-    ymin = np.array(list(map(lambda b: b.y0, bboxes.flat))).reshape(axes.shape).min(axis=1)
+    ymax = (
+        np.array(list(map(lambda b: b.y1, bboxes.flat))).reshape(axes.shape).max(axis=1)
+    )
+    ymin = (
+        np.array(list(map(lambda b: b.y0, bboxes.flat))).reshape(axes.shape).min(axis=1)
+    )
     ys = np.c_[ymax[1:], ymin[:-1]].mean(axis=1)
 
     # Draw a horizontal lines at those coordinates
@@ -1196,10 +1226,7 @@ def draw_scores(datasets, trackers, success_rets, eval_dir, filename=None):
         value = mean_succ[idx]
         label = "Ours" if "AAA" in tracker_name else tracker_name
         line = ax.bar(
-            ind + (idx - (len(trackers) - 1) / 2.0) * width,
-            value,
-            width,
-            label=label,
+            ind + (idx - (len(trackers) - 1) / 2.0) * width, value, width, label=label
         )
         lines.append(line)
 
@@ -1248,12 +1275,13 @@ def main(experts, baselines, algorithm, eval_dir):
 
     eval_save = eval_dir / "eval.pkl"
     if eval_save.exists():
-        successes, precisions, anchor_frames, anchor_successes, anchor_precisions, offline_successes, offline_precisions, regret_gts, regret_offlines = pickle.loads(
+        successes, precisions, tracking_times, anchor_frames, anchor_successes, anchor_precisions, offline_successes, offline_precisions, regret_gts, regret_offlines = pickle.loads(
             eval_save.read_bytes()
         )
     else:
         successes = {}
         precisions = {}
+        tracking_times = {}
         anchor_frames = {}
         anchor_successes = {}
         anchor_precisions = {}
@@ -1268,8 +1296,10 @@ def main(experts, baselines, algorithm, eval_dir):
 
             success = ope.eval_success(eval_trackers)
             precision = ope.eval_precision(eval_trackers)
+            tracking_time = ope.eval_times(eval_trackers)
             successes[name] = success
             precisions[name] = precision
+            tracking_times[name] = tracking_time
 
             if algorithm is not None:
                 anchor_frame, anchor_success, anchor_precision = offline.eval_anchor_frame(
@@ -1295,6 +1325,7 @@ def main(experts, baselines, algorithm, eval_dir):
                 (
                     successes,
                     precisions,
+                    tracking_times,
                     anchor_frames,
                     anchor_successes,
                     anchor_precisions,
@@ -1306,7 +1337,11 @@ def main(experts, baselines, algorithm, eval_dir):
             )
         )
 
-    find_rank(datasets_name, baselines + [algorithm], experts, successes, eval_dir)
+    for name in datasets_name:
+        fps = 1 / np.mean(list(tracking_times[name][algorithm].values()))
+        print(f"{algorithm}, {name}: {fps}")
+
+    # find_rank(datasets_name, baselines + [algorithm], experts, successes, eval_dir)
 
     # colors = name2color(eval_trackers)
     # sns.set_palette(colors)

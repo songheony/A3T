@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import sys
+import path_config
 
 sys.path.append("external/pytracking")
 from pytracking.evaluation.data import Sequence, BaseDataset, SequenceList
@@ -24,7 +25,7 @@ class LaSOTDatasetClass(BaseDataset):
 
     def __init__(self):
         super().__init__()
-        self.base_path = self.env_settings.lasot_path
+        self.base_path = path_config.LASOT_PATH
         self.sequence_list = self._get_sequence_list()
         self.clean_list = self.clean_seq_list()
 

@@ -1,6 +1,7 @@
 import numpy as np
 import sys
 import os
+import path_config
 
 sys.path.append("external/pytracking")
 from pytracking.evaluation.data import Sequence, BaseDataset, SequenceList
@@ -14,11 +15,6 @@ def GOT10KDatasetTest():
 def GOT10KDatasetVal():
     """ GOT-10k official val set"""
     return GOT10KDatasetClass("val").get_sequence_list()
-
-
-def GOT10KDatasetLTRVal():
-    """ GOT-10k val split from LTR (a subset of GOT-10k official train set)"""
-    return GOT10KDatasetClass("ltrval").get_sequence_list()
 
 
 class GOT10KDatasetClass(BaseDataset):
@@ -42,9 +38,9 @@ class GOT10KDatasetClass(BaseDataset):
         super().__init__()
         # Split can be test, val, or ltrval
         if split == "test" or split == "val":
-            self.base_path = os.path.join(self.env_settings.got10k_path, split)
+            self.base_path = os.path.join(path_config.GOT10K_PATH, split)
         else:
-            self.base_path = os.path.join(self.env_settings.got10k_path, "train")
+            self.base_path = os.path.join(path_config.GOT10K_PATH, "train")
 
         self.sequence_list = self._get_sequence_list(split)
         self.split = split
@@ -78,11 +74,4 @@ class GOT10KDatasetClass(BaseDataset):
         with open("{}/list.txt".format(self.base_path)) as f:
             sequence_list = f.read().splitlines()
 
-        if split == "ltrval":
-            with open(
-                "{}/got10k_val_split.txt".format(self.env_settings.dataspec_path)
-            ) as f:
-                seq_ids = f.read().splitlines()
-
-            sequence_list = [sequence_list[int(x)] for x in seq_ids]
         return sequence_list

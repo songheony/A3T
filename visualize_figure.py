@@ -570,7 +570,7 @@ def main(experiments, all_experts, all_experts_name, save_dir, eval_dir, tune_di
     # High
     high_algorithm, high_baselines, high_experts = experiments["High"]
     eval_save = eval_dir / "High" / "eval.pkl"
-    high_successes, high_precisions, high_anchor_frames, high_anchor_successes, high_anchor_precisions, high_offline_successes, high_offline_precisions, high_regret_gts, high_regret_offlines = pickle.loads(
+    high_successes, high_precisions, high_tracking_times, high_anchor_frames, high_anchor_successes, high_anchor_precisions, high_offline_successes, high_offline_precisions, high_regret_gts, high_regret_offlines = pickle.loads(
         eval_save.read_bytes()
     )
 
@@ -600,7 +600,7 @@ def main(experiments, all_experts, all_experts_name, save_dir, eval_dir, tune_di
     # Low
     low_algorithm, low_baselines, low_experts = experiments["Low"]
     eval_save = eval_dir / "Low" / "eval.pkl"
-    low_successes, low_precisions, low_anchor_frames, low_anchor_successes, low_anchor_precisions, low_offline_successes, low_offline_precisions, low_regret_gts, low_regret_offlines = pickle.loads(
+    low_successes, low_precisions, low_tracking_times, low_anchor_frames, low_anchor_successes, low_anchor_precisions, low_offline_successes, low_offline_precisions, low_regret_gts, low_regret_offlines = pickle.loads(
         eval_save.read_bytes()
     )
     table2(
@@ -616,7 +616,7 @@ def main(experiments, all_experts, all_experts_name, save_dir, eval_dir, tune_di
     # Mix
     mix_algorithm, mix_baselines, mix_experts = experiments["Mix"]
     eval_save = eval_dir / "Mix" / "eval.pkl"
-    mix_successes, mix_precisions, mix_anchor_frames, mix_anchor_successes, mix_anchor_precisions, mix_offline_successes, mix_offline_precisions, mix_regret_gts, mix_regret_offlines = pickle.loads(
+    mix_successes, mix_precisions, mix_tracking_times, mix_anchor_frames, mix_anchor_successes, mix_anchor_precisions, mix_offline_successes, mix_offline_precisions, mix_regret_gts, mix_regret_offlines = pickle.loads(
         eval_save.read_bytes()
     )
     table3(
@@ -654,7 +654,7 @@ def main(experiments, all_experts, all_experts_name, save_dir, eval_dir, tune_di
     # SiamDW
     siamdw_algorithm, siamdw_baselines, siamdw_experts = experiments["SiamDW"]
     eval_save = eval_dir / "SiamDW" / "eval.pkl"
-    siamdw_successes, siamdw_precisions, siamdw_anchor_frames, siamdw_anchor_successes, siamdw_anchor_precisions, siamdw_offline_successes, siamdw_offline_precisions, siamdw_regret_gts, siamdw_regret_offlines = pickle.loads(
+    siamdw_successes, siamdw_precisions, siamdw_tracking_times, siamdw_anchor_frames, siamdw_anchor_successes, siamdw_anchor_precisions, siamdw_offline_successes, siamdw_offline_precisions, siamdw_regret_gts, siamdw_regret_offlines = pickle.loads(
         eval_save.read_bytes()
     )
     table4(
@@ -670,7 +670,7 @@ def main(experiments, all_experts, all_experts_name, save_dir, eval_dir, tune_di
     # SiamRPN++
     siamrpn_algorithm, siamrpn_baselines, siamrpn_experts = experiments["SiamRPN++"]
     eval_save = eval_dir / "SiamRPN++" / "eval.pkl"
-    siamrpn_successes, siamrpn_precisions, siamrpn_anchor_frames, siamrpn_anchor_successes, siamrpn_anchor_precisions, siamrpn_offline_successes, siamrpn_offline_precisions, siamrpn_regret_gts, siamrpn_regret_offlines = pickle.loads(
+    siamrpn_successes, siamrpn_precisions, siamrpn_tracking_times, siamrpn_anchor_frames, siamrpn_anchor_successes, siamrpn_anchor_precisions, siamrpn_offline_successes, siamrpn_offline_precisions, siamrpn_regret_gts, siamrpn_regret_offlines = pickle.loads(
         eval_save.read_bytes()
     )
     table5(

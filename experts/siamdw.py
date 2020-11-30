@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 from easydict import EasyDict as edict
 from base_tracker import BaseTracker
+import path_config
 
 sys.path.append("external/SiamDW/lib")
 from tracker.siamrpn import SiamRPN
@@ -13,10 +14,7 @@ from utils.utils import load_pretrain
 class SiamDW(BaseTracker):
     def __init__(self):
         super().__init__("SiamDW")
-        # TODO: edit this path
-        net_file = (
-            "/home/heonsong/Desktop/AAA/AAA-journal/external/SiamDW/CIResNet22_RPN.pth"
-        )
+        net_file = path_config.SIAMDW_MODEL
         info = edict()
         info.arch = "SiamRPNRes22"
         info.dataset = "OTB2015"

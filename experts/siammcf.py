@@ -5,6 +5,7 @@ os.environ["C_CPP_MIN_LOG_LEVEL"] = "3"
 import sys
 from base_tracker import BaseTracker
 import tensorflow as tf
+import path_config
 
 tf.get_logger().setLevel("INFO")
 
@@ -18,7 +19,7 @@ from src.region_to_bbox import region_to_bbox
 class SiamMCF(BaseTracker):
     def __init__(self):
         super(SiamMCF, self).__init__("SiamMCF")
-        root_dir = "/home/heonsong/Desktop/AAA/AAA-journal/external/siam-mcf/"
+        root_dir = path_config.SIAMMCF_ROOT_DIR
         self.hp, self.evaluation, self.env, self.design = parse_arguments(root_dir)
         self.final_score_sz = self.hp.response_up * (self.design.score_sz - 1) + 1
         # build TF graph once for all
@@ -34,7 +35,7 @@ class SiamMCF(BaseTracker):
             if "postnorm" not in v.name:
                 vars_to_load.append(v)
 
-        siam_ckpt_name = "/home/heonsong/Desktop/AAA/AAA-journal/external/siam-mcf/pretrained/siam_mcf.ckpt-50000"
+        siam_ckpt_name = path_config.SIAMMCF_MODEL
         siam_saver = tf.train.Saver(vars_to_load)
         siam_saver.restore(self.sess, siam_ckpt_name)
 

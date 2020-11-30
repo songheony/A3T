@@ -3,6 +3,7 @@ import cv2
 import torch
 import numpy as np
 from base_tracker import BaseTracker
+import path_config
 
 sys.path.append("external/DaSiamRPN/code")
 from net import SiamRPNotb
@@ -13,9 +14,7 @@ from utils import cxy_wh_2_rect
 class DaSiamRPN(BaseTracker):
     def __init__(self):
         super(DaSiamRPN, self).__init__(name="DaSiamRPN")
-        self.net_file = (
-            "/home/heonsong/Desktop/AAA/AAA-journal/external/DaSiamRPN/SiamRPNOTB.model"
-        )
+        self.net_file = path_config.DASIAMRPN_MODEL
 
     def initialize(self, image_file, box):
         self.net = SiamRPNotb()

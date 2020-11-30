@@ -1,6 +1,7 @@
 import sys
 from PIL import Image
 from base_tracker import BaseTracker
+import path_config
 
 sys.path.append("external/siamrpn_pytorch")
 from siamrpn import TrackerSiamRPN
@@ -9,10 +10,7 @@ from siamrpn import TrackerSiamRPN
 class SiamRPN(BaseTracker):
     def __init__(self):
         super(SiamRPN, self).__init__("SiamRPN")
-        # TODO: edit this path
-        self.net_file = (
-            "/home/heonsong/Desktop/AAA/AAA-journal/external/siamrpn_pytorch/model.pth"
-        )
+        self.net_file = path_config.SIAMRPN_MODEL
 
     def initialize(self, image_file, box):
         image = Image.open(image_file).convert("RGB")

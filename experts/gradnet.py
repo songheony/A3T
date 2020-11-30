@@ -5,6 +5,7 @@ os.environ["C_CPP_MIN_LOG_LEVEL"] = "3"
 import sys
 import cv2
 import numpy as np
+import path_config
 import tensorflow as tf
 
 tf.get_logger().setLevel("INFO")
@@ -100,7 +101,7 @@ class GradNet(BaseTracker):
         self.sess = tf.Session(config=self.config)
         self.saver.restore(
             self.sess,
-            "/home/heonsong/Desktop/AAA/AAA-journal/external/GradNet-Tensorflow/ckpt/base_l5_1t_49/model_epoch49.ckpt",
+            path_config.GRADNET_MODEL,
         )
 
     def initialize(self, image_file, box):

@@ -2,6 +2,7 @@ import sys
 import json
 import cv2
 from base_tracker import BaseTracker
+import path_config
 
 sys.path.append("external/THOR")
 from trackers.tracker import SiamFC_Tracker, SiamRPN_Tracker, SiamMask_Tracker
@@ -16,7 +17,7 @@ class THOR(BaseTracker):
         vanilla = False
         lb_type = "dynamic"  # [dynamic, ensemble]
         json_path = (
-            f"/home/heonsong/Desktop/AAA/AAA-journal/external/THOR/configs/{tracker}/"
+            f"{path_config.THOR_CONFIG}/{tracker}/"
         )
         json_path += f"{dataset}_"
         if vanilla:

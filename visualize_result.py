@@ -1,4 +1,3 @@
-import sys
 import os
 import json
 import pickle
@@ -9,10 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import seaborn as sns
 from algorithms.aaa_util import calc_overlap
-
-sys.path.append("external/pytracking")
-
-from pytracking.evaluation.environment import env_settings
+import path_config
 
 sns.set()
 sns.set_style("whitegrid")
@@ -63,7 +59,7 @@ def draw_groudtruth(dataset, result_dir):
 def draw_offline_tracking(dataset, algorithm, result_dir):
     for seq in dataset:
         gt_traj = np.array(seq.ground_truth_rect)
-        results_dir = "{}/{}".format(env_settings().results_path, algorithm)
+        results_dir = "{}/{}".format(path_config.RESULTS_PATH, algorithm)
         base_results_path = "{}/{}".format(results_dir, seq.name)
         offline_path = "{}_offline.pkl".format(base_results_path)
         with open(offline_path, "rb") as fp:
@@ -162,7 +158,7 @@ def draw_result(
         tracker_trajs = []
 
         for tracker in trackers:
-            results_dir = "{}/{}".format(env_settings().results_path, tracker)
+            results_dir = "{}/{}".format(path_config.RESULTS_PATH, tracker)
             base_results_path = "{}/{}".format(results_dir, seq.name)
             results_path = "{}.txt".format(base_results_path)
             tracker_traj = np.loadtxt(results_path, delimiter="\t")
@@ -172,7 +168,7 @@ def draw_result(
         if algorithm is None:
             save_dir = result_dir / "Experts" / seq.name
         else:
-            results_dir = "{}/{}".format(env_settings().results_path, algorithm)
+            results_dir = "{}/{}".format(path_config.RESULTS_PATH, algorithm)
             base_results_path = "{}/{}".format(results_dir, seq.name)
             weights_path = "{}_weight.txt".format(base_results_path)
             tracker_weight = np.loadtxt(weights_path, delimiter="\t")
@@ -379,14 +375,14 @@ def draw_graph(
         tracker_trajs = []
 
         for tracker in trackers:
-            results_dir = "{}/{}".format(env_settings().results_path, tracker)
+            results_dir = "{}/{}".format(path_config.RESULTS_PATH, tracker)
             base_results_path = "{}/{}".format(results_dir, seq.name)
             results_path = "{}.txt".format(base_results_path)
             tracker_traj = np.loadtxt(results_path, delimiter="\t")
             tracker_trajs.append(tracker_traj)
         tracker_trajs = np.array(tracker_trajs)
 
-        results_dir = "{}/{}".format(env_settings().results_path, algorithm)
+        results_dir = "{}/{}".format(path_config.RESULTS_PATH, algorithm)
         base_results_path = "{}/{}".format(results_dir, seq.name)
         weights_path = "{}_weight.txt".format(base_results_path)
         tracker_weight = np.loadtxt(weights_path, delimiter="\t")
@@ -450,11 +446,18 @@ def draw_graph(
 
         for sframe, text in sframes:
             # draw text
-            ax.axvline(
-                x=sframe, color="black", linestyle="-", linewidth=1.0
-            )
+            ax.axvline(x=sframe, color="black", linestyle="-", linewidth=1.0)
             if iserror:
-                ax.annotate(text, xy=(sframe, 1), xytext=(0, 10), color="black", textcoords="offset points", size=12, ha='center', va='center')
+                ax.annotate(
+                    text,
+                    xy=(sframe, 1),
+                    xytext=(0, 10),
+                    color="black",
+                    textcoords="offset points",
+                    size=12,
+                    ha="center",
+                    va="center",
+                )
 
         filename = "error" if iserror else "weight"
         if legend:
@@ -474,7 +477,7 @@ def draw_algorithms(dataset, algorithms, colors, result_dir):
         tracker_trajs = []
 
         for tracker in algorithms:
-            results_dir = "{}/{}".format(env_settings().results_path, tracker)
+            results_dir = "{}/{}".format(path_config.RESULTS_PATH, tracker)
             base_results_path = "{}/{}".format(results_dir, seq.name)
             results_path = "{}.txt".format(base_results_path)
             tracker_traj = np.loadtxt(results_path, delimiter="\t")
@@ -547,18 +550,33 @@ def draw_algorithms(dataset, algorithms, colors, result_dir):
             plt.close()
 
 
-def img2video(dataset, seq_name, trackers):
-    boxes, weights, anchors, img_files, anno_rects = get_video(dataset, seq_name, trackers)
-    save_dir = os.path.join(dataset.report_dir, seq_name+ '_error')
+# def img2video(dataset, seq_name, trackers):
+#     boxes, weights, anchors, img_files, anno_rects = get_video(
+#         dataset, seq_name, trackers
+#     )
+#     save_dir = os.path.join(dataset.report_dir, seq_name + "_error")
 
-    writer = skvideo.io.FFmpegWriter(os.path.join(save_dir, "%s.mp4" % seq_name), outputdict={'-c:v': 'libx264', '-pix_fmt': 'yuv420p', '-q:v': "1", '-filter:v': "setpts=4.0*PTS"}, verbosity=1) #,outputdict={'-filter:v': "setpts=4.0*PTS"}  outputdict={'-c:v': 'libx264', '-pix_fmt': 'yuv420p', '-filter:v': "setpts=4.0*PTS"}
+#     writer = skvideo.io.FFmpegWriter(
+#         os.path.join(save_dir, "%s.mp4" % seq_name),
+#         outputdict={
+#             "-c:v": "libx264",
+#             "-pix_fmt": "yuv420p",
+#             "-q:v": "1",
+#             "-filter:v": "setpts=4.0*PTS",
+#         },
+#         verbosity=1,
+#     )  # ,outputdict={'-filter:v': "setpts=4.0*PTS"}  outputdict={'-c:v': 'libx264', '-pix_fmt': 'yuv420p', '-filter:v': "setpts=4.0*PTS"}
 
-    for frame in range(len(img_files)):
-        img = Image.open(frame).convert("RGB")
-        img = np.asarray(img)
-        writer.writeFrame(img)
+#     for frame in range(len(img_files)):
+#         img = Image.open(frame).convert("RGB")
+#         img = np.asarray(img)
+#         writer.writeFrame(img)
 
-    writer.close()
+#     writer.close()
 
-    metadata = skvideo.io.ffprobe(os.path.join(save_dir, "%s.mp4" % seq_name))
-    json.dump(metadata["video"], open(os.path.join(save_dir, "%s.json" % seq_name), 'w'), indent=4)
+#     metadata = skvideo.io.ffprobe(os.path.join(save_dir, "%s.mp4" % seq_name))
+#     json.dump(
+#         metadata["video"],
+#         open(os.path.join(save_dir, "%s.json" % seq_name), "w"),
+#         indent=4,
+#     )

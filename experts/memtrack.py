@@ -4,6 +4,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 os.environ["C_CPP_MIN_LOG_LEVEL"] = "3"
 import sys
 import tensorflow as tf
+import path_config
 
 tf.get_logger().setLevel("INFO")
 from base_tracker import BaseTracker
@@ -19,7 +20,7 @@ class MemTrack(BaseTracker):
         self.config_proto.gpu_options.allow_growth = True
         self.sess = tf.Session(config=self.config_proto)
         ckpt = tf.train.get_checkpoint_state(
-            "/home/heonsong/Desktop/AAA/AAA-journal/external/MemTrack/output/models"
+            path_config.MEMTRACK_MODEL
         )
         self.model = Model(self.sess, ckpt.model_checkpoint_path)
 

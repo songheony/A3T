@@ -1,6 +1,7 @@
 import sys
 from PIL import Image
 from base_tracker import BaseTracker
+import path_config
 
 sys.path.append("external/siamfc")
 from siamfc import TrackerSiamFC
@@ -10,9 +11,7 @@ class SiamFC(BaseTracker):
     def __init__(self):
         super(SiamFC, self).__init__("SiamFC")
         # TODO: edit this path
-        self.net_file = (
-            "/home/heonsong/Desktop/AAA/AAA-journal/external/siamfc/model.pth"
-        )
+        self.net_file = path_config.SIAMFC_MODEL
 
     def initialize(self, image_file, box):
         image = Image.open(image_file).convert("RGB")

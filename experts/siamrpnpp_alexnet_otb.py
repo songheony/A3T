@@ -2,6 +2,7 @@ import sys
 import cv2
 import torch
 from base_tracker import BaseTracker
+import path_config
 
 sys.path.append("external/pysot")
 from pysot.core.config import cfg
@@ -12,9 +13,8 @@ from pysot.tracker.tracker_builder import build_tracker
 class SiamRPNPP(BaseTracker):
     def __init__(self):
         super(SiamRPNPP, self).__init__("SiamRPN++_AlexNet_OTB")
-        # TODO: edit this path
-        config = "/home/heonsong/Desktop/AAA/AAA-weights/external/pysot/experiments/siamrpn_alex_dwxcorr_otb/config.yaml"
-        snapshot = "/home/heonsong/Desktop/AAA/AAA-weights/external/pysot/experiments/siamrpn_alex_dwxcorr_otb/model.pth"
+        config = path_config.SIAMRPNPP_ALEXNET_OTB_CONFIG
+        snapshot = path_config.SIAMRPNPP_ALEXNET_OTB_SNAPSHOT
 
         # load config
         cfg.merge_from_file(config)

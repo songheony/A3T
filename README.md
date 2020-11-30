@@ -12,16 +12,22 @@ Heon Song, Daiki Suehiro, Seiichi Uchida
 
 * [ATOM](https://arxiv.org/abs/1811.07628)[<https://github.com/visionml/pytracking>]
 * [DaSiamRPN](https://arxiv.org/abs/1808.06048)[<https://github.com/foolwood/DaSiamRPN>,<https://github.com/songheony/DaSiamRPN>]<sup>[1]</sup>
+* [DiMP](https://arxiv.org/abs/2003.06761)[<https://github.com/visionml/pytracking>]
 * [GradNet](https://arxiv.org/abs/1909.06800)[<https://github.com/LPXTT/GradNet-Tensorflow>]
+* [KYS](https://arxiv.org/pdf/2003.11014.pdf)[<https://github.com/visionml/pytracking>]
 * [MemTrack](https://arxiv.org/abs/1803.07268)[<https://github.com/skyoung/MemTrack>]
+* [PrDiMP](https://arxiv.org/pdf/2003.12565.pdf)[<https://github.com/visionml/pytracking>]
+* [SiamBAN](https://arxiv.org/abs/2003.06761)[<https://github.com/hqucv/siamban>]
 * [SiamDW](https://arxiv.org/abs/1901.01660)[<https://github.com/researchmm/SiamDW>]
 * [SiamFC](https://arxiv.org/abs/1606.09549)[<https://github.com/got-10k/siamfc>]
 * [SiamMCF](https://link.springer.com/chapter/10.1007/978-3-030-11009-3_6)[<https://github.com/hmorimitsu/siam-mcf>]
+* [SiamR-CNN](https://arxiv.org/abs/1911.12836)[<https://github.com/VisualComputingInstitute/SiamR-CNN>]
 * [SiamRPN](http://openaccess.thecvf.com/content_cvpr_2018/papers/Li_High_Performance_Visual_CVPR_2018_paper.pdf)[<https://github.com/huanglianghua/siamrpn-pytorch>]
 * [SiamRPN++](https://arxiv.org/abs/1812.11703)[<https://github.com/STVIR/pysot>]
 * [SPM](https://arxiv.org/abs/1904.04452)[<https://github.com/microsoft/SPM-Tracker>]
 * [Staple](https://arxiv.org/abs/1512.01355)[<https://github.com/wwdguu/pyCFTrackers>]
 * [THOR](https://arxiv.org/abs/1907.12920)[<https://github.com/xl-sr/THOR>]
+* [TRAS](https://arxiv.org/abs/2007.04108)[<https://github.com/dontfollowmeimcrazy/vot-kd-rl>]
 
 [1] Since the original code of DaSiamRPN is for Python2, We've had to modify the code a little bit to be compatible with Python3.
 
@@ -31,6 +37,7 @@ Heon Song, Daiki Suehiro, Seiichi Uchida
 * [NFS](https://arxiv.org/abs/1703.05884)[<http://ci2cv.net/nfs/index.html>]
 * [UAV123](https://ivul.kaust.edu.sa/Pages/pub-benchmark-simulator-uav.aspx)[<https://uav123.org/>]
 * [TColor128](https://ieeexplore.ieee.org/document/7277070)[<http://www.dabi.temple.edu/~hbling/data/TColor-128/TColor-128.html>]
+* [TrackingNet](https://arxiv.org/abs/1803.10794)[<https://tracking-net.org/>]
 * [VOT2018](https://link.springer.com/chapter/10.1007/978-3-030-11009-3_1)[<http://www.votchallenge.net/>]<sup>[2]</sup>
 * [LaSOT](https://arxiv.org/abs/1809.07845)[<https://cis.temple.edu/lasot/download.html>]
 * [Got10K](https://arxiv.org/abs/1810.11981)[<http://got-10k.aitestunion.com/>]

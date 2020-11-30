@@ -1,5 +1,6 @@
 import numpy as np
 import sys
+import path_config
 
 sys.path.append("external/pytracking")
 from pytracking.evaluation.data import Sequence, BaseDataset, SequenceList
@@ -23,7 +24,7 @@ class UAVDatasetClass(BaseDataset):
 
     def __init__(self):
         super().__init__()
-        self.base_path = self.env_settings.uav_path
+        self.base_path = path_config.UAV_PATH
         self.sequence_info_list = self._get_sequence_info_list()
 
     def get_sequence_list(self):

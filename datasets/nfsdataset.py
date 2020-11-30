@@ -1,6 +1,7 @@
 import numpy as np
 import sys
 import glob
+import path_config
 
 sys.path.append("external/pytracking")
 from pytracking.evaluation.data import Sequence, BaseDataset, SequenceList
@@ -25,7 +26,7 @@ class NFSDatasetClass(BaseDataset):
     def __init__(self, fps):
         super().__init__()
         self.fps = fps
-        self.base_path = self.env_settings.nfs_path
+        self.base_path = path_config.NFS_PATH
         self.sequence_info_list = self._get_sequence_info_list()
 
     def get_sequence_list(self):

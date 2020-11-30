@@ -4,11 +4,9 @@ import sys
 import pickle
 
 from algorithms.aaa_util import calc_overlap
+import path_config
 
 sys.path.append("external/pysot-toolkit/pysot")
-sys.path.append("external/pytracking")
-
-from pytracking.evaluation.environment import env_settings
 from utils import success_overlap, success_error
 
 
@@ -51,7 +49,7 @@ class OfflineBenchmark:
         anchor_precision_ = {}
         for seq in self.dataset:
             gt_traj = np.array(seq.ground_truth_rect)
-            results_dir = "{}/{}".format(env_settings().results_path, eval_algorithm)
+            results_dir = "{}/{}".format(path_config.RESULTS_PATH, eval_algorithm)
             base_results_path = "{}/{}".format(results_dir, seq.name)
             offline_path = "{}_offline.pkl".format(base_results_path)
             with open(offline_path, "rb") as fp:
@@ -87,7 +85,7 @@ class OfflineBenchmark:
             anchor_precision_ = {}
             for seq in self.dataset:
                 gt_traj = np.array(seq.ground_truth_rect)
-                results_dir = "{}/{}".format(env_settings().results_path, tracker_name)
+                results_dir = "{}/{}".format(path_config.RESULTS_PATH, tracker_name)
                 base_results_path = "{}/{}".format(results_dir, seq.name)
                 results_path = "{}.txt".format(base_results_path)
                 tracker_traj = np.loadtxt(results_path, delimiter="\t")
@@ -137,7 +135,7 @@ class OfflineBenchmark:
         precision_ret_ = {}
         for seq in self.dataset:
             gt_traj = np.array(seq.ground_truth_rect)
-            results_dir = "{}/{}".format(env_settings().results_path, eval_algorithm)
+            results_dir = "{}/{}".format(path_config.RESULTS_PATH, eval_algorithm)
             base_results_path = "{}/{}".format(results_dir, seq.name)
             offline_path = "{}_offline.pkl".format(base_results_path)
             with open(offline_path, "rb") as fp:
@@ -172,7 +170,7 @@ class OfflineBenchmark:
             precision_ret_ = {}
             for seq in self.dataset:
                 gt_traj = np.array(seq.ground_truth_rect)
-                results_dir = "{}/{}".format(env_settings().results_path, tracker_name)
+                results_dir = "{}/{}".format(path_config.RESULTS_PATH, tracker_name)
                 base_results_path = "{}/{}".format(results_dir, seq.name)
                 results_path = "{}.txt".format(base_results_path)
                 tracker_traj = np.loadtxt(results_path, delimiter="\t")
@@ -218,7 +216,7 @@ class OfflineBenchmark:
 
                 # get offline
                 results_dir = "{}/{}".format(
-                    env_settings().results_path, eval_algorithm
+                    path_config.RESULTS_PATH, eval_algorithm
                 )
                 base_results_path = "{}/{}".format(results_dir, seq.name)
                 offline_path = "{}_offline.pkl".format(base_results_path)
@@ -231,7 +229,7 @@ class OfflineBenchmark:
                 offline_results = np.array(offline_results)
 
                 # get results
-                results_dir = "{}/{}".format(env_settings().results_path, tracker_name)
+                results_dir = "{}/{}".format(path_config.RESULTS_PATH, tracker_name)
                 base_results_path = "{}/{}".format(results_dir, seq.name)
                 results_path = "{}.txt".format(base_results_path)
                 tracker_traj = np.loadtxt(results_path, delimiter="\t")

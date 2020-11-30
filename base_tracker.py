@@ -4,11 +4,10 @@ import os
 import sys
 import numpy as np
 import cv2
-
+import path_config
 
 sys.path.append("external/pysot-toolkit/pysot")
 sys.path.append("external/pytracking")
-from pytracking.evaluation.environment import env_settings
 from utils.region import vot_overlap
 
 
@@ -17,8 +16,7 @@ class BaseTracker(object):
 
     def __init__(self, name):
         self.name = name
-        env = env_settings()
-        self.results_dir = "{}/{}".format(env.results_path, self.name)
+        self.results_dir = "{}/{}".format(path_config.RESULTS_PATH, self.name)
         if not os.path.exists(self.results_dir):
             os.makedirs(self.results_dir)
 
@@ -37,7 +35,7 @@ class BaseTracker(object):
             boxes = np.zeros((len(experts), len(sequence.ground_truth_rect), 4))
             tracker_times = np.zeros((len(experts), len(sequence.ground_truth_rect)))
             for n, tracker_name in enumerate(experts):
-                results_dir = "{}/{}".format(env_settings().results_path, tracker_name)
+                results_dir = "{}/{}".format(path_config.RESULTS_PATH, tracker_name)
                 base_results_path = "{}/{}".format(results_dir, sequence.name)
                 results_path = "{}.txt".format(base_results_path)
                 tracker_traj = np.loadtxt(results_path, delimiter="\t", dtype=float)
@@ -49,7 +47,7 @@ class BaseTracker(object):
         times = []
         start_time = time.time()
         self.initialize(sequence.frames[0], np.array(sequence.init_bbox()))
-        init_time = getattr(self, "time", time.time() - start_time)
+        init_time = time.time() - start_time
         times.append(init_time)
 
         # Track
