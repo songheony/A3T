@@ -19,9 +19,7 @@ class MemTrack(BaseTracker):
         self.config_proto = tf.ConfigProto()
         self.config_proto.gpu_options.allow_growth = True
         self.sess = tf.Session(config=self.config_proto)
-        ckpt = tf.train.get_checkpoint_state(
-            path_config.MEMTRACK_MODEL
-        )
+        ckpt = tf.train.get_checkpoint_state(path_config.MEMTRACK_MODEL)
         self.model = Model(self.sess, ckpt.model_checkpoint_path)
 
     def initialize(self, image_file, box):

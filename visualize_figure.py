@@ -7,17 +7,17 @@ from datasets.votdataset import VOTDataset
 from datasets.tpldataset import TPLDataset
 from visualize_result import draw_graph, draw_result
 from visualize_eval import (
-    name2color,
-    draw_rank_all,
-    draw_pie,
-    draw_succ_with_thresholds,
-    # draw_prec_with_thresholds,
-    make_score_table,
-    draw_curves,
     # draw_score_anchor,
     # make_regret_table,
     # draw_rank,
     # draw_scores,
+    # draw_prec_with_thresholds,
+    name2color,
+    draw_rank_all,
+    draw_pie,
+    draw_succ_with_thresholds,
+    make_score_table,
+    draw_curves,
 )
 
 
@@ -52,21 +52,21 @@ def get_tuning_results(tune_dir):
                 algorithm
             ]
             if "AAA" in algorithm:
-                threshold_anchor_successes[mode][algorithm_split_name] = anchor_successes[
-                    dataset_name
-                ][algorithm]
-                threshold_anchor_precisions[mode][algorithm_split_name] = anchor_precisions[
-                    dataset_name
-                ][algorithm]
-                threshold_offline_successes[mode][algorithm_split_name] = offline_successes[
-                    dataset_name
-                ][algorithm]
+                threshold_anchor_successes[mode][
+                    algorithm_split_name
+                ] = anchor_successes[dataset_name][algorithm]
+                threshold_anchor_precisions[mode][
+                    algorithm_split_name
+                ] = anchor_precisions[dataset_name][algorithm]
+                threshold_offline_successes[mode][
+                    algorithm_split_name
+                ] = offline_successes[dataset_name][algorithm]
                 threshold_offline_precisions[mode][
                     algorithm_split_name
                 ] = offline_precisions[dataset_name][algorithm]
-                threshold_anchors[mode][algorithm_split_name] = anchor_frames[dataset_name][
-                    algorithm
-                ]
+                threshold_anchors[mode][algorithm_split_name] = anchor_frames[
+                    dataset_name
+                ][algorithm]
             else:
                 threshold_anchor_successes = None
                 threshold_anchor_precisions = None
@@ -117,7 +117,14 @@ def figure2(vot_dataset, high_algorithm, high_experts, save_dir):
     )
 
 
-def figure4(datasets_name, high_algorithm, high_experts, high_successes, high_precisions, save_dir):
+def figure4(
+    datasets_name,
+    high_algorithm,
+    high_experts,
+    high_successes,
+    high_precisions,
+    save_dir,
+):
     figsize = (20, 5)
     vis_trackers = high_experts + [high_algorithm]
     colors = name2color(vis_trackers)
@@ -183,7 +190,16 @@ def figure6(otb_dataset, tpl_dataset, high_algorithm, high_experts, save_dir):
         otb_seqs,
         iserror=True,
         legend=True,
-        sframes=[(14, "(a)"), (87, "(b)"), (131, "(c)"), (150, "(d)"), (575, "(e)"), (931, "(f)"), (1235, "(g)"), (1495, "(h)")]
+        sframes=[
+            (14, "(a)"),
+            (87, "(b)"),
+            (131, "(c)"),
+            (150, "(d)"),
+            (575, "(e)"),
+            (931, "(f)"),
+            (1235, "(g)"),
+            (1495, "(h)"),
+        ],
     )
     draw_graph(
         otb_dataset,
@@ -194,7 +210,16 @@ def figure6(otb_dataset, tpl_dataset, high_algorithm, high_experts, save_dir):
         otb_seqs,
         iserror=False,
         legend=False,
-        sframes=[(14, "(a)"), (87, "(b)"), (131, "(c)"), (150, "(d)"), (575, "(e)"), (931, "(f)"), (1235, "(g)"), (1495, "(h)")]
+        sframes=[
+            (14, "(a)"),
+            (87, "(b)"),
+            (131, "(c)"),
+            (150, "(d)"),
+            (575, "(e)"),
+            (931, "(f)"),
+            (1235, "(g)"),
+            (1495, "(h)"),
+        ],
     )
     draw_result(
         otb_dataset,
@@ -216,7 +241,16 @@ def figure6(otb_dataset, tpl_dataset, high_algorithm, high_experts, save_dir):
         tpl_seqs,
         iserror=True,
         legend=False,
-        sframes=[(2, "(i)"), (29, "(j)"), (36, "(k)"), (109, "(l)"), (119, "(m)"), (175, "(n)"), (203, "(o)"), (212, "(p)")]
+        sframes=[
+            (2, "(i)"),
+            (29, "(j)"),
+            (36, "(k)"),
+            (109, "(l)"),
+            (119, "(m)"),
+            (175, "(n)"),
+            (203, "(o)"),
+            (212, "(p)"),
+        ],
     )
     draw_graph(
         tpl_dataset,
@@ -227,7 +261,16 @@ def figure6(otb_dataset, tpl_dataset, high_algorithm, high_experts, save_dir):
         tpl_seqs,
         iserror=False,
         legend=False,
-        sframes=[(2, "(i)"), (29, "(j)"), (36, "(k)"), (109, "(l)"), (119, "(m)"), (175, "(n)"), (203, "(o)"), (212, "(p)")]
+        sframes=[
+            (2, "(i)"),
+            (29, "(j)"),
+            (36, "(k)"),
+            (109, "(l)"),
+            (119, "(m)"),
+            (175, "(n)"),
+            (203, "(o)"),
+            (212, "(p)"),
+        ],
     )
     draw_result(
         tpl_dataset,
@@ -592,7 +635,14 @@ def main(experiments, all_experts, all_experts_name, save_dir, eval_dir, tune_di
         save_dir,
     )
     figure2(vot, high_algorithm, high_experts, save_dir)
-    figure4(datasets_name, high_algorithm, high_experts, high_successes, high_precisions, save_dir)
+    figure4(
+        datasets_name,
+        high_algorithm,
+        high_experts,
+        high_successes,
+        high_precisions,
+        save_dir,
+    )
     figure6(otb, tpl, high_algorithm, high_experts, save_dir)
     figure8(otb, high_algorithm, high_baselines[1], high_experts, save_dir)
     figure9(otb, high_algorithm, high_baselines[0], high_experts, save_dir)
@@ -648,7 +698,7 @@ def main(experiments, all_experts, all_experts_name, save_dir, eval_dir, tune_di
         mix_experts,
         mix_successes,
         mix_precisions,
-        save_dir
+        save_dir,
     )
 
     # SiamDW
@@ -698,8 +748,18 @@ if __name__ == "__main__":
     high_baselines = ["HDT_High_0.98", "MCCT_High_0.10", "Random_High", "Max_High"]
     low_baselines = ["HDT_Low_0.32", "MCCT_Low_0.10", "Random_Low", "Max_Low"]
     mix_baselines = ["HDT_Mix_0.94", "MCCT_Mix_0.10", "Random_Mix", "Max_Mix"]
-    siamdw_baselines = ["HDT_SiamDW_0.98", "MCCT_SiamDW_0.10", "Random_SiamDW", "Max_SiamDW"]
-    siamrpn_baselines = ["HDT_SiamRPN++_0.74", "MCCT_SiamRPN++_0.10", "Random_SiamRPN++", "Max_SiamRPN++"]
+    siamdw_baselines = [
+        "HDT_SiamDW_0.98",
+        "MCCT_SiamDW_0.10",
+        "Random_SiamDW",
+        "Max_SiamDW",
+    ]
+    siamrpn_baselines = [
+        "HDT_SiamRPN++_0.74",
+        "MCCT_SiamRPN++_0.10",
+        "Random_SiamRPN++",
+        "Max_SiamRPN++",
+    ]
 
     all_experts = [
         "ATOM",

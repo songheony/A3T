@@ -215,9 +215,7 @@ class OfflineBenchmark:
                 gt_traj = np.array(seq.ground_truth_rect)
 
                 # get offline
-                results_dir = "{}/{}".format(
-                    path_config.RESULTS_PATH, eval_algorithm
-                )
+                results_dir = "{}/{}".format(path_config.RESULTS_PATH, eval_algorithm)
                 base_results_path = "{}/{}".format(results_dir, seq.name)
                 offline_path = "{}_offline.pkl".format(base_results_path)
                 with open(offline_path, "rb") as fp:

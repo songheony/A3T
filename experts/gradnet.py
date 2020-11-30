@@ -99,10 +99,7 @@ class GradNet(BaseTracker):
         self.config = tf.ConfigProto()
         self.config.gpu_options.allow_growth = True
         self.sess = tf.Session(config=self.config)
-        self.saver.restore(
-            self.sess,
-            path_config.GRADNET_MODEL,
-        )
+        self.saver.restore(self.sess, path_config.GRADNET_MODEL)
 
     def initialize(self, image_file, box):
         im = cv2.imread(image_file, cv2.IMREAD_COLOR)

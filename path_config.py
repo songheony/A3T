@@ -11,26 +11,44 @@ UAV_PATH = "/home/heonsong/Disk2/Dataset/UAV123"
 VOT_PATH = "/home/heonsong/Disk2/Dataset/VOT2018"
 
 # DaSiamRPN
-DASIAMRPN_MODEL = "/home/heonsong/Desktop/AAA/AAA-journal/external/DaSiamRPN/SiamRPNOTB.model"
+DASIAMRPN_MODEL = (
+    "/home/heonsong/Desktop/AAA/AAA-journal/external/DaSiamRPN/SiamRPNOTB.model"
+)
 
 # GradNet
 GRADNET_MODEL = "/home/heonsong/Desktop/AAA/AAA-journal/external/GradNet-Tensorflow/ckpt/base_l5_1t_49/model_epoch49.ckpt"
 
 # MemTrack
-MEMTRACK_MODEL = "/home/heonsong/Desktop/AAA/AAA-journal/external/MemTrack/output/models"
+MEMTRACK_MODEL = (
+    "/home/heonsong/Desktop/AAA/AAA-journal/external/MemTrack/output/models"
+)
 
 # SiamBAN
 SIAMBAN_CONFIG = ""
 SIAMBAN_SNAPSHOT = ""
 
 # SiamDW
-SIAMDW_MODEL = "/home/heonsong/Desktop/AAA/AAA-journal/external/SiamDW/CIResNet22_RPN.pth"
-SIAMDW_CIRINCEP22_MODEL = "/home/heonsong/Desktop/AAA/AAA-weights/external/SiamDW/CIRIncep22.pth"
-SIAMDW_CIRNEXT22_MODEL = "/home/heonsong/Desktop/AAA/AAA-weights/external/SiamDW/CIRNext22.pth"
-SIAMDW_CIRESNET22FC_G_MODEL = "/home/heonsong/Desktop/AAA/AAA-weights/external/SiamDW/CIResNet22FC_G.pth"
-SIAMDW_CIRESNET22_MODEL = "/home/heonsong/Desktop/AAA/AAA-weights/external/SiamDW/CIResNet22.pth"
-SIAMDW_SIAMFCRES22W_MODEL = "/home/heonsong/Desktop/AAA/AAA-weights/external/SiamDW/SiamFCRes22W.pth"
-SIAMDW_CIRESNET22_RPN_MODEL = "/home/heonsong/Desktop/AAA/AAA-journal/external/SiamDW/CIResNet22_RPN.pth"
+SIAMDW_MODEL = (
+    "/home/heonsong/Desktop/AAA/AAA-journal/external/SiamDW/CIResNet22_RPN.pth"
+)
+SIAMDW_CIRINCEP22_MODEL = (
+    "/home/heonsong/Desktop/AAA/AAA-weights/external/SiamDW/CIRIncep22.pth"
+)
+SIAMDW_CIRNEXT22_MODEL = (
+    "/home/heonsong/Desktop/AAA/AAA-weights/external/SiamDW/CIRNext22.pth"
+)
+SIAMDW_CIRESNET22FC_G_MODEL = (
+    "/home/heonsong/Desktop/AAA/AAA-weights/external/SiamDW/CIResNet22FC_G.pth"
+)
+SIAMDW_CIRESNET22_MODEL = (
+    "/home/heonsong/Desktop/AAA/AAA-weights/external/SiamDW/CIResNet22.pth"
+)
+SIAMDW_SIAMFCRES22W_MODEL = (
+    "/home/heonsong/Desktop/AAA/AAA-weights/external/SiamDW/SiamFCRes22W.pth"
+)
+SIAMDW_CIRESNET22_RPN_MODEL = (
+    "/home/heonsong/Desktop/AAA/AAA-journal/external/SiamDW/CIResNet22_RPN.pth"
+)
 
 # SiamFC
 SIAMFC_MODEL = "/home/heonsong/Desktop/AAA/AAA-journal/external/siamfc/model.pth"
@@ -40,7 +58,9 @@ SIAMMCF_ROOT_DIR = "/home/heonsong/Desktop/AAA/AAA-journal/external/siam-mcf/"
 SIAMMCF_MODEL = "/home/heonsong/Desktop/AAA/AAA-journal/external/siam-mcf/pretrained/siam_mcf.ckpt-50000"
 
 # SiamRPN
-SIAMRPN_MODEL = "/home/heonsong/Desktop/AAA/AAA-journal/external/siamrpn_pytorch/model.pth"
+SIAMRPN_MODEL = (
+    "/home/heonsong/Desktop/AAA/AAA-journal/external/siamrpn_pytorch/model.pth"
+)
 
 # SiamRPN++
 SIAMRPNPP_CONFIG = "/home/heonsong/Desktop/AAA/AAA-weights/external/pysot/experiments/siamrpn_r50_l234_dwxcorr_otb/config.yaml"

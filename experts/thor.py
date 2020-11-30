@@ -16,9 +16,7 @@ class THOR(BaseTracker):
         dataset = "OTB2015"
         vanilla = False
         lb_type = "dynamic"  # [dynamic, ensemble]
-        json_path = (
-            f"{path_config.THOR_CONFIG}/{tracker}/"
-        )
+        json_path = f"{path_config.THOR_CONFIG}/{tracker}/"
         json_path += f"{dataset}_"
         if vanilla:
             json_path += "vanilla.json"
