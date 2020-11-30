@@ -11,46 +11,30 @@ def select_expert(tracker_name):
         from experts.atom import ATOM
 
         tracker = ATOM()
-    elif tracker_name == "BACF":
-        from experts.bacf import BACF
-
-        tracker = BACF()
-    elif tracker_name == "CSRDCF":
-        from experts.csrdcf import CSRDCF
-
-        tracker = CSRDCF()
     elif tracker_name == "DaSiamRPN":
         from experts.dasiamrpn import DaSiamRPN
 
         tracker = DaSiamRPN()
     elif tracker_name == "DiMP":
-        from experts.dimp import DiMP
+        from experts.dimp import DiMP50
 
-        tracker = DiMP()
-    elif tracker_name == "ECO":
-        from experts.eco import ECO
-
-        tracker = ECO()
-    elif tracker_name == "ECO-HC":
-        from experts.eco_hc import ECO_HC
-
-        tracker = ECO_HC()
+        tracker = DiMP50()
     elif tracker_name == "GradNet":
         from experts.gradnet import GradNet
 
         tracker = GradNet()
-    elif tracker_name == "LDES":
-        from experts.ldes import LDES
-
-        tracker = LDES()
     elif tracker_name == "MemTrack":
         from experts.memtrack import MemTrack
 
         tracker = MemTrack()
-    elif tracker_name == "RT-MDNet":
-        from experts.rt_mdnet import RTMDNet
+    elif tracker_name == "PrDiMP":
+        from experts.prdimp import PrDiMP50
 
-        tracker = RTMDNet()
+        tracker = PrDiMP50()
+    elif tracker_name == "SiamBAN":
+        from experts.siamban import SiamBAN
+
+        tracker = SiamBAN()
     elif tracker_name == "SiamDW":
         from experts.siamdw import SiamDW
 
@@ -103,6 +87,10 @@ def select_expert(tracker_name):
         from experts.siammcf import SiamMCF
 
         tracker = SiamMCF()
+    elif tracker_name == "SiamRCNN":
+        from experts.siamrcnn import SiamRCNN
+
+        tracker = SiamRCNN()
     elif tracker_name == "SiamRPN":
         from experts.siamrpn import SiamRPN
 
@@ -147,62 +135,22 @@ def select_expert(tracker_name):
         from experts.staple import Staple
 
         tracker = Staple()
-    elif tracker_name == "STRCF":
-        from experts.strcf import STRCF
-
-        tracker = STRCF()
     elif tracker_name == "THOR":
         from experts.thor import THOR
 
         tracker = THOR()
-    elif tracker_name == "THOR_SiamFC_Dynamic_OTB":
-        from experts.thor_siamfc_dynamic_otb import THOR
+    elif tracker_name == "TRAS":
+        from experts.tras import ETRAS
 
-        tracker = THOR()
-    elif tracker_name == "THOR_SiamFC_Dynamic_VOT":
-        from experts.thor_siamfc_dynamic_vot import THOR
+        tracker = ETRAS()
+    elif tracker_name == "TRAST":
+        from experts.tras import ETRAST
 
-        tracker = THOR()
-    elif tracker_name == "THOR_SiamFC_Ensemble_OTB":
-        from experts.thor_siamfc_ensemble_otb import THOR
+        tracker = ETRAST()
+    elif tracker_name == "TRASFUST":
+        from experts.tras import ETRASFUST
 
-        tracker = THOR()
-    elif tracker_name == "THOR_SiamFC_Ensemble_VOT":
-        from experts.thor_siamfc_ensemble_vot import THOR
-
-        tracker = THOR()
-    elif tracker_name == "THOR_SiamMask_Dynamic_OTB":
-        from experts.thor_siammask_dynamic_otb import THOR
-
-        tracker = THOR()
-    elif tracker_name == "THOR_SiamMask_Dynamic_VOT":
-        from experts.thor_siammask_dynamic_vot import THOR
-
-        tracker = THOR()
-    elif tracker_name == "THOR_SiamMask_Ensemble_OTB":
-        from experts.thor_siammask_ensemble_otb import THOR
-
-        tracker = THOR()
-    elif tracker_name == "THOR_SiamMask_Ensemble_VOT":
-        from experts.thor_siammask_ensemble_vot import THOR
-
-        tracker = THOR()
-    elif tracker_name == "THOR_SiamRPN_Dynamic_OTB":
-        from experts.thor_siamrpn_dynamic_otb import THOR
-
-        tracker = THOR()
-    elif tracker_name == "THOR_SiamRPN_Dynamic_VOT":
-        from experts.thor_siamrpn_dynamic_vot import THOR
-
-        tracker = THOR()
-    elif tracker_name == "THOR_SiamRPN_Ensemble_OTB":
-        from experts.thor_siamrpn_ensemble_otb import THOR
-
-        tracker = THOR()
-    elif tracker_name == "THOR_SiamRPN_Ensemble_VOT":
-        from experts.thor_siamrpn_ensemble_vot import THOR
-
-        tracker = THOR()
+        tracker = ETRASFUST()
     else:
         raise ValueError("Unknown expert name")
 
