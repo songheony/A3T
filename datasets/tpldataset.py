@@ -63,7 +63,9 @@ class TPLDatasetClass(BaseDataset):
                 str(anno_path), delimiter=",", dtype=np.float64
             )
 
-        return Sequence(sequence_info["name"], frames, 'tpl', ground_truth_rect[init_omit:, :])
+        return Sequence(
+            sequence_info["name"], frames, "tpl", ground_truth_rect[init_omit:, :]
+        )
 
     def __len__(self):
         """Overload this function in your evaluation. This should return number of sequences in the evaluation """

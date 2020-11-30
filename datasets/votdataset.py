@@ -68,7 +68,7 @@ class VOTDatasetClass(BaseDataset):
             y2 = np.amax(gt_y_all, 1).reshape(-1, 1)
 
             ground_truth_rect = np.concatenate((x1, y1, x2 - x1, y2 - y1), 1)
-        return Sequence(sequence_name, frames, 'vot', ground_truth_rect)
+        return Sequence(sequence_name, frames, "vot", ground_truth_rect)
 
     def __len__(self):
         return len(self.sequence_list)

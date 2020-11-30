@@ -28,21 +28,7 @@ class AAA(BaseTracker):
         cost_feature=True,
         cost_score=True,
     ):
-        super(AAA, self).__init__(
-            "AAA_%s_%.2f_%.2f_%s_%s_%s_%s_%s_%s_%s"
-            % (
-                mode,
-                iou_threshold,
-                feature_threshold,
-                reset_target,
-                only_max,
-                use_iou,
-                use_feature,
-                cost_iou,
-                cost_feature,
-                cost_score,
-            )
-        )
+        super(AAA, self).__init__(f"AAA_{mode}_{iou_threshold:.2f}")
 
         # Whether select expert randomly
         self.random_select = True
