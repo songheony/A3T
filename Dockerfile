@@ -146,7 +146,7 @@ RUN python -m pip --no-cache-dir install --upgrade \
 # fix error
 # ------------------------------------------------------------------
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libgl1-mesa-glx
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libgl1-mesa-glx ninja-build
 
 RUN python -m pip --no-cache-dir install --upgrade numba
 

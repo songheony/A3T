@@ -145,7 +145,7 @@ docker run --gpus all -it -v "${PWD}:/workspace" --ipc=host songheony/aaa bash
 # For mpi4py
 sudo apt install libopenmpi-dev
 
-pip install tensorflow-gpu==1.15 matplotlib pandas tqdm cython visdom scikit-image tikzplotlib pycocotools lvis jpeg4py pyyaml yacs colorama tensorboard future optuna shapely scipy easydict tensorboardX mpi4py==2.0.0 gaft torchvision hyperopt ray==0.6.3 requests pillow msgpack msgpack_numpy tabulate xmltodict zmq annoy wget protobuf cupy-cuda101 mxnet-cu101 h5py pyzmq
+pip install tensorflow-gpu==1.15 matplotlib pandas tqdm cython visdom scikit-image tikzplotlib pycocotools lvis jpeg4py pyyaml yacs colorama tensorboard future optuna shapely scipy easydict tensorboardX mpi4py==2.0.0 gaft torchvision hyperopt ray==0.6.3 requests pillow msgpack msgpack_numpy tabulate xmltodict zmq annoy wget protobuf cupy-cuda101 mxnet-cu101 h5py pyzmq numba
 
 pip install --upgrade git+https://github.com/got-10k/toolkit.git@master
 pip install --upgrade git+https://github.com/tensorpack/tensorpack.git
@@ -154,6 +154,11 @@ pip install --upgrade git+https://github.com/tensorpack/tensorpack.git
 After installing the libraries, some libraries need to be compiled manually.
 
 ```sh
+# For ATOM
+cd external/pytracking
+git submodule update --init  
+apt-get install ninja-build
+
 # For SiamBAN
 cd external/siamban
 python setup.py build_ext --inplace
@@ -180,6 +185,9 @@ Or, if you want to reproduce our results by yourself, run the following commands
 ```sh
 # edit network path of ATOM, DiMP, PrDiMP, KYS
 cp local.py external/pytracking/pytracking/evaluation/local.py
+cd external/pytracking
+python -c "from ltr.admin.environment import create_default_local_file; create_default_local_file()"
+cd ../../
 
 # clone experts
 git clone https://github.com/songheony/DaSiamRPN
