@@ -17,6 +17,7 @@ In this repository, we implemented or edited the following trackers to use as ex
 * [DiMP](https://arxiv.org/abs/1904.07220)[<https://github.com/visionml/pytracking>]
 * [GradNet](https://arxiv.org/abs/1909.06800)[<https://github.com/LPXTT/GradNet-Tensorflow>]
 * [MemTrack](https://arxiv.org/abs/1803.07268)[<https://github.com/skyoung/MemTrack>]
+* [Ocean](https://arxiv.org/abs/2006.10721)[<https://github.com/researchmm/TracKit>]
 * [PrDiMP](https://arxiv.org/abs/2003.12565)[<https://github.com/visionml/pytracking>]
 * [SiamBAN](https://arxiv.org/abs/2003.06761)[<https://github.com/hqucv/siamban>]
 * [SiamCAR](https://arxiv.org/abs/1911.07241)[<https://github.com/ohhhyeahhh/SiamCAR>]
@@ -134,6 +135,7 @@ cd external
 git clone https://github.com/songheony/DaSiamRPN
 git clone https://github.com/LPXTT/GradNet-Tensorflow
 git clone https://github.com/skyoung/MemTrack
+git clone https://github.com/researchmm/TracKit
 git clone https://github.com/hqucv/siamban
 git clone https://github.com/ohhhyeahhh/SiamCAR
 git clone https://github.com/researchmm/SiamDW

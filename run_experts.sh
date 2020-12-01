@@ -28,7 +28,7 @@ for (( j=0; j<${#datasets[@]}; j++ )); do
     done
 done
 
-new_experts=("DiMP" "PrDiMP" "SiamBAN" "SiamCAR" "SiamFC++" "SiamRCNN" "TRASFUST")
+new_experts=("DiMP" "Ocean" "PrDiMP" "SiamBAN" "SiamCAR" "SiamFC++" "SiamRCNN" "TRASFUST")
 for (( j=0; j<${#datasets[@]}; j++ )); do
     for (( i=0; i<${#high_experts[@]}; i++ )); do
         python ./track_expert.py -e ${high_experts[$i]} -d ${datasets[$j]}

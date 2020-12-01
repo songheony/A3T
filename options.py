@@ -29,6 +29,10 @@ def select_expert(tracker_name):
         from experts.memtrack import MemTrack
 
         tracker = MemTrack()
+    elif tracker_name == "Ocean":
+        from experts.ocean import Ocean
+
+        tracker = Ocean()
     elif tracker_name == "PrDiMP":
         from experts.prdimp import PrDiMP50
 

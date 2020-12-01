@@ -19,6 +19,9 @@ GRADNET_MODEL = "weights/GradNet/ckpt/base_l5_1t_49/model_epoch49.ckpt"
 # MemTrack
 MEMTRACK_MODEL = "weights/MemTrack/models"
 
+# Ocean
+OCEAN_MODEL = "weights/Ocean/OceanO.pth"
+
 # ROAM
 ROAM_FEAT_DIR = ""
 ROAM_MODEL_DIR = ""
