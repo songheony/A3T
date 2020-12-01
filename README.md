@@ -10,28 +10,31 @@ Heon Song, Daiki Suehiro, Seiichi Uchida
 
 ## Experts
 
-In this repository, we implemented or edited the following trackers to use as experts.
+In this repository, we implemented or edited the following trackers to use as experts.  
+**You can use the tracker with just a few lines of code.**
 
-* [ATOM](https://arxiv.org/abs/1811.07628)[<https://github.com/visionml/pytracking>]
-* [DaSiamRPN](https://arxiv.org/abs/1808.06048)[<https://github.com/foolwood/DaSiamRPN>,<https://github.com/songheony/DaSiamRPN>]<sup>[1]</sup>
-* [DiMP](https://arxiv.org/abs/1904.07220)[<https://github.com/visionml/pytracking>]
-* [GradNet](https://arxiv.org/abs/1909.06800)[<https://github.com/LPXTT/GradNet-Tensorflow>]
-* [MemTrack](https://arxiv.org/abs/1803.07268)[<https://github.com/skyoung/MemTrack>]
-* [Ocean](https://arxiv.org/abs/2006.10721)[<https://github.com/researchmm/TracKit>]
-* [PrDiMP](https://arxiv.org/abs/2003.12565)[<https://github.com/visionml/pytracking>]
-* [SiamBAN](https://arxiv.org/abs/2003.06761)[<https://github.com/hqucv/siamban>]
-* [SiamCAR](https://arxiv.org/abs/1911.07241)[<https://github.com/ohhhyeahhh/SiamCAR>]
-* [SiamDW](https://arxiv.org/abs/1901.01660)[<https://github.com/researchmm/SiamDW>]
-* [SiamFC](https://arxiv.org/abs/1606.09549)[<https://github.com/got-10k/siamfc>]
-* [SiamFC++](https://arxiv.org/abs/1911.06188)[<https://github.com/MegviiDetection/video_analyst>]
-* [SiamMCF](https://link.springer.com/chapter/10.1007/978-3-030-11009-3_6)[<https://github.com/hmorimitsu/siam-mcf>]
-* [SiamR-CNN](https://arxiv.org/abs/1911.12836)[<https://github.com/VisualComputingInstitute/SiamR-CNN>]
-* [SiamRPN](http://openaccess.thecvf.com/content_cvpr_2018/papers/Li_High_Performance_Visual_CVPR_2018_paper.pdf)[<https://github.com/huanglianghua/siamrpn-pytorch>]
-* [SiamRPN++](https://arxiv.org/abs/1812.11703)[<https://github.com/STVIR/pysot>]
-* [SPM](https://arxiv.org/abs/1904.04452)[<https://github.com/microsoft/SPM-Tracker>]
-* [Staple](https://arxiv.org/abs/1512.01355)[<https://github.com/wwdguu/pyCFTrackers>]
-* [THOR](https://arxiv.org/abs/1907.12920)[<https://github.com/xl-sr/THOR>]
-* [TRAS](https://arxiv.org/abs/2007.04108)[<https://github.com/dontfollowmeimcrazy/vot-kd-rl>]
+| Tracker   | Link                |
+|-----------|---------------------|
+| ATOM      | [Paper](https://arxiv.org/abs/1811.07628) / [Original Repo](https://github.com/visionml/pytracking) |
+| DaSiamRPN | [Paper](https://arxiv.org/abs/1808.06048) / [Original Repo](https://github.com/foolwood/DaSiamRPN) |
+| DiMP      | [Paper](https://arxiv.org/abs/1904.07220) / [Original Repo](https://github.com/visionml/pytracking) |
+| GradNet   | [Paper](https://arxiv.org/abs/1909.06800) / [Original Repo](https://github.com/LPXTT/GradNet-Tensorflow) |
+| MemTrack  | [Paper](https://arxiv.org/abs/1803.07268) / [Original Repo](https://github.com/skyoung/MemTrack) |
+| Ocean     | [Paper](https://arxiv.org/abs/2006.10721) / [Original Repo](https://github.com/researchmm/TracKit) |
+| PrDiMP    | [Paper](https://arxiv.org/abs/2003.12565) / [Original Repo](https://github.com/visionml/pytracking) |
+| SiamBAN   | [Paper](https://arxiv.org/abs/2003.06761) / [Original Repo](https://github.com/hqucv/siamban) |
+| SiamCAR   | [Paper](https://arxiv.org/abs/1911.07241) / [Original Repo](https://github.com/ohhhyeahhh/SiamCAR) |
+| SiamDW    | [Paper](https://arxiv.org/abs/1901.01660) / [Original Repo](https://github.com/researchmm/SiamDW) |
+| SiamFC    | [Paper](https://arxiv.org/abs/1606.09549) / [Original Repo](https://github.com/got-10k/siamfc) |
+| SiamFC++  | [Paper](https://arxiv.org/abs/1911.06188) / [Original Repo](https://github.com/MegviiDetection/video_analyst) |
+| SiamMCF   | [Paper](https://link.springer.com/chapter/10.1007/978-3-030-11009-3_6) / [Original Repo](https://github.com/hmorimitsu/siam-mcf) |
+| SiamR-CNN | [Paper](https://arxiv.org/abs/1911.12836) / [Original Repo](https://github.com/VisualComputingInstitute/SiamR-CNN) |
+| SiamRPN   | [Paper](http://openaccess.thecvf.com/content_cvpr_2018/papers/Li_High_Performance_Visual_CVPR_2018_paper.pdf) / [Original Repo](https://github.com/huanglianghua/siamrpn-pytorch) |
+| SiamRPN++ | [Paper](https://arxiv.org/abs/1812.11703) / [Original Repo](https://github.com/STVIR/pysot) |
+| SPM       | [Paper](https://arxiv.org/abs/1904.04452) / [Original Repo](https://github.com/microsoft/SPM-Tracker) |
+| Staple    | [Paper](https://arxiv.org/abs/1512.01355) / [Original Repo](https://github.com/wwdguu/pyCFTrackers) |
+| THOR      | [Paper](https://arxiv.org/abs/1907.12920) / [Original Repo](https://github.com/xl-sr/THOR) |
+| TRAS      | [Paper](https://arxiv.org/abs/2007.04108) / [Original Repo](https://github.com/dontfollowmeimcrazy/vot-kd-rl) |
 
 [1] Since the original code of DaSiamRPN is for Python2, We've had to modify the code a little bit to be compatible with Python3.
 
@@ -44,7 +47,7 @@ We evaluated the performance of the experts and AAA on the following datasets.
 * [UAV123](https://ivul.kaust.edu.sa/Pages/pub-benchmark-simulator-uav.aspx)[<https://uav123.org/>]
 * [TColor128](https://ieeexplore.ieee.org/document/7277070)[<http://www.dabi.temple.edu/~hbling/data/TColor-128/TColor-128.html>]
 * [TrackingNet](https://arxiv.org/abs/1803.10794)[<https://tracking-net.org/>]
-* [VOT2018](https://link.springer.com/chapter/10.1007/978-3-030-11009-3_1)[<http://www.votchallenge.net/>]<sup>[2]</sup>
+* [VOT2018](https://link.springer.com/chapter/10.1007/978-3-030-11009-3_1)[<http://www.votchallenge.net/>]
 * [LaSOT](https://arxiv.org/abs/1809.07845)[<https://cis.temple.edu/lasot/download.html>]
 * [Got10K](https://arxiv.org/abs/1810.11981)[<http://got-10k.aitestunion.com/>]
 
@@ -94,7 +97,7 @@ conda install pytorch torchvision cudatoolkit=[CUDA_VERSION] -c pytorch
 pip install python-igraph opencv-python opencv-contrib-python
 ```
 
-## How to run
+## Tracking
 
 If you want to apply AAA to your own project,  
 simply make the following python script:
@@ -121,6 +124,27 @@ for img_path in img_paths[1:]:
     # if the frame is not anchor frame, offline is None. else offline will be offline tracking results.
     # weight is the weight of the experts.
     state, offline, weight = self.track(img_path, experts_result)  
+```
+
+In addition, trackers that we have implemented can be easily executed the following python script.
+
+```python
+from options import select_expert
+
+img_paths = []  # list of image file paths
+initial_bbox = [x, y, w, h]  # left x, top y, width, height of the initial target bbox
+
+# define Expert
+tracker_name = "ATOM"
+tracker = select_expert(tracker_name)
+
+# initialize Expert
+tracker.initialize(img_paths[0], initial_bbox)
+
+# track the target
+for img_path in img_paths[1:]:
+    # state is the prediction of target bbox.
+    state = self.track(img_path)  
 ```
 
 ## Requirements for experts

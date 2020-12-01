@@ -101,7 +101,7 @@ def select_expert(tracker_name):
         from experts.siammcf import SiamMCF
 
         tracker = SiamMCF()
-    elif tracker_name == "SiamRCNN":
+    elif tracker_name == "SiamR-CNN":
         from experts.siamrcnn import SiamRCNN
 
         tracker = SiamRCNN()
