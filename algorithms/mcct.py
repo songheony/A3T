@@ -3,8 +3,8 @@ import numpy as np
 from base_tracker import BaseTracker
 
 sys.path.append("external/pyCFTrackers")
-sys.path.append("external/pysot-toolkit/pysot")
-from utils import overlap_ratio
+sys.path.append("external/pysot-toolkit")
+from pysot.utils import overlap_ratio
 from cftracker.config.mccth_staple_config import MCCTHOTBConfig
 
 
@@ -48,7 +48,7 @@ class MCCT(BaseTracker):
 
             smooth = np.linalg.norm(center - pre_center)
             avg_dim = np.sum(boxes[i][2:]) / 2
-            self.experts[i].smooth_scores.append(np.exp(-(smooth / avg_dim) ** 2 / 2))
+            self.experts[i].smooth_scores.append(np.exp(-((smooth / avg_dim) ** 2) / 2))
 
         if self.frame_idx >= self.period - 1:
             for i in range(self.expert_num):
@@ -67,7 +67,7 @@ class MCCT(BaseTracker):
         for i in range(self.expert_num):
             target_bboxes = np.array(self.experts[i].rect_positions[-self.period :])
             overlaps = overlap_ratio(src_bboxes, target_bboxes)
-            overlap_score[:, i] = np.exp(-(1 - overlaps) ** 2)
+            overlap_score[:, i] = np.exp(-((1 - overlaps) ** 2))
         avg_overlap = np.mean(overlap_score, axis=1)
         expert_avg_overlap = np.mean(overlap_score, axis=0)
         var_overlap = np.sqrt(

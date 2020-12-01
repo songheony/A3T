@@ -2,14 +2,13 @@ RESULTS_PATH = "tracking_results"
 EVALUATION_PATH = "evaluation_results"
 
 # Dataset
-GOT10K_PATH = "/workspace/dataset/Got10K"
-LASOT_PATH = "/workspace/dataset/LaSOT"
-NFS_PATH = "/workspace/dataset/NFS"
-OTB_PATH = "/workspace/dataset/OTB"
-TPL_PATH = "/workspace/dataset/TColor128"
-TRACKINGNET_PATH = ""
-UAV_PATH = "/workspace/dataset/UAV123"
-VOT_PATH = "/workspace/dataset/VOT2018"
+GOT10K_PATH = "/home/heonsong/Disk2/Dataset/Got10K"
+LASOT_PATH = "/home/heonsong/Disk2/Dataset/LaSOT"
+NFS_PATH = "/home/heonsong/Disk2/Dataset/NFS"
+OTB_PATH = "/home/heonsong/Disk2/Dataset/OTB"
+TPL_PATH = "/home/heonsong/Disk2/Dataset/TColor128"
+UAV_PATH = "/home/heonsong/Disk2/Dataset/UAV123"
+VOT_PATH = "/home/heonsong/Disk2/Dataset/VOT2018"
 
 # DaSiamRPN
 DASIAMRPN_MODEL = "weights/DaSiamRPN/SiamRPNOTB.model"
@@ -20,9 +19,17 @@ GRADNET_MODEL = "weights/GradNet/ckpt/base_l5_1t_49/model_epoch49.ckpt"
 # MemTrack
 MEMTRACK_MODEL = "weights/MemTrack/models"
 
+# ROAM
+ROAM_FEAT_DIR = ""
+ROAM_MODEL_DIR = ""
+
 # SiamBAN
-SIAMBAN_CONFIG = "weights/siamban_r50_l234_otb/config.yaml"
-SIAMBAN_SNAPSHOT = "weights/siamban_r50_l234_otb/model.pth"
+SIAMBAN_CONFIG = "weights/SiamBAN/siamban_r50_l234_otb/config.yaml"
+SIAMBAN_SNAPSHOT = "weights/SiamBAN/siamban_r50_l234_otb/model.pth"
+
+# SiamCAR
+SIAMCAR_CONFIG = "weights/SiamCAR/siamcar_r50/config.yaml"
+SIAMCAR_SNAPSHOT = "weights/SiamCAR/model_general.pth"
 
 # SiamDW
 SIAMDW_MODEL = "weights/SiamDW/CIResNet22_RPN.pth"
@@ -35,6 +42,9 @@ SIAMDW_CIRESNET22_RPN_MODEL = "weights/SiamDW/CIResNet22_RPN.pth"
 
 # SiamFC
 SIAMFC_MODEL = "weights/SiamFC/model.pth"
+
+# SiamFC++
+SIAMFCPP_CONFIG = "weights/SiamFC++/otb/siamfcpp_googlenet-otb.yaml"
 
 # SiamMFC
 SIAMMCF_ROOT_DIR = "external/siam-mcf/"
@@ -74,6 +84,9 @@ SPM_CONFIG = "weights/SPM/alexnet_c42_otb.yaml"
 
 # THOR
 THOR_CONFIG = "weights/THOR"
+THOR_SIAMFC_MODEL = "weights/THOR/SiamFC/model.pth"
+THOR_SIAMRPN_MODEL = "weights/THOR/SiamRPN/SiamRPNBIG.model"
+THOR_SIAMMASK_MODEL = "weights/THOR/SiamMask/model.pth"
 
 # TRAS
 TRAS_MODEL = "weights/TRAS/Student.weights"

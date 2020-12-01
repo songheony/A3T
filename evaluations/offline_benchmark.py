@@ -6,8 +6,8 @@ import pickle
 from algorithms.aaa_util import calc_overlap
 import path_config
 
-sys.path.append("external/pysot-toolkit/pysot")
-from utils import success_overlap, success_error
+sys.path.append("external/pysot-toolkit")
+from pysot.utils import success_overlap, success_error
 
 
 class OfflineBenchmark:

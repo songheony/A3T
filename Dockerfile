@@ -1,4 +1,4 @@
-FROM nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
+FROM nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04
 ENV LANG C.UTF-8
 RUN rm -rf /var/lib/apt/lists/* \
            /etc/apt/sources.list.d/cuda.list \
@@ -72,8 +72,8 @@ RUN python -m pip --no-cache-dir install --upgrade \
         typing \
         && \
     python -m pip --no-cache-dir install --upgrade \
-        torch==1.7.0+cu101 \
-        torchvision==0.8.1+cu101 -f \
+        torch==1.2.0+cu100 \
+        torchvision==0.4.0+cu100 -f \
         https://download.pytorch.org/whl/torch_stable.html
 
 # ==================================================================
@@ -81,7 +81,7 @@ RUN python -m pip --no-cache-dir install --upgrade \
 # ------------------------------------------------------------------
 
 RUN python -m pip --no-cache-dir install --upgrade \
-        tensorflow-gpu==1.15
+        tensorflow-gpu==1.14
 
 # ==================================================================
 # AAA
@@ -98,7 +98,7 @@ RUN python -m pip --no-cache-dir install --upgrade \
 
 RUN pip uninstall -y enum34
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libopenmpi-dev
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libopenmpi-dev libgl1-mesa-glx ninja-build
 
 RUN python -m pip --no-cache-dir install --upgrade \
         matplotlib \
@@ -135,20 +135,14 @@ RUN python -m pip --no-cache-dir install --upgrade \
         annoy \
         wget \
         protobuf \
-        cupy-cuda101 \
-        mxnet-cu101 \
+        cupy-cuda100 \
+        mxnet-cu100 \
         h5py \
         pyzmq \
+        ipdb \
+        numba \
         git+https://github.com/got-10k/toolkit.git@master \
         git+https://github.com/tensorpack/tensorpack.git
-
-# ==================================================================
-# fix error
-# ------------------------------------------------------------------
-
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libgl1-mesa-glx ninja-build
-
-RUN python -m pip --no-cache-dir install --upgrade numba
 
 # ==================================================================
 # config & cleanup

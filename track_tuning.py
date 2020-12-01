@@ -25,9 +25,15 @@ def main(eval_dir, algorithm_name, experts, thresholds, **kwargs):
 
     eval_save = eval_dir / "eval.pkl"
     if eval_save.exists():
-        successes, precisions, anchor_frames, anchor_successes, anchor_precisions, offline_successes, offline_precisions = pickle.loads(
-            eval_save.read_bytes()
-        )
+        (
+            successes,
+            precisions,
+            anchor_frames,
+            anchor_successes,
+            anchor_precisions,
+            offline_successes,
+            offline_precisions,
+        ) = pickle.loads(eval_save.read_bytes())
     else:
         # algorithms' performance
         ope = OPEBenchmark(dataset)
@@ -43,9 +49,11 @@ def main(eval_dir, algorithm_name, experts, thresholds, **kwargs):
             offline_successes = {dataset_name: {}}
             offline_precisions = {dataset_name: {}}
             for algorithm in algorithms:
-                anchor_frame, anchor_success, anchor_precision = offline.eval_anchor_frame(
-                    algorithm, experts
-                )
+                (
+                    anchor_frame,
+                    anchor_success,
+                    anchor_precision,
+                ) = offline.eval_anchor_frame(algorithm, experts)
                 offline_success, offline_precision = offline.eval_offline_tracker(
                     algorithm, experts
                 )

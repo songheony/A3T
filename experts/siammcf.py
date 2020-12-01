@@ -23,7 +23,13 @@ class SiamMCF(BaseTracker):
         self.hp, self.evaluation, self.env, self.design = parse_arguments(root_dir)
         self.final_score_sz = self.hp.response_up * (self.design.score_sz - 1) + 1
         # build TF graph once for all
-        self.filename, self.image, self.templates_x, self.templates_z, self.scores_list = siam.build_tracking_graph(
+        (
+            self.filename,
+            self.image,
+            self.templates_x,
+            self.templates_z,
+            self.scores_list,
+        ) = siam.build_tracking_graph(
             root_dir, self.final_score_sz, self.design, self.env, self.hp
         )
         config = tf.ConfigProto()

@@ -2,8 +2,8 @@ import numpy as np
 import sys
 import path_config
 
-sys.path.append("external/pysot-toolkit/pysot")
-from utils import success_overlap, success_error
+sys.path.append("external/pysot-toolkit")
+from pysot.utils import success_overlap, success_error
 
 
 class OPEBenchmark:

@@ -1,14 +1,10 @@
 import copy
 import time
 import os
-import sys
 import numpy as np
 import cv2
 import path_config
-
-sys.path.append("external/pysot-toolkit/pysot")
-sys.path.append("external/pytracking")
-from utils.region import vot_overlap
+from print_manager import do_not_print
 
 
 class BaseTracker(object):
@@ -74,36 +70,10 @@ class BaseTracker(object):
 
         return tracked_bb, offline_bb, weights, times
 
-    def track_supervised(self, sequence):
-        """Run tracker on a sequence."""
-
-        # Track
-        frame_counter = 0
-        tracked_bb = []
-        for n, frame in enumerate(sequence.frames):
-            img = self._read_image(frame)
-
-            if n == frame_counter:
-                self.initialize(frame, np.array(sequence.init_bbox()))
-                tracked_bb.append(1)
-            elif n > frame_counter:
-                state, _, _ = self.track(frame)
-                overlap = vot_overlap(
-                    state, sequence.ground_truth_rect[n], (img.shape[1], img.shape[0])
-                )
-                if overlap > 0:
-                    tracked_bb.append(state)
-                else:
-                    tracked_bb.append(2)
-                    frame_counter = n + 5
-            else:
-                tracked_bb.append(0)
-
-        return tracked_bb
-
     def _read_image(self, image_file: str):
         return cv2.cvtColor(cv2.imread(image_file), cv2.COLOR_BGR2RGB)
 
+    @do_not_print
     def run(self, seq, trackers):
         """Run tracker on sequence.
         args:

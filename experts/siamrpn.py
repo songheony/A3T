@@ -3,7 +3,7 @@ from PIL import Image
 from base_tracker import BaseTracker
 import path_config
 
-sys.path.append("external/siamrpn_pytorch")
+sys.path.append("external/siamrpn-pytorch")
 from siamrpn import TrackerSiamRPN
 
 

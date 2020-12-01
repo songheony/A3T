@@ -835,9 +835,9 @@ def make_score_table(
                 for value in [mean_succ, mean_prec]:
                     sorted_idx = np.argsort(value[:, j])
                     if i == sorted_idx[-1]:
-                        line += f' & {{\\color{{red}} \\textbf{{{value[i, j]:0.2f}}}}}'
+                        line += f" & {{\\color{{red}} \\textbf{{{value[i, j]:0.2f}}}}}"
                     elif i == sorted_idx[-2]:
-                        line += f' & {{\\color{{blue}} \\textit{{{value[i, j]:0.2f}}}}}'
+                        line += f" & {{\\color{{blue}} \\textit{{{value[i, j]:0.2f}}}}}"
                     else:
                         line += f" & {value[i, j]:0.2f}"
 
@@ -845,11 +845,11 @@ def make_score_table(
             sorted_idx = np.argsort(mean_succ[:, vot_idx])
             if i == sorted_idx[-1]:
                 line += (
-                    f' & {{\\color{{red}} \\textbf{{{mean_succ[i, vot_idx]:0.2f}}}}}'
+                    f" & {{\\color{{red}} \\textbf{{{mean_succ[i, vot_idx]:0.2f}}}}}"
                 )
             elif i == sorted_idx[-2]:
                 line += (
-                    f' & {{\\color{{blue}} \\textit{{{mean_succ[i, vot_idx]:0.2f}}}}}'
+                    f" & {{\\color{{blue}} \\textit{{{mean_succ[i, vot_idx]:0.2f}}}}}"
                 )
             else:
                 line += f" & {mean_succ[i, vot_idx]:0.2f}"
@@ -858,9 +858,9 @@ def make_score_table(
                 for value in [mean_succ, mean_prec]:
                     sorted_idx = np.argsort(value[:, j])
                     if i == sorted_idx[-1]:
-                        line += f' & {{\\color{{red}} \\textbf{{{value[i, j]:0.2f}}}}}'
+                        line += f" & {{\\color{{red}} \\textbf{{{value[i, j]:0.2f}}}}}"
                     elif i == sorted_idx[-2]:
-                        line += f' & {{\\color{{blue}} \\textit{{{value[i, j]:0.2f}}}}}'
+                        line += f" & {{\\color{{blue}} \\textit{{{value[i, j]:0.2f}}}}}"
                     else:
                         line += f" & {value[i, j]:0.2f}"
         line += " \\\\\n"
@@ -928,9 +928,9 @@ def make_regret_table(
         for j in range(len(datasets)):
             sorted_idx = np.argsort(mean_offline[:, j])[::-1]
             if i == sorted_idx[-1]:
-                line += f' & {{\\color{{red}} \\textbf{{{mean_offline[i, j]:0.2f}}}}}'
+                line += f" & {{\\color{{red}} \\textbf{{{mean_offline[i, j]:0.2f}}}}}"
             elif i == sorted_idx[-2]:
-                line += f' & {{\\color{{blue}} \\textit{{{mean_offline[i, j]:0.2f}}}}}'
+                line += f" & {{\\color{{blue}} \\textit{{{mean_offline[i, j]:0.2f}}}}}"
             else:
                 line += f" & {mean_offline[i, j]:0.2f}"
         line += " \\\\\n"
@@ -1035,19 +1035,19 @@ def make_score_regret_table(
                 for value in [mean_succ, mean_prec]:
                     sorted_idx = np.argsort(value[:, j])
                     if i == sorted_idx[-1]:
-                        line += f' & {{\\color{{red}} \\textbf{{{value[i, j]:0.2f}}}}}'
+                        line += f" & {{\\color{{red}} \\textbf{{{value[i, j]:0.2f}}}}}"
                     elif i == sorted_idx[-2]:
-                        line += f' & {{\\color{{blue}} \\textit{{{value[i, j]:0.2f}}}}}'
+                        line += f" & {{\\color{{blue}} \\textit{{{value[i, j]:0.2f}}}}}"
                     else:
                         line += f" & {value[i, j]:0.2f}"
                 sorted_idx = np.argsort(mean_offline[:, j])[::-1]
                 if i == sorted_idx[-1]:
                     line += (
-                        f' & {{\\color{{red}} \\textbf{{{mean_offline[i, j]:0.2f}}}}}'
+                        f" & {{\\color{{red}} \\textbf{{{mean_offline[i, j]:0.2f}}}}}"
                     )
                 elif i == sorted_idx[-2]:
                     line += (
-                        f' & {{\\color{{blue}} \\textit{{{mean_offline[i, j]:0.2f}}}}}'
+                        f" & {{\\color{{blue}} \\textit{{{mean_offline[i, j]:0.2f}}}}}"
                     )
                 else:
                     line += f" & {mean_offline[i, j]:0.2f}"
@@ -1056,11 +1056,11 @@ def make_score_regret_table(
             sorted_idx = np.argsort(mean_succ[:, vot_idx])
             if i == sorted_idx[-1]:
                 line += (
-                    f' & {{\\color{{red}} \\textbf{{{mean_succ[i, vot_idx]:0.2f}}}}}'
+                    f" & {{\\color{{red}} \\textbf{{{mean_succ[i, vot_idx]:0.2f}}}}}"
                 )
             elif i == sorted_idx[-2]:
                 line += (
-                    f' & {{\\color{{blue}} \\textit{{{mean_succ[i, vot_idx]:0.2f}}}}}'
+                    f" & {{\\color{{blue}} \\textit{{{mean_succ[i, vot_idx]:0.2f}}}}}"
                 )
             else:
                 line += f" & {mean_succ[i, vot_idx]:0.2f}"
@@ -1068,10 +1068,10 @@ def make_score_regret_table(
             sorted_idx = np.argsort(mean_offline[:, vot_idx])[::-1]
             if i == sorted_idx[-1]:
                 line += (
-                    f' & {{\\color{{red}} \\textbf{{{mean_offline[i, vot_idx]:0.2f}}}}}'
+                    f" & {{\\color{{red}} \\textbf{{{mean_offline[i, vot_idx]:0.2f}}}}}"
                 )
             elif i == sorted_idx[-2]:
-                line += f' & {{\\color{{blue}} \\textit{{{mean_offline[i, vot_idx]:0.2f}}}}}'
+                line += f" & {{\\color{{blue}} \\textit{{{mean_offline[i, vot_idx]:0.2f}}}}}"
             else:
                 line += f" & {mean_offline[i, vot_idx]:0.2f}"
         else:
@@ -1079,20 +1079,20 @@ def make_score_regret_table(
                 for value in [mean_succ, mean_prec]:
                     sorted_idx = np.argsort(value[:, j])
                     if i == sorted_idx[-1]:
-                        line += f' & {{\\color{{red}} \\textbf{{{value[i, j]:0.2f}}}}}'
+                        line += f" & {{\\color{{red}} \\textbf{{{value[i, j]:0.2f}}}}}"
                     elif i == sorted_idx[-2]:
-                        line += f' & {{\\color{{blue}} \\textit{{{value[i, j]:0.2f}}}}}'
+                        line += f" & {{\\color{{blue}} \\textit{{{value[i, j]:0.2f}}}}}"
                     else:
                         line += f" & {value[i, j]:0.2f}"
 
                 sorted_idx = np.argsort(mean_offline[:, j])[::-1]
                 if i == sorted_idx[-1]:
                     line += (
-                        f' & {{\\color{{red}} \\textbf{{{mean_offline[i, j]:0.2f}}}}}'
+                        f" & {{\\color{{red}} \\textbf{{{mean_offline[i, j]:0.2f}}}}}"
                     )
                 elif i == sorted_idx[-2]:
                     line += (
-                        f' & {{\\color{{blue}} \\textit{{{mean_offline[i, j]:0.2f}}}}}'
+                        f" & {{\\color{{blue}} \\textit{{{mean_offline[i, j]:0.2f}}}}}"
                     )
                 else:
                     line += f" & {mean_offline[i, j]:0.2f}"
@@ -1172,9 +1172,9 @@ def make_ratio_table(
             for value in [mean_succ, mean_ratio]:
                 sorted_idx = np.argsort(value[:, j])
                 if i == sorted_idx[-1]:
-                    line += f' & {{\\color{{red}} \\textbf{{{value[i, j]:0.2f}}}}}'
+                    line += f" & {{\\color{{red}} \\textbf{{{value[i, j]:0.2f}}}}}"
                 elif i == sorted_idx[-2]:
-                    line += f' & {{\\color{{blue}} \\textit{{{value[i, j]:0.2f}}}}}'
+                    line += f" & {{\\color{{blue}} \\textit{{{value[i, j]:0.2f}}}}}"
                 else:
                     line += f" & {value[i, j]:0.2f}"
         line += " \\\\\n"
@@ -1275,9 +1275,18 @@ def main(experts, baselines, algorithm, eval_dir):
 
     eval_save = eval_dir / "eval.pkl"
     if eval_save.exists():
-        successes, precisions, tracking_times, anchor_frames, anchor_successes, anchor_precisions, offline_successes, offline_precisions, regret_gts, regret_offlines = pickle.loads(
-            eval_save.read_bytes()
-        )
+        (
+            successes,
+            precisions,
+            tracking_times,
+            anchor_frames,
+            anchor_successes,
+            anchor_precisions,
+            offline_successes,
+            offline_precisions,
+            regret_gts,
+            regret_offlines,
+        ) = pickle.loads(eval_save.read_bytes())
     else:
         successes = {}
         precisions = {}
@@ -1302,9 +1311,11 @@ def main(experts, baselines, algorithm, eval_dir):
             tracking_times[name] = tracking_time
 
             if algorithm is not None:
-                anchor_frame, anchor_success, anchor_precision = offline.eval_anchor_frame(
-                    algorithm, experts
-                )
+                (
+                    anchor_frame,
+                    anchor_success,
+                    anchor_precision,
+                ) = offline.eval_anchor_frame(algorithm, experts)
                 offline_success, offline_precision = offline.eval_offline_tracker(
                     algorithm, experts
                 )

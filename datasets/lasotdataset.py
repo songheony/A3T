@@ -1,10 +1,7 @@
 import numpy as np
 import os
-import sys
 import path_config
-
-sys.path.append("external/pytracking")
-from pytracking.evaluation.data import Sequence, BaseDataset, SequenceList
+from datasets.data import Sequence, BaseDataset, SequenceList
 
 
 def LaSOTDataset():

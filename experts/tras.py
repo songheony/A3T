@@ -21,7 +21,7 @@ class ETRAS(BaseTracker):
 
     def track(self, image_file):
         image = Image.open(image_file).convert("RGB")
-        return self.update(image)
+        return self.tracker.update(image)
 
 
 class ETRAST(BaseTracker):
@@ -37,7 +37,7 @@ class ETRAST(BaseTracker):
 
     def track(self, image_file):
         image = Image.open(image_file).convert("RGB")
-        return self.update(image)
+        return self.tracker.update(image)
 
 
 class ETRASFUST(BaseTracker):
@@ -53,4 +53,4 @@ class ETRASFUST(BaseTracker):
 
     def track(self, image_file):
         image = Image.open(image_file).convert("RGB")
-        return self.update(image)
+        return self.tracker.update(image)

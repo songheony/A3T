@@ -32,12 +32,15 @@ def run_sequence(seq, tracker, experts=None, debug=False):
     tracked_bb = np.array(tracked_bb).astype(float)
     exec_times = np.array(exec_times).astype(float)
 
-    print(
-        "FPS: {} Anchor: {}".format(
-            len(exec_times) / exec_times.sum(),
-            (sum(x is not None for x in offline_bb) + 1) / len(tracked_bb),
+    if experts is not None:
+        print(
+            "FPS: {} Anchor: {}".format(
+                len(exec_times) / exec_times.sum(),
+                (sum(x is not None for x in offline_bb) + 1) / len(tracked_bb),
+            )
         )
-    )
+    else:
+        print("FPS: {}".format(len(exec_times) / exec_times.sum()))
     if not debug:
         np.savetxt(results_path, tracked_bb, delimiter="\t", fmt="%f")
         np.savetxt(times_path, exec_times, delimiter="\t", fmt="%f")

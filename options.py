@@ -4,8 +4,10 @@ from datasets.tpldataset import TPLDataset
 from datasets.uavdataset import UAVDataset
 from datasets.nfsdataset import NFSDataset
 from datasets.lasotdataset import LaSOTDataset
+from print_manager import do_not_print
 
 
+@do_not_print
 def select_expert(tracker_name):
     if tracker_name == "ATOM":
         from experts.atom import ATOM
@@ -35,6 +37,10 @@ def select_expert(tracker_name):
         from experts.siamban import SiamBAN
 
         tracker = SiamBAN()
+    elif tracker_name == "SiamCAR":
+        from experts.siamcar import SiamCAR
+
+        tracker = SiamCAR()
     elif tracker_name == "SiamDW":
         from experts.siamdw import SiamDW
 
@@ -83,6 +89,10 @@ def select_expert(tracker_name):
         from experts.siamfc import SiamFC
 
         tracker = SiamFC()
+    elif tracker_name == "SiamFC++":
+        from experts.siamfcpp import SiamFCPP
+
+        tracker = SiamFCPP()
     elif tracker_name == "SiamMCF":
         from experts.siammcf import SiamMCF
 

@@ -14,13 +14,15 @@ In this repository, we implemented or edited the following trackers to use as ex
 
 * [ATOM](https://arxiv.org/abs/1811.07628)[<https://github.com/visionml/pytracking>]
 * [DaSiamRPN](https://arxiv.org/abs/1808.06048)[<https://github.com/foolwood/DaSiamRPN>,<https://github.com/songheony/DaSiamRPN>]<sup>[1]</sup>
-* [DiMP](https://arxiv.org/abs/2003.06761)[<https://github.com/visionml/pytracking>]
+* [DiMP](https://arxiv.org/abs/1904.07220)[<https://github.com/visionml/pytracking>]
 * [GradNet](https://arxiv.org/abs/1909.06800)[<https://github.com/LPXTT/GradNet-Tensorflow>]
 * [MemTrack](https://arxiv.org/abs/1803.07268)[<https://github.com/skyoung/MemTrack>]
-* [PrDiMP](https://arxiv.org/pdf/2003.12565.pdf)[<https://github.com/visionml/pytracking>]
+* [PrDiMP](https://arxiv.org/abs/2003.12565)[<https://github.com/visionml/pytracking>]
 * [SiamBAN](https://arxiv.org/abs/2003.06761)[<https://github.com/hqucv/siamban>]
+* [SiamCAR](https://arxiv.org/abs/1911.07241)[<https://github.com/ohhhyeahhh/SiamCAR>]
 * [SiamDW](https://arxiv.org/abs/1901.01660)[<https://github.com/researchmm/SiamDW>]
 * [SiamFC](https://arxiv.org/abs/1606.09549)[<https://github.com/got-10k/siamfc>]
+* [SiamFC++](https://arxiv.org/abs/1911.06188)[<https://github.com/MegviiDetection/video_analyst>]
 * [SiamMCF](https://link.springer.com/chapter/10.1007/978-3-030-11009-3_6)[<https://github.com/hmorimitsu/siam-mcf>]
 * [SiamR-CNN](https://arxiv.org/abs/1911.12836)[<https://github.com/VisualComputingInstitute/SiamR-CNN>]
 * [SiamRPN](http://openaccess.thecvf.com/content_cvpr_2018/papers/Li_High_Performance_Visual_CVPR_2018_paper.pdf)[<https://github.com/huanglianghua/siamrpn-pytorch>]
@@ -78,7 +80,7 @@ python setup.py build_ext --inplace
 After that, you need to install the following libraries.
 
 * pytorch
-* python-graph
+* python-igraph
 * opencv-python
 
 We strongly recommend using a virtual environment like Anaconda or Docker.  
@@ -122,6 +124,33 @@ for img_path in img_paths[1:]:
 
 ## Requirements for experts
 
+First, metafiles including pretrained weights are need to be donloaded.  
+After modifing the path of metafiles in ``path_config.py`` and ``local.py`` file, run following commands to clone repositories.
+
+```sh
+cd external
+
+# clone experts
+git clone https://github.com/songheony/DaSiamRPN
+git clone https://github.com/LPXTT/GradNet-Tensorflow
+git clone https://github.com/skyoung/MemTrack
+git clone https://github.com/hqucv/siamban
+git clone https://github.com/ohhhyeahhh/SiamCAR
+git clone https://github.com/researchmm/SiamDW
+git clone https://github.com/got-10k/siamfc
+git clone https://github.com/MegviiDetection/video_analyst
+git clone https://github.com/hmorimitsu/siam-mcf
+git clone https://github.com/VisualComputingInstitute/SiamR-CNN
+git clone https://github.com/huanglianghua/siamrpn-pytorch
+git clone https://github.com/STVIR/pysot
+git clone https://github.com/microsoft/SPM-Tracker
+git clone https://github.com/wwdguu/pyCFTrackers
+git clone https://github.com/xl-sr/THOR
+git clone https://github.com/dontfollowmeimcrazy/vot-kd-rl
+
+cd ../
+```
+
 In order to run experts, you need to install additional libraries.  
 We offer three options to make it easy to run experts:
 
@@ -145,106 +174,101 @@ docker run --gpus all -it -v "${PWD}:/workspace" --ipc=host songheony/aaa bash
 # For mpi4py
 sudo apt install libopenmpi-dev
 
-pip install tensorflow-gpu==1.15 matplotlib pandas tqdm cython visdom scikit-image tikzplotlib pycocotools lvis jpeg4py pyyaml yacs colorama tensorboard future optuna shapely scipy easydict tensorboardX mpi4py==2.0.0 gaft torchvision hyperopt ray==0.6.3 requests pillow msgpack msgpack_numpy tabulate xmltodict zmq annoy wget protobuf cupy-cuda101 mxnet-cu101 h5py pyzmq numba
+# Change cupy-cuda100 and mxnet-cu100 to proper CUDA version.
+pip install tensorflow-gpu==1.15 matplotlib pandas tqdm cython visdom scikit-image tikzplotlib pycocotools lvis jpeg4py pyyaml yacs colorama tensorboard future optuna shapely scipy easydict tensorboardX mpi4py==2.0.0 gaft torchvision hyperopt ray==0.6.3 requests pillow msgpack msgpack_numpy tabulate xmltodict zmq annoy wget protobuf cupy-cuda100 mxnet-cu100 h5py pyzmq numba ipdb loguru
 
 pip install --upgrade git+https://github.com/got-10k/toolkit.git@master
-pip install --upgrade git+https://github.com/tensorpack/tensorpack.git
 ```
 
 After installing the libraries, some libraries need to be compiled manually.
 
 ```sh
+cd external
+
+# edit network path of ATOM, DiMP, PrDiMP, KYS
+cd pytracking
+cp ../../local.py pytracking/evaluation/local.py
+python -c "from ltr.admin.environment import create_default_local_file; create_default_local_file()"
+cd ../
+
 # For ATOM
-cd external/pytracking
+cd pytracking
 git submodule update --init  
 apt-get install ninja-build
+cd ../
 
 # For SiamBAN
-cd external/siamban
+cd siamban
 python setup.py build_ext --inplace
+cd ../
+
+# For SiamR-CNN
+cd SiamR-CNN
+git clone https://github.com/pvoigtlaender/got10k-toolkit.git
+git clone https://github.com/tensorpack/tensorpack.git
+cd tensorpack
+git checkout d24a9230d50b1dea1712a4c2765a11876f1e193c
+cd ../../
 
 # For SiamRPN++
-cd external/pysot
+cd pysot
 python setup.py build_ext --inplace
+cd ../
 
 # For SPM
-cd external/SPM-Tracker
+cd SPM-Tracker
 bash compile.sh
+cd ../
 
 # For Staple
-cd external/pyCFTrackers/lib/pysot/utils
+cd pyCFTrackers/lib/pysot/utils
 python setup.py build_ext --inplace
+cd ../../../../
+cd pyCFTrackers/lib/eco/features/
+python setup.py build_ext --inplace
+cd ../../../../
+
+# For THOR
+cd THOR
+bash benchmark/make_toolkits.sh
+cd ../
+
+cd ../
 ```
 
 ## Reproduce our results
 
-You can reproduce our results by using created environment and results.  
+<!-- You can reproduce our results by using created environment and results.  
 If you don't want to run experts or AAA, you can download [AAA+Experts Tracking results](https://drive.google.com/file/d/1Vw8KuF-4_1Dc7XHa6lAyHxjKve-UlE5B/view?usp=sharing) and [Evaluation results](https://drive.google.com/file/d/1nqQk8fZIef1hFIRM_RW425ti6stKwxJA/view?usp=sharing). Moreover, you can download figures in our paper from [here](https://drive.google.com/file/d/12O2saVFQD9e01GuTkKHWi79ohqjQR3eQ/view?usp=sharing).  
-Or, if you want to reproduce our results by yourself, run the following commands.  
+Or, if you want to reproduce our results by yourself, run the following commands.   -->
 
 ```sh
-# edit network path of ATOM, DiMP, PrDiMP, KYS
-cp local.py external/pytracking/pytracking/evaluation/local.py
-cd external/pytracking
-python -c "from ltr.admin.environment import create_default_local_file; create_default_local_file()"
-cd ../../
-
-# clone experts
-git clone https://github.com/songheony/DaSiamRPN
-git clone https://github.com/LPXTT/GradNet-Tensorflow
-git clone https://github.com/skyoung/MemTrack
-git clone https://github.com/hqucv/siamban
-git clone https://github.com/researchmm/SiamDW
-git clone https://github.com/got-10k/siamfc
-git clone https://github.com/hmorimitsu/siam-mcf
-git clone https://github.com/VisualComputingInstitute/SiamR-CNN
-git clone https://github.com/huanglianghua/siamrpn-pytorch
-git clone https://github.com/STVIR/pysot
-git clone https://github.com/microsoft/SPM-Tracker
-git clone https://github.com/wwdguu/pyCFTrackers
-git clone https://github.com/xl-sr/THOR
-git clone https://github.com/dontfollowmeimcrazy/vot-kd-rl
-
-# run experts. if you download AAA+Experts Tracking results, you can skip this command
+# run experts. if you've downloaded Experts Tracking results, you can skip this command
 bash run_experts.sh
 
-# tune the hyperparameter. if you download AAA+Experts Tracking results, you can skip this command
+# tune the hyperparameter. if you've downloaded AAA Tuning results, you can skip this command
 bash run_tuning.sh
 
-# run AAA. if you download AAA+Experts Tracking results, you can skip this command
+# run AAA. if you've download AAA Tracking results, you can skip this command
 bash run_algorithm.sh
 
-# run HDT. if you download AAA+Experts Tracking results, you can skip this command
+# run HDT. if you've download HDT Tracking results, you can skip this command
 bash run_hdt.sh
 
-# run MCCT. if you download AAA+Experts Tracking results, you can skip this command
+# run MCCT. if you've download MCCT Tracking results, you can skip this command
 bash run_mcct.sh
 
-# run Max and Random. if you download AAA+Experts Tracking results, you can skip this command
+# run Max and Random. if you've download Baselines Tracking results, you can skip this command
 bash run_baselines.sh
 
-# evaluate experts and AAA. if you download Evaluation results Tracking results, you can skip this command
+# evaluate experts and AAA. if you've download Evaluation results, you can skip this command
 bash run_eval.sh
 
 # visualize results
 python visualize_figure.py
 ```
 
-The above command proceeds in the following order.
-
-1. Clone experts who you want to hire.
-
-2. Edit run_expert.sh file and run experts.
-
-3. Edit run_tuning.sh file and tune hyperparamter theta.
-
-4. Edit run_algorithm.sh file and run algorithm.<sup>[3]</sup>
-
-5. Edit run_eval.sh and evaluate the trackers.
-
-6. Edit visualize_figure.py and create figures used in our paper.
-
-[3] The code is supposed to run algorithms after running experts for test. However, it is easy to modify the code to do both simultaneously.
+The code is supposed to run algorithms after running experts for test. However, it is easy to modify the code to do both simultaneously.
 
 ## Citation
 

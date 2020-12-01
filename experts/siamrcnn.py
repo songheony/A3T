@@ -4,6 +4,8 @@ from PIL import Image
 from base_tracker import BaseTracker
 
 sys.path.append("external/SiamR-CNN/")
+sys.path.append("external/SiamR-CNN/tensorpack")
+sys.path.append("external/SiamR-CNN/got10k-toolkit")
 from tracking.argmax_tracker import ArgmaxTracker
 from tracking.three_stage_tracker import ThreeStageTracker
 
@@ -85,4 +87,4 @@ class SiamRCNN(BaseTracker):
 
     def track(self, image_file):
         image = Image.open(image_file).convert("RGB")
-        return self.update(image)
+        return self.tracker.update(image)

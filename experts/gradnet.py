@@ -168,7 +168,11 @@ class GradNet(BaseTracker):
         self.zCrop = np.expand_dims(self.zCrop, axis=0)
         self.zCrop0 = np.copy(self.zCrop)
 
-        self.zFeat5_gra_init, self.zFeat2_gra_init, self.zFeat5_sia_init = self.sess.run(
+        (
+            self.zFeat5_gra_init,
+            self.zFeat2_gra_init,
+            self.zFeat5_sia_init,
+        ) = self.sess.run(
             [self.zFeat5Op_gra, self.zFeat2Op_gra, self.zFeat5Op_sia],
             feed_dict={
                 self.exemplarOp_init: self.zCrop0,
