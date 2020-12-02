@@ -21,10 +21,18 @@ def select_expert(tracker_name):
         from experts.dimp import DiMP50
 
         tracker = DiMP50()
+    elif tracker_name == "DROL":
+        from experts.drol import DROL
+
+        tracker = DROL()
     elif tracker_name == "GradNet":
         from experts.gradnet import GradNet
 
         tracker = GradNet()
+    elif tracker_name == "KYS":
+        from experts.kys import KYS
+
+        tracker = KYS()
     elif tracker_name == "MemTrack":
         from experts.memtrack import MemTrack
 
@@ -37,6 +45,10 @@ def select_expert(tracker_name):
         from experts.prdimp import PrDiMP50
 
         tracker = PrDiMP50()
+    elif tracker_name == "RLS-RTMDNet":
+        from experts.rls_rtmdnet import RLS_RTMDNet
+
+        tracker = RLS_RTMDNet()
     elif tracker_name == "SiamBAN":
         from experts.siamban import SiamBAN
 

@@ -13,6 +13,10 @@ VOT_PATH = "/home/heonsong/Disk2/Dataset/VOT2018"
 # DaSiamRPN
 DASIAMRPN_MODEL = "weights/DaSiamRPN/SiamRPNOTB.model"
 
+# DROL
+DROL_CONFIG = "weights/DROL/siamrpn_r50_l234_dwxcorr_otb/config.yaml"
+DROL_SNAPSHOT = "weights/DROL/siamrpn_r50_l234_dwxcorr_otb/model.pth"
+
 # GradNet
 GRADNET_MODEL = "weights/GradNet/ckpt/base_l5_1t_49/model_epoch49.ckpt"
 
@@ -21,6 +25,9 @@ MEMTRACK_MODEL = "weights/MemTrack/models"
 
 # Ocean
 OCEAN_MODEL = "weights/Ocean/OceanO.pth"
+
+# RLS-RTMDNet
+RLS_RTMDNET_MODEL = "weights/RLS-RTMDNet/rt-mdnet.pth"
 
 # ROAM
 ROAM_FEAT_DIR = ""

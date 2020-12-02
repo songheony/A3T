@@ -15,26 +15,29 @@ In this repository, we implemented or edited the following trackers to use as ex
 
 | Tracker   | Link                |
 |-----------|---------------------|
-| ATOM      | [Paper](https://arxiv.org/abs/1811.07628) / [Original Repo](https://github.com/visionml/pytracking) |
-| DaSiamRPN | [Paper](https://arxiv.org/abs/1808.06048) / [Original Repo](https://github.com/foolwood/DaSiamRPN) |
-| DiMP      | [Paper](https://arxiv.org/abs/1904.07220) / [Original Repo](https://github.com/visionml/pytracking) |
-| GradNet   | [Paper](https://arxiv.org/abs/1909.06800) / [Original Repo](https://github.com/LPXTT/GradNet-Tensorflow) |
-| MemTrack  | [Paper](https://arxiv.org/abs/1803.07268) / [Original Repo](https://github.com/skyoung/MemTrack) |
-| Ocean     | [Paper](https://arxiv.org/abs/2006.10721) / [Original Repo](https://github.com/researchmm/TracKit) |
-| PrDiMP    | [Paper](https://arxiv.org/abs/2003.12565) / [Original Repo](https://github.com/visionml/pytracking) |
-| SiamBAN   | [Paper](https://arxiv.org/abs/2003.06761) / [Original Repo](https://github.com/hqucv/siamban) |
-| SiamCAR   | [Paper](https://arxiv.org/abs/1911.07241) / [Original Repo](https://github.com/ohhhyeahhh/SiamCAR) |
-| SiamDW    | [Paper](https://arxiv.org/abs/1901.01660) / [Original Repo](https://github.com/researchmm/SiamDW) |
-| SiamFC    | [Paper](https://arxiv.org/abs/1606.09549) / [Original Repo](https://github.com/got-10k/siamfc) |
-| SiamFC++  | [Paper](https://arxiv.org/abs/1911.06188) / [Original Repo](https://github.com/MegviiDetection/video_analyst) |
-| SiamMCF   | [Paper](https://link.springer.com/chapter/10.1007/978-3-030-11009-3_6) / [Original Repo](https://github.com/hmorimitsu/siam-mcf) |
-| SiamR-CNN | [Paper](https://arxiv.org/abs/1911.12836) / [Original Repo](https://github.com/VisualComputingInstitute/SiamR-CNN) |
-| SiamRPN   | [Paper](http://openaccess.thecvf.com/content_cvpr_2018/papers/Li_High_Performance_Visual_CVPR_2018_paper.pdf) / [Original Repo](https://github.com/huanglianghua/siamrpn-pytorch) |
-| SiamRPN++ | [Paper](https://arxiv.org/abs/1812.11703) / [Original Repo](https://github.com/STVIR/pysot) |
-| SPM       | [Paper](https://arxiv.org/abs/1904.04452) / [Original Repo](https://github.com/microsoft/SPM-Tracker) |
-| Staple    | [Paper](https://arxiv.org/abs/1512.01355) / [Original Repo](https://github.com/wwdguu/pyCFTrackers) |
-| THOR      | [Paper](https://arxiv.org/abs/1907.12920) / [Original Repo](https://github.com/xl-sr/THOR) |
-| TRAS      | [Paper](https://arxiv.org/abs/2007.04108) / [Original Repo](https://github.com/dontfollowmeimcrazy/vot-kd-rl) |
+| ATOM (CVPR 2019)      | [Paper](https://arxiv.org/abs/1811.07628) / [Original Repo](https://github.com/visionml/pytracking) |
+| DaSiamRPN (ECCV 2018) | [Paper](https://arxiv.org/abs/1808.06048) / [Original Repo](https://github.com/foolwood/DaSiamRPN) |
+| DiMP (ICCV 2019)      | [Paper](https://arxiv.org/abs/1904.07220) / [Original Repo](https://github.com/visionml/pytracking) |
+| DROL (AAAI 2020)      | [Paper](https://arxiv.org/abs/1909.02959) / [Original Repo](https://github.com/shallowtoil/DROL) |
+| GradNet (ICCV 2019)   | [Paper](https://arxiv.org/abs/1909.06800) / [Original Repo](https://github.com/LPXTT/GradNet-Tensorflow) |
+| KYS (ECCV 2020)   | [Paper](https://arxiv.org/abs/2003.11014) / [Original Repo](https://github.com/visionml/pytracking) |
+| MemTrack (ECCV 2018)  | [Paper](https://arxiv.org/abs/1803.07268) / [Original Repo](https://github.com/skyoung/MemTrack) |
+| Ocean (ECCV 2020)     | [Paper](https://arxiv.org/abs/2006.10721) / [Original Repo](https://github.com/researchmm/TracKit) |
+| PrDiMP (CVPR 2020)    | [Paper](https://arxiv.org/abs/2003.12565) / [Original Repo](https://github.com/visionml/pytracking) |
+| RLS-RTMDNet (CVPR 2020)    | [Paper](https://openaccess.thecvf.com/content_CVPR_2020/html/Gao_Recursive_Least-Squares_Estimator-Aided_Online_Learning_for_Visual_Tracking_CVPR_2020_paper.html) / [Original Repo](https://github.com/Amgao/RLS-RTMDNet) |
+| SiamBAN (CVPR 2020)   | [Paper](https://arxiv.org/abs/2003.06761) / [Original Repo](https://github.com/hqucv/siamban) |
+| SiamCAR (CVPR 2020)   | [Paper](https://arxiv.org/abs/1911.07241) / [Original Repo](https://github.com/ohhhyeahhh/SiamCAR) |
+| SiamDW (CVPR 2019)    | [Paper](https://arxiv.org/abs/1901.01660) / [Original Repo](https://github.com/researchmm/SiamDW) |
+| SiamFC (ECCVW 2016)    | [Paper](https://arxiv.org/abs/1606.09549) / [Original Repo](https://github.com/got-10k/siamfc) |
+| SiamFC++ (AAAI 2020)  | [Paper](https://arxiv.org/abs/1911.06188) / [Original Repo](https://github.com/MegviiDetection/video_analyst) |
+| SiamMCF (ECCVW 2018)   | [Paper](https://link.springer.com/chapter/10.1007/978-3-030-11009-3_6) / [Original Repo](https://github.com/hmorimitsu/siam-mcf) |
+| SiamR-CNN (CVPR 2020) | [Paper](https://arxiv.org/abs/1911.12836) / [Original Repo](https://github.com/VisualComputingInstitute/SiamR-CNN) |
+| SiamRPN (CVPR 2018)   | [Paper](http://openaccess.thecvf.com/content_cvpr_2018/papers/Li_High_Performance_Visual_CVPR_2018_paper.pdf) / [Original Repo](https://github.com/huanglianghua/siamrpn-pytorch) |
+| SiamRPN++ (CVPR 2019) | [Paper](https://arxiv.org/abs/1812.11703) / [Original Repo](https://github.com/STVIR/pysot) |
+| SPM (CVPR 2019)       | [Paper](https://arxiv.org/abs/1904.04452) / [Original Repo](https://github.com/microsoft/SPM-Tracker) |
+| Staple (CVPR 2016)   | [Paper](https://arxiv.org/abs/1512.01355) / [Original Repo](https://github.com/wwdguu/pyCFTrackers) |
+| THOR (BMVC 2019)     | [Paper](https://arxiv.org/abs/1907.12920) / [Original Repo](https://github.com/xl-sr/THOR) |
+| TRAS (ACCV 2020)     | [Paper](https://arxiv.org/abs/2007.04108) / [Original Repo](https://github.com/dontfollowmeimcrazy/vot-kd-rl) |
 
 [1] Since the original code of DaSiamRPN is for Python2, We've had to modify the code a little bit to be compatible with Python3.
 
@@ -91,7 +94,7 @@ We strongly recommend using a virtual environment like Anaconda or Docker.
 The following is how to build the virtual environment for AAA when using anaconda.
 
 ```sh
-conda create -n [ENV_NAME] python=[PYTHON_VERSION>=3.6]
+conda create -n [ENV_NAME] python=[PYTHON_VERSION>=3]
 conda activate [ENV_NAME]
 conda install pytorch torchvision cudatoolkit=[CUDA_VERSION] -c pytorch
 pip install python-igraph opencv-python opencv-contrib-python
@@ -129,7 +132,7 @@ for img_path in img_paths[1:]:
 In addition, trackers that we have implemented can be easily executed the following python script.
 
 ```python
-from options import select_expert
+from select_options import select_expert
 
 img_paths = []  # list of image file paths
 initial_bbox = [x, y, w, h]  # left x, top y, width, height of the initial target bbox
@@ -148,6 +151,10 @@ for img_path in img_paths[1:]:
 ```
 
 ## Requirements for experts
+
+* PyTorch 1.4.0
+* CUDA 10.0
+* GCC 8
 
 First, metafiles including pretrained weights are need to be donloaded.  
 After modifing the path of metafiles in ``path_config.py`` and ``local.py`` file, run following commands to clone repositories.
@@ -201,7 +208,7 @@ docker run --gpus all -it -v "${PWD}:/workspace" --ipc=host songheony/aaa bash
 sudo apt install libopenmpi-dev
 
 # Change cupy-cuda100 and mxnet-cu100 to proper CUDA version.
-pip install tensorflow-gpu==1.15 matplotlib pandas tqdm cython visdom scikit-image tikzplotlib pycocotools lvis jpeg4py pyyaml yacs colorama tensorboard future optuna shapely scipy easydict tensorboardX mpi4py==2.0.0 gaft torchvision hyperopt ray==0.6.3 requests pillow msgpack msgpack_numpy tabulate xmltodict zmq annoy wget protobuf cupy-cuda100 mxnet-cu100 h5py pyzmq numba ipdb loguru
+pip install tensorflow-gpu==1.14 matplotlib pandas tqdm cython visdom scikit-image tikzplotlib pycocotools lvis jpeg4py pyyaml yacs colorama tensorboard future optuna shapely scipy easydict tensorboardX mpi4py==2.0.0 gaft hyperopt ray==0.6.3 requests pillow msgpack msgpack_numpy tabulate xmltodict zmq annoy wget protobuf cupy-cuda100 mxnet-cu100 h5py pyzmq numba ipdb loguru scikit-learn spatial-correlation-sampler
 
 pip install --upgrade git+https://github.com/got-10k/toolkit.git@master
 ```
@@ -222,6 +229,16 @@ cd pytracking
 git submodule update --init  
 apt-get install ninja-build
 cd ../
+
+# For DROL
+cd DROL
+python setup.py build_ext --inplace
+cd ../
+
+# For RLS-RTMDNet
+cd RLS-RTMDNet/modules/roi_align
+python setup.py build_ext --inplace
+cd ../../../
 
 # For SiamBAN
 cd siamban

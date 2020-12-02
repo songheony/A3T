@@ -39,19 +39,21 @@ class Ocean(BaseTracker):
     def initialize(self, image_file, box):
         im = cv2.imread(image_file)
         if len(im.shape) == 2:
-            im = cv2.cvtColor(im, cv2.COLOR_GRAY2BGR)   # align with training
+            im = cv2.cvtColor(im, cv2.COLOR_GRAY2BGR)  # align with training
 
         cx, cy, w, h = get_axis_aligned_bbox(box)
         target_pos = np.array([cx, cy])
         target_sz = np.array([w, h])
 
-        self.state = self.siam_tracker.init(im, target_pos, target_sz, self.siam_net)  # init tracker
+        self.state = self.siam_tracker.init(
+            im, target_pos, target_sz, self.siam_net
+        )  # init tracker
 
     def track(self, image_file):
         im = cv2.imread(image_file)
         if len(im.shape) == 2:
-            im = cv2.cvtColor(im, cv2.COLOR_GRAY2BGR)   # align with training
+            im = cv2.cvtColor(im, cv2.COLOR_GRAY2BGR)  # align with training
 
         self.state = self.siam_tracker.track(self.state, im)
-        location = cxy_wh_2_rect(self.state['target_pos'], self.state['target_sz'])
+        location = cxy_wh_2_rect(self.state["target_pos"], self.state["target_sz"])
         return location

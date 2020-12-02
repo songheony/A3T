@@ -3,7 +3,7 @@ import multiprocessing
 import os
 import pickle
 from itertools import product
-from options import select_datasets
+from select_options import select_datasets
 
 
 def run_sequence(seq, tracker, experts=None, debug=False):
@@ -98,4 +98,4 @@ def run_tracker(tracker, dataset, experts=None, sequence=None, debug=0, threads=
 def run(tracker, dataset_name, experts=None):
     dataset = select_datasets(dataset_name)
 
-    run_tracker(tracker, dataset, experts=experts, debug=False)
+    run_tracker(tracker, dataset, experts=experts, debug=True)

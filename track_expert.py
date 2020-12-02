@@ -2,7 +2,7 @@ import random
 import numpy as np
 import torch
 from track_dataset import run
-from options import select_expert
+from select_options import select_expert
 
 random.seed(42)
 np.random.seed(42)
@@ -19,7 +19,9 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--expert", default="Ocean", type=str, help="expert")
+    parser.add_argument(
+        "-e", "--expert", default="ATOM", type=str, help="expert"
+    )
     parser.add_argument("-d", "--dataset", default="OTB", type=str, help="dataset")
     args = parser.parse_args()
 

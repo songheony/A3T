@@ -2,7 +2,7 @@ import random
 import numpy as np
 import torch
 from track_dataset import run
-from options import select_algorithms
+from select_options import select_algorithms
 
 random.seed(42)
 np.random.seed(42)

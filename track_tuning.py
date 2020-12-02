@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 
 from track_dataset import run_tracker
-from options import select_algorithms
+from select_options import select_algorithms
 from datasets.got10kdataset import GOT10KDatasetVal
 from evaluations.ope_benchmark import OPEBenchmark
 from evaluations.offline_benchmark import OfflineBenchmark

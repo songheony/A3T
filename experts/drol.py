@@ -4,32 +4,29 @@ import numpy as np
 from base_tracker import BaseTracker
 import path_config
 
-sys.path.append("external/SiamCAR/")
+sys.path.append("external/DROL")
 from pysot.core.config import cfg
-from pysot.tracker.siamcar_tracker import SiamCARTracker
+from pysot.models.model_builder import ModelBuilder
+from pysot.tracker.tracker_builder import build_tracker
 from pysot.utils.bbox import get_axis_aligned_bbox
 from pysot.utils.model_load import load_pretrain
-from pysot.models.model_builder import ModelBuilder
 
 
-class SiamCAR(BaseTracker):
+class DROL(BaseTracker):
     def __init__(self):
-        super(SiamCAR, self).__init__("SiamCAR")
+        super(DROL, self).__init__("DROL")
 
         # load config
-        cfg.merge_from_file(path_config.SIAMCAR_CONFIG)
+        cfg.merge_from_file(path_config.DROL_CONFIG)
 
-        # hp_search
-        params = getattr(cfg.HP_SEARCH, "OTB100")
-        self.hp = {"lr": params[0], "penalty_k": params[1], "window_lr": params[2]}
-
+        # create model
         model = ModelBuilder()
 
         # load model
-        model = load_pretrain(model, path_config.SIAMCAR_SNAPSHOT).cuda().eval()
+        model = load_pretrain(model, path_config.DROL_SNAPSHOT).cuda().eval()
 
         # build tracker
-        self.tracker = SiamCARTracker(model, cfg.TRACK)
+        self.tracker = build_tracker(model)
 
     def initialize(self, image_file, box):
         image = cv2.imread(image_file)
@@ -39,6 +36,6 @@ class SiamCAR(BaseTracker):
 
     def track(self, image_file):
         image = cv2.imread(image_file)
-        outputs = self.tracker.track(image, self.hp)
+        outputs = self.tracker.track(image)
         pred_bbox = outputs["bbox"]
         return pred_bbox

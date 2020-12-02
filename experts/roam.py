@@ -20,9 +20,9 @@ class ROAM(BaseTracker):
         self.tracker.load_models(models[-1])
 
     def initialize(self, image_file, box):
-        img = np.array(Image.open(image_file).convert('RGB'))
+        img = np.array(Image.open(image_file).convert("RGB"))
         self.tracker.initialize(img, box)
 
     def track(self, image_file):
-        img = np.array(Image.open(image_file).convert('RGB'))
+        img = np.array(Image.open(image_file).convert("RGB"))
         return self.tracker.track(img)
