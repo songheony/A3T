@@ -65,39 +65,20 @@ The following frameworks were used to conveniently track videos and evaluate tra
 
 ## Requirements
 
-First, you need to download this repository and the frameworks.
+We strongly recommend using a virtual environment like Anaconda or Docker.  
+The following is how to build the virtual environment for AAA using anaconda.
 
 ```sh
 # clone this repository
 git clone https://github.com/songheony/AAA-journal
+cd AAA-journal
 
-# make directory for external libraries
-mkdir AAA-journal/external
-cd AAA-journal/external
-
-# clone frameworks
-git clone https://github.com/visionml/pytracking
-git clone https://github.com/StrangerZhang/pysot-toolkit
-
-# install region
-cd pysot-toolkit/pysot/utils/
-python setup.py build_ext --inplace
-```
-
-After that, you need to install the following libraries.
-
-* pytorch
-* python-igraph
-* opencv-python
-
-We strongly recommend using a virtual environment like Anaconda or Docker.  
-The following is how to build the virtual environment for AAA when using anaconda.
-
-```sh
-conda create -n [ENV_NAME] python=[PYTHON_VERSION>=3]
+# create and activate anaconda environment
+conda create -y -n [ENV_NAME] python=[PYTHON_VERSION>=3]
 conda activate [ENV_NAME]
-conda install pytorch torchvision cudatoolkit=[CUDA_VERSION] -c pytorch
-pip install python-igraph opencv-python opencv-contrib-python
+
+# install requirements
+bash install_for_aaa.sh
 ```
 
 ## Tracking
@@ -152,131 +133,27 @@ for img_path in img_paths[1:]:
 
 ## Requirements for experts
 
-* PyTorch 1.4.0
-* CUDA 10.0
+* PyTorch 1.6.0
+* CUDA 10.1
 * GCC 8
 
 First, metafiles including pretrained weights are need to be donloaded.  
-After modifing the path of metafiles in ``path_config.py`` and ``local.py`` file, run following commands to clone repositories.
-
-```sh
-cd external
-
-# clone experts
-git clone https://github.com/songheony/DaSiamRPN
-git clone https://github.com/LPXTT/GradNet-Tensorflow
-git clone https://github.com/skyoung/MemTrack
-git clone https://github.com/researchmm/TracKit
-git clone https://github.com/hqucv/siamban
-git clone https://github.com/ohhhyeahhh/SiamCAR
-git clone https://github.com/researchmm/SiamDW
-git clone https://github.com/got-10k/siamfc
-git clone https://github.com/MegviiDetection/video_analyst
-git clone https://github.com/hmorimitsu/siam-mcf
-git clone https://github.com/VisualComputingInstitute/SiamR-CNN
-git clone https://github.com/huanglianghua/siamrpn-pytorch
-git clone https://github.com/STVIR/pysot
-git clone https://github.com/microsoft/SPM-Tracker
-git clone https://github.com/wwdguu/pyCFTrackers
-git clone https://github.com/xl-sr/THOR
-git clone https://github.com/dontfollowmeimcrazy/vot-kd-rl
-
-cd ../
-```
+And, the path of metafiles in ``path_config.py`` and ``local.py`` file must be edited.
 
 In order to run experts, you need to install additional libraries.  
-We offer three options to make it easy to run experts:
+We offer install script to make it easy to run experts:
 
-### Install pre-built Anaconda environment
-
-```sh
-conda create -f environment.yml
-conda activate aaa
-```
-
-### Install pre-built Docker environment
+### Install requirements with Anaconda environment
 
 ```sh
-docker pull songheony/aaa
-docker run --gpus all -it -v "${PWD}:/workspace" --ipc=host songheony/aaa bash
-```
+# Only for Ubuntu
+sudo apt install -y libopenmpi-dev libgl1-mesa-glx ninja-build
 
-### Install python libraries manually
+# activate anaconda environment
+conda activate [ENV_NAME]
 
-```sh
-# For mpi4py
-sudo apt install libopenmpi-dev
-
-# Change cupy-cuda100 and mxnet-cu100 to proper CUDA version.
-pip install tensorflow-gpu==1.14 matplotlib pandas tqdm cython visdom scikit-image tikzplotlib pycocotools lvis jpeg4py pyyaml yacs colorama tensorboard future optuna shapely scipy easydict tensorboardX mpi4py==2.0.0 gaft hyperopt ray==0.6.3 requests pillow msgpack msgpack_numpy tabulate xmltodict zmq annoy wget protobuf cupy-cuda100 mxnet-cu100 h5py pyzmq numba ipdb loguru scikit-learn spatial-correlation-sampler
-
-pip install --upgrade git+https://github.com/got-10k/toolkit.git@master
-```
-
-After installing the libraries, some libraries need to be compiled manually.
-
-```sh
-cd external
-
-# edit network path of ATOM, DiMP, PrDiMP, KYS
-cd pytracking
-cp ../../local.py pytracking/evaluation/local.py
-python -c "from ltr.admin.environment import create_default_local_file; create_default_local_file()"
-cd ../
-
-# For ATOM
-cd pytracking
-git submodule update --init  
-apt-get install ninja-build
-cd ../
-
-# For DROL
-cd DROL
-python setup.py build_ext --inplace
-cd ../
-
-# For RLS-RTMDNet
-cd RLS-RTMDNet/modules/roi_align
-python setup.py build_ext --inplace
-cd ../../../
-
-# For SiamBAN
-cd siamban
-python setup.py build_ext --inplace
-cd ../
-
-# For SiamR-CNN
-cd SiamR-CNN
-git clone https://github.com/pvoigtlaender/got10k-toolkit.git
-git clone https://github.com/tensorpack/tensorpack.git
-cd tensorpack
-git checkout d24a9230d50b1dea1712a4c2765a11876f1e193c
-cd ../../
-
-# For SiamRPN++
-cd pysot
-python setup.py build_ext --inplace
-cd ../
-
-# For SPM
-cd SPM-Tracker
-bash compile.sh
-cd ../
-
-# For Staple
-cd pyCFTrackers/lib/pysot/utils
-python setup.py build_ext --inplace
-cd ../../../../
-cd pyCFTrackers/lib/eco/features/
-python setup.py build_ext --inplace
-cd ../../../../
-
-# For THOR
-cd THOR
-bash benchmark/make_toolkits.sh
-cd ../
-
-cd ../
+# install requirements
+bash install_for_experts.sh
 ```
 
 ## Reproduce our results
