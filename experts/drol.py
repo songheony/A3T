@@ -1,5 +1,6 @@
 import sys
 import cv2
+import torch
 import numpy as np
 from base_tracker import BaseTracker
 import path_config
@@ -27,6 +28,10 @@ class DROL(BaseTracker):
 
         # build tracker
         self.tracker = build_tracker(model)
+
+        # warmup
+        for i in range(10):
+            model.template(torch.FloatTensor(1,3,127,127).cuda())
 
     def initialize(self, image_file, box):
         image = cv2.imread(image_file)

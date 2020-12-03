@@ -11,7 +11,7 @@ Heon Song, Daiki Suehiro, Seiichi Uchida
 ## Experts
 
 In this repository, we implemented or edited the following trackers to use as experts.  
-**You can use the tracker with just a few lines of code.**
+**You can use the trackers with just a few lines of code.**
 
 | Tracker   | Link                |
 |-----------|---------------------|
@@ -37,7 +37,7 @@ In this repository, we implemented or edited the following trackers to use as ex
 | SPM (CVPR 2019)       | [Paper](https://arxiv.org/abs/1904.04452) / [Original Repo](https://github.com/microsoft/SPM-Tracker) |
 | Staple (CVPR 2016)   | [Paper](https://arxiv.org/abs/1512.01355) / [Original Repo](https://github.com/wwdguu/pyCFTrackers) |
 | THOR (BMVC 2019)     | [Paper](https://arxiv.org/abs/1907.12920) / [Original Repo](https://github.com/xl-sr/THOR) |
-| TRAS (ACCV 2020)     | [Paper](https://arxiv.org/abs/2007.04108) / [Original Repo](https://github.com/dontfollowmeimcrazy/vot-kd-rl) |
+| TRASFUST (ACCV 2020)     | [Paper](https://arxiv.org/abs/2007.04108) / [Original Repo](https://github.com/dontfollowmeimcrazy/vot-kd-rl) |
 
 [1] Since the original code of DaSiamRPN is for Python2, We've had to modify the code a little bit to be compatible with Python3.
 

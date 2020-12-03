@@ -12,10 +12,10 @@ class SiamFC(BaseTracker):
         super(SiamFC, self).__init__("SiamFC")
         # TODO: edit this path
         self.net_file = path_config.SIAMFC_MODEL
+        self.tracker = TrackerSiamFC(net_path=self.net_file)
 
     def initialize(self, image_file, box):
         image = Image.open(image_file).convert("RGB")
-        self.tracker = TrackerSiamFC(net_path=self.net_file)
         self.tracker.init(image, box)
 
     def track(self, image_file):

@@ -8,6 +8,7 @@ NFS_PATH = "/home/heonsong/Disk2/Dataset/NFS"
 OTB_PATH = "/home/heonsong/Disk2/Dataset/OTB"
 TPL_PATH = "/home/heonsong/Disk2/Dataset/TColor128"
 UAV_PATH = "/home/heonsong/Disk2/Dataset/UAV123"
+TRACKINGNET_PATH = "/home/heonsong/Disk2/Dataset/TrackingNet"
 VOT_PATH = "/home/heonsong/Disk2/Dataset/VOT2018"
 
 # DaSiamRPN

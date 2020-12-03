@@ -1,18 +1,32 @@
 datasets=("OTB" "NFS" "UAV" "TPL" "VOT" "LaSOT" "Got10K")
 
-high_experts=("ATOM" "DaSiamRPN" "SiamMCF" "SiamRPN++" "SPM" "THOR")
+ultra_fast_experts=("DaSiamRPN" "SiamDW" "SiamRPN" "SPM" "THOR")
 for (( j=0; j<${#datasets[@]}; j++ )); do
-    for (( i=0; i<${#high_experts[@]}; i++ )); do
-        python ./track_expert.py -e ${high_experts[$i]} -d ${datasets[$j]}
+    for (( i=0; i<${#ultra_fast_experts[@]}; i++ )); do
+        python ./track_expert.py -e ${ultra_fast_experts[$i]} -d ${datasets[$j]}
     done
 done
 
-low_experts=("GradNet" "MemTrack" "SiamDW" "SiamFC" "SiamRPN" "Staple")
+fast_experts=("GradNet" "Ocean" "SiamBAN" "SiamCAR" "SiamFC++" "SiamRPN++" "Staple")
 for (( j=0; j<${#datasets[@]}; j++ )); do
-    for (( i=0; i<${#low_experts[@]}; i++ )); do
-        python ./track_expert.py -e ${low_experts[$i]} -d ${datasets[$j]}
+    for (( i=0; i<${#fast_experts[@]}; i++ )); do
+        python ./track_expert.py -e ${fast_experts[$i]} -d ${datasets[$j]}
     done
 done
+
+normal_experts=("ATOM" "DiMP" "KYS" "PrDiMP" "RLS-RTMDNet" "SiamMCF")
+for (( j=0; j<${#datasets[@]}; j++ )); do
+    for (( i=0; i<${#normal_experts[@]}; i++ )); do
+        python ./track_expert.py -e ${normal_experts[$i]} -d ${datasets[$j]}
+    done
+done
+
+# slow_experts=("DROL" "SiamFC" "SiamR-CNN")
+# for (( j=0; j<${#datasets[@]}; j++ )); do
+#     for (( i=0; i<${#slow_experts[@]}; i++ )); do
+#         python ./track_expert.py -e ${slow_experts[$i]} -d ${datasets[$j]}
+#     done
+# done
 
 siamdw_experts=("SiamDW_SiamFCRes22" "SiamDW_SiamFCIncep22" "SiamDW_SiamFCNext22" "SiamDW_SiamRPNRes22" "SiamDW_SiamFCRes22_VOT" "SiamDW_SiamFCIncep22_VOT" "SiamDW_SiamFCNext22_VOT" "SiamDW_SiamRPNRes22_VOT")
 for (( j=0; j<${#datasets[@]}; j++ )); do
@@ -25,12 +39,5 @@ siamrpn_experts=("SiamRPN++_AlexNet" "SiamRPN++_AlexNet_OTB" "SiamRPN++_ResNet-5
 for (( j=0; j<${#datasets[@]}; j++ )); do
     for (( i=0; i<${#siamrpn_experts[@]}; i++ )); do
         python ./track_expert.py -e ${siamrpn_experts[$i]} -d ${datasets[$j]}
-    done
-done
-
-new_experts=("DiMP" "DROL" "KYS" "Ocean" "PrDiMP" "RLS-RTMDNet" "SiamBAN" "SiamCAR" "SiamFC++" "SiamR-CNN" "TRASFUST")
-for (( j=0; j<${#datasets[@]}; j++ )); do
-    for (( i=0; i<${#high_experts[@]}; i++ )); do
-        python ./track_expert.py -e ${high_experts[$i]} -d ${datasets[$j]}
     done
 done

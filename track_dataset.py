@@ -1,8 +1,6 @@
-import numpy as np
-import multiprocessing
 import os
 import pickle
-from itertools import product
+import numpy as np
 from select_options import select_datasets
 
 
@@ -50,52 +48,37 @@ def run_sequence(seq, tracker, experts=None, debug=False):
                 pickle.dump(offline_bb, fp)
 
 
-def run_dataset(dataset, trackers, experts=None, debug=False, threads=0):
+def run_dataset(dataset, trackers, experts=None, debug=False):
     """Runs a list of experts on a dataset.
     args:
         dataset: List of Sequence instances, forming a dataset.
         experts: List of Tracker instances.
         debug: Debug level.
-        threads: Number of threads to use (default 0).
     """
-    if threads == 0:
-        mode = "sequential"
-    else:
-        mode = "parallel"
 
-    if mode == "sequential":
-        for seq in dataset:
-            for tracker_info in trackers:
-                run_sequence(seq, tracker_info, experts=experts, debug=debug)
-    elif mode == "parallel":
-        param_list = [
-            (seq, tracker_info, experts, debug)
-            for seq, tracker_info in product(dataset, trackers)
-        ]
-        with multiprocessing.Pool(processes=threads) as pool:
-            pool.starmap(run_sequence, param_list)
+    for seq in dataset:
+        for tracker_info in trackers:
+            run_sequence(seq, tracker_info, experts=experts, debug=debug)
     print("Done")
 
 
-def run_tracker(tracker, dataset, experts=None, sequence=None, debug=0, threads=0):
+def run_tracker(tracker, dataset, experts=None, sequence=None, debug=0):
     """Run tracker on sequence or dataset.
     args:
         tracker_name: Name of tracking method.
         tracker_param: Name of parameter file.
-        run_id: The run id.
         dataset: Dataset (otb, nfs, uav, tpl, vot, tn, gott, gotv, lasot).
         sequence: Sequence number or name.
         debug: Debug level.
-        threads: Number of threads.
     """
 
     if sequence is not None:
         dataset = [dataset[sequence]]
 
-    run_dataset(dataset, [tracker], experts=experts, debug=debug, threads=threads)
+    run_dataset(dataset, [tracker], experts=experts, debug=debug)
 
 
 def run(tracker, dataset_name, experts=None):
     dataset = select_datasets(dataset_name)
 
-    run_tracker(tracker, dataset, experts=experts, debug=True)
+    run_tracker(tracker, dataset, experts=experts, debug=False)

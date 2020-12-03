@@ -1,6 +1,7 @@
 from datasets.otbdataset import OTBDataset
 from datasets.votdataset import VOTDataset
 from datasets.tpldataset import TPLDataset
+from datasets.trackingnetdataset import TrackingNetDataset
 from datasets.uavdataset import UAVDataset
 from datasets.nfsdataset import NFSDataset
 from datasets.lasotdataset import LaSOTDataset
@@ -231,6 +232,8 @@ def select_datasets(dataset_name):
         dataset = UAVDataset()
     elif dataset_name == "TPL":
         dataset = TPLDataset()
+    elif dataset_name == "TrackingNet":
+        dataset = TrackingNetDataset()
     elif dataset_name == "VOT":
         dataset = VOTDataset()
     elif dataset_name == "LaSOT":
