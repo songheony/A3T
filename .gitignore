@@ -114,3 +114,4 @@ backup/
 weights/
 train_log/
 experiments/
+dump/

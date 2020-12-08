@@ -5,6 +5,7 @@ from datasets.trackingnetdataset import TrackingNetDataset
 from datasets.uavdataset import UAVDataset
 from datasets.nfsdataset import NFSDataset
 from datasets.lasotdataset import LaSOTDataset
+from datasets.got10kdataset import GOT10KDatasetVal
 from print_manager import do_not_print
 
 
@@ -238,6 +239,8 @@ def select_datasets(dataset_name):
         dataset = VOTDataset()
     elif dataset_name == "LaSOT":
         dataset = LaSOTDataset()
+    elif dataset_name == "Got10K":
+        dataset = GOT10KDatasetVal()
     else:
         raise ValueError("Unknown dataset name")
 

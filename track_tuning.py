@@ -4,8 +4,7 @@ from pathlib import Path
 import numpy as np
 
 from track_dataset import run_tracker
-from select_options import select_algorithms
-from datasets.got10kdataset import GOT10KDatasetVal
+from select_options import select_algorithms, select_datasets
 from evaluations.ope_benchmark import OPEBenchmark
 from evaluations.offline_benchmark import OfflineBenchmark
 import path_config
@@ -13,8 +12,8 @@ import path_config
 
 def main(eval_dir, algorithm_name, experts, thresholds, **kwargs):
     algorithms = []
-    dataset = GOT10KDatasetVal()
     dataset_name = "GOT10K"
+    dataset = select_datasets(dataset_name)
 
     for threshold in thresholds:
         kwargs["feature_threshold"] = threshold

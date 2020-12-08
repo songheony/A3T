@@ -759,7 +759,7 @@ def find_rank(datasets, algorithms, experts, success_rets, eval_dir):
             text += f"{algorithm.split('_')[0]}: best-{first} / worst-{last}\n"
         text += "\n"
 
-    txt_file = eval_dir / f"Ranking.txt"
+    txt_file = eval_dir / "Ranking.txt"
     txt_file.write_text(text)
 
 

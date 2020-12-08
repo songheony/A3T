@@ -183,9 +183,9 @@ class AAA(BaseTracker):
 
             # Return box with aggrogating experts' box
             if self.random_select:
-                predict = boxes[self._weighted_random_choice()]
+                predict = random.choices(boxes, weights=self.learner.w)
             else:
-                np.dot(self.learner.w, boxes)
+                predict = np.dot(self.learner.w, boxes)
 
         return predict, offline_results, self.learner.w
 
@@ -203,11 +203,3 @@ class AAA(BaseTracker):
             )
 
         return expert_gradient_losses
-
-    def _weighted_random_choice(self):
-        pick = random.uniform(0, sum(self.learner.w))
-        current = 0
-        for i, weight in enumerate(self.learner.w):
-            current += weight
-            if current >= pick:
-                return i
