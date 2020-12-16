@@ -46,7 +46,7 @@ def calc_rank(dataset_name, seq_names, trackers, rets):
 
 
 def draw_pie(
-    datasets,
+    datasets_name,
     experts_name,
     specific_names,
     success_rets,
@@ -57,7 +57,7 @@ def draw_pie(
 ):
     fig, axes = plt.subplots(
         nrows=2,
-        ncols=(len(datasets) + 1) // 2,
+        ncols=(len(datasets_name) + 1) // 2,
         figsize=figsize,
         subplot_kw=dict(aspect="equal"),
     )
@@ -69,9 +69,9 @@ def draw_pie(
         else:
             return ""
 
-    for i, dataset_name in enumerate(datasets):
+    for i, dataset_name in enumerate(datasets_name):
         n_row = i % 2
-        n_col = i % (len(datasets) // 2)
+        n_col = i // 2
         ax = axes[n_row, n_col]
 
         seq_names = sorted(success_rets[dataset_name][experts_name[0]].keys())
@@ -102,8 +102,7 @@ def draw_pie(
             specific_names,
             frameon=False,
             loc="center left",
-            bbox_to_anchor=(0.0, 0.5)
-            # ncol=len(trackers) // 3
+            bbox_to_anchor=(-0.1, 0.5)
         )
 
     if file_name is None:

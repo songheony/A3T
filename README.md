@@ -1,12 +1,10 @@
-# AAA: Adaptive Aggregation of Arbitrary Online Trackers with Theoretical Performance Guarantee
+# [AAA: Adaptive Aggregation of Arbitrary Online Trackers with Theoretical Performance Guarantee](https://arxiv.org/abs/2009.09237)
 
-[AAA: Adaptive Aggregation of Arbitrary Online Trackers with Theoretical Performance Guarantee](https://arxiv.org/abs/2009.09237)
+![Figure 1](assets/Fig1.png?raw=true "Score")
 
 Heon Song, Daiki Suehiro, Seiichi Uchida
 
 > For visual object tracking, it is difficult to realize an almighty online tracker due to the huge variations of target appearance depending on an image sequence. This paper proposes an online tracking method that adaptively aggregates arbitrary multiple online trackers. The performance of the proposed method is theoretically guaranteed to be comparable to that of the best tracker for any image sequence, although the best expert is unknown during tracking. The experimental study on the large variations of benchmark datasets and aggregated trackers demonstrates that the proposed method can achieve state-of-the-art performance.
-
-![Alt text](assets/Table1.png?raw=true "Score")
 
 ## Experts
 

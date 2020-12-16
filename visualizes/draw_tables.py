@@ -3,7 +3,7 @@ from sympy import preview
 
 
 def make_score_table(
-    datasets,
+    datasets_name,
     algorithms_name,
     experts_name,
     success_rets,
@@ -14,10 +14,10 @@ def make_score_table(
     drop_last_dp=False
 ):
     trackers_name = experts_name + algorithms_name
-    mean_succ = np.zeros((len(trackers_name), len(datasets)))
-    mean_prec = np.zeros((len(trackers_name), len(datasets)))
+    mean_succ = np.zeros((len(trackers_name), len(datasets_name)))
+    mean_prec = np.zeros((len(trackers_name), len(datasets_name)))
     for i, tracker_name in enumerate(trackers_name):
-        for j, dataset_name in enumerate(datasets):
+        for j, dataset_name in enumerate(datasets_name):
             succ = [
                 v
                 for v in success_rets[dataset_name][tracker_name].values()
@@ -39,11 +39,11 @@ def make_score_table(
 
     header = "c"
     if drop_dp:
-        num_header = len(datasets)
+        num_header = len(datasets_name)
     elif drop_last_dp:
-        num_header = len(datasets) * 2 - 1
+        num_header = len(datasets_name) * 2 - 1
     else:
-        num_header = len(datasets) * 2
+        num_header = len(datasets_name) * 2
     for i in range(num_header):
         header += "|c"
 
@@ -52,16 +52,17 @@ def make_score_table(
 
     columns = "\\multirow{2}{*}{Tracker}"
 
-    for i in range(len(datasets)):
-        if drop_dp or (drop_last_dp and i == len(datasets) - 1):
-            columns += f" & \\multicolumn{{1}}{{c|}}{{{datasets[i]}}}"
+    for i in range(len(datasets_name)):
+        dataset_name = datasets_name[i].replace("%", "\\%")
+        if drop_dp or (drop_last_dp and i == len(datasets_name) - 1):
+            columns += f" & \\multicolumn{{1}}{{c|}}{{{dataset_name}}}"
         else:
-            columns += f" & \\multicolumn{{2}}{{c|}}{{{datasets[i]}}}"
+            columns += f" & \\multicolumn{{2}}{{c|}}{{{dataset_name}}}"
     latex += f"{columns} \\\\\n"
 
     small_columns = " "
-    for i in range(len(datasets)):
-        if drop_dp or (drop_last_dp and i == len(datasets) - 1):
+    for i in range(len(datasets_name)):
+        if drop_dp or (drop_last_dp and i == len(datasets_name) - 1):
             small_columns += " & AUC"
         else:
             small_columns += " & AUC & DP"
@@ -77,8 +78,8 @@ def make_score_table(
         else:
             line = trackers_name[i].replace("_", "\\_")
 
-        for j in range(len(datasets)):
-            if drop_dp or (drop_last_dp and i == len(datasets) - 1):
+        for j in range(len(datasets_name)):
+            if drop_dp or (drop_last_dp and i == len(datasets_name) - 1):
                 values = [mean_succ]
             else:
                 values = [mean_succ, mean_prec]

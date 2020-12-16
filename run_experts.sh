@@ -1,4 +1,5 @@
-datasets=("OTB2015" "OTB2015-80%" "NFS" "UAV123" "TColor128" "VOT2018" "LaSOT" "Got10K")
+# datasets=("OTB2015" "OTB2015-80%" "NFS" "UAV123" "TColor128" "VOT2018" "LaSOT" "Got10K")
+datasets=("OTB2015-60%")
 
 ultra_fast_experts=("DaSiamRPN" "SiamDW" "SiamRPN" "SPM" "THOR")
 for (( j=0; j<${#datasets[@]}; j++ )); do
@@ -14,6 +15,7 @@ for (( j=0; j<${#datasets[@]}; j++ )); do
     done
 done
 
+# "MemDTC"
 normal_experts=("ATOM" "DiMP" "DROL" "KYS" "PrDiMP" "RLS-RTMDNet" "SiamMCF")
 for (( j=0; j<${#datasets[@]}; j++ )); do
     for (( i=0; i<${#normal_experts[@]}; i++ )); do

@@ -421,7 +421,7 @@ def main(experiments, all_experts, all_experts_name):
     save_dir = Path(VISUALIZATION_PATH)
     os.makedirs(save_dir, exist_ok=True)
 
-    datasets_name = ["OTB2015", "TColor128", "UAV123", "NFS", "LaSOT", "VOT2018"]
+    datasets_name = ["OTB2015", "OTB2015-80%", "TColor128", "UAV123", "NFS", "LaSOT", "VOT2018"]
     datasets = [select_datasets(dataset_name) for dataset_name in datasets_name]
 
     total_colors = sns.color_palette("hls", len(all_experts) + 2).as_hex()[::-1][1:]
@@ -652,14 +652,12 @@ if __name__ == "__main__":
         "DROL",
         "GradNet",
         "KYS",
-        "MemTrack",
         "Ocean",
         "PrDiMP-50",
         "RLS-RTMDNet",
         "SiamBAN",
         "SiamCAR",
         "SiamDW",
-        "SiamFC",
         "SiamFC++",
         "SiamMCF",
         "SiamRPN",
@@ -675,14 +673,12 @@ if __name__ == "__main__":
         "DROL (AAAI 2020)",
         "GradNet (ICCV 2019)",
         "KYS (ECCV 2020)",
-        "MemTrack (ECCV 2018)",
         "Ocean (ECCV 2020)",
         "PrDiMP (CVPR 2020)",
         "RLS-RTMDNet (CVPR 2020)",
         "SiamBAN (CVPR 2020)",
         "SiamCAR (CVPR 2020)",
         "SiamDW (CVPR 2019)",
-        "SiamFC (ECCVW 2016)",
         "SiamFC++ (AAAI 2020)",
         "SiamMCF (ECCVW 2018)",
         "SiamRPN (CVPR 2018)",
