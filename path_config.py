@@ -24,6 +24,9 @@ DROL_SNAPSHOT = "weights/DROL/siamrpn_r50_l234_dwxcorr_otb/model.pth"
 # GradNet
 GRADNET_MODEL = "weights/GradNet/ckpt/base_l5_1t_49/model_epoch49.ckpt"
 
+# MemDTC
+MEMDTC_MODEL = "weights/MemDTC/models"
+
 # MemTrack
 MEMTRACK_MODEL = "weights/MemTrack/models"
 

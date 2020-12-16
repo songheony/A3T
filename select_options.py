@@ -36,6 +36,10 @@ def select_expert(tracker_name):
         from experts.kys import KYS
 
         tracker = KYS()
+    elif tracker_name == "MemDTC":
+        from experts.memdtc import MemDTC
+
+        tracker = MemDTC()
     elif tracker_name == "MemTrack":
         from experts.memtrack import MemTrack
 

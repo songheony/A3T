@@ -9,17 +9,17 @@ import path_config
 tf.get_logger().setLevel("INFO")
 from base_tracker import BaseTracker
 
-sys.path.append("external/MemTrack/")
+sys.path.append("external/MemDTC/")
 from tracking.tracker import Tracker, Model
 
 
-class MemTrack(BaseTracker):
+class MemDTC(BaseTracker):
     def __init__(self):
-        super(MemTrack, self).__init__("MemTrack")
+        super(MemDTC, self).__init__("MemDTC")
         config_proto = tf.ConfigProto()
         config_proto.gpu_options.allow_growth = True
+        ckpt = tf.train.get_checkpoint_state(path_config.MEMDTC_MODEL)
         sess = tf.Session(config=config_proto)
-        ckpt = tf.train.get_checkpoint_state(path_config.MEMTRACK_MODEL)
         model = Model(sess, ckpt.model_checkpoint_path)
         self.tracker = Tracker(model)
 

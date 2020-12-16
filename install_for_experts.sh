@@ -10,6 +10,7 @@ git clone https://github.com/ClementPinard/Pytorch-Correlation-extension.git
 git clone https://github.com/songheony/DaSiamRPN
 git clone https://github.com/shallowtoil/DROL
 git clone https://github.com/LPXTT/GradNet-Tensorflow
+git clone https://github.com/skyoung/MemDTC.git
 git clone https://github.com/skyoung/MemTrack
 git clone https://github.com/researchmm/TracKit
 git clone https://github.com/songheony/RLS-RTMDNet
@@ -25,7 +26,6 @@ git clone https://github.com/STVIR/pysot
 git clone https://github.com/songheony/SPM-Tracker
 git clone https://github.com/wwdguu/pyCFTrackers
 git clone https://github.com/xl-sr/THOR
-git clone https://github.com/dontfollowmeimcrazy/vot-kd-rl
 
 # edit network path of ATOM, DiMP, PrDiMP, KYS
 cd pytracking

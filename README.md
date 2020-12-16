@@ -21,6 +21,7 @@ In this repository, we implemented or edited the following trackers to use as ex
 | DROL (AAAI 2020)      | [Paper](https://arxiv.org/abs/1909.02959) / [Original Repo](https://github.com/shallowtoil/DROL) |
 | GradNet (ICCV 2019)   | [Paper](https://arxiv.org/abs/1909.06800) / [Original Repo](https://github.com/LPXTT/GradNet-Tensorflow) |
 | KYS (ECCV 2020)   | [Paper](https://arxiv.org/abs/2003.11014) / [Original Repo](https://github.com/visionml/pytracking) |
+| MemDTC (TPAMI 2019)  | [Paper](https://arxiv.org/abs/1907.07613) / [Original Repo](https://github.com/skyoung/MemTrack) |
 | MemTrack (ECCV 2018)  | [Paper](https://arxiv.org/abs/1803.07268) / [Original Repo](https://github.com/skyoung/MemTrack) |
 | Ocean (ECCV 2020)     | [Paper](https://arxiv.org/abs/2006.10721) / [Original Repo](https://github.com/researchmm/TracKit) |
 | PrDiMP (CVPR 2020)    | [Paper](https://arxiv.org/abs/2003.12565) / [Original Repo](https://github.com/visionml/pytracking) |
@@ -37,9 +38,9 @@ In this repository, we implemented or edited the following trackers to use as ex
 | SPM (CVPR 2019)       | [Paper](https://arxiv.org/abs/1904.04452) / [Original Repo](https://github.com/microsoft/SPM-Tracker) |
 | Staple (CVPR 2016)   | [Paper](https://arxiv.org/abs/1512.01355) / [Original Repo](https://github.com/wwdguu/pyCFTrackers) |
 | THOR (BMVC 2019)     | [Paper](https://arxiv.org/abs/1907.12920) / [Original Repo](https://github.com/xl-sr/THOR) |
-| TRASFUST (ACCV 2020)     | [Paper](https://arxiv.org/abs/2007.04108) / [Original Repo](https://github.com/dontfollowmeimcrazy/vot-kd-rl) |
 
 [*] Since the original code of DaSiamRPN is for Python2, We've had to modify the code a little bit to be compatible with Python3.
+[*] For RLS-RTMDNet and SPM, We've had to modify the code a little bit to be compatible with Pytorch >= 1.3.
 
 ## Datasets
 
@@ -134,6 +135,7 @@ for img_path in img_paths[1:]:
 ## Requirements for experts
 
 * PyTorch 1.6.0
+* Tensorflow 1.14.0
 * CUDA 10.1
 * GCC 8
 
@@ -156,37 +158,46 @@ bash install_for_experts.sh
 
 ## Reproduce our results
 
-<!-- You can reproduce our results by using created environment and results.  
-If you don't want to run experts or AAA, you can download [AAA+Experts Tracking results](https://drive.google.com/file/d/1Vw8KuF-4_1Dc7XHa6lAyHxjKve-UlE5B/view?usp=sharing) and [Evaluation results](https://drive.google.com/file/d/1nqQk8fZIef1hFIRM_RW425ti6stKwxJA/view?usp=sharing). Moreover, you can download figures in our paper from [here](https://drive.google.com/file/d/12O2saVFQD9e01GuTkKHWi79ohqjQR3eQ/view?usp=sharing).  
-Or, if you want to reproduce our results by yourself, run the following commands.   -->
+We provide scripts to reproduce all results, figures, and tables in our paper.  
+In addition, we provide the following files in case you don't have time to run all the scripts yourself.  
+[Experts tracking results](##)  
+[AAA tuning results](##)  
+[AAA tracking results](##)  
+[HDT tracking results](##)  
+[MCCT tracking results](##)  
+[Baselines tracking results](##)  
 
 ```sh
-# run experts. if you've downloaded Experts Tracking results, you can skip this command
+# Run experts
+# If you've downloaded Experts tracking results, you can skip this command
 bash run_experts.sh
 
-# tune the hyperparameter. if you've downloaded AAA Tuning results, you can skip this command
+# Tune the hyperparameter
+# If you've downloaded AAA tuning results, you can skip this command
 bash run_tuning.sh
 
-# run AAA. if you've download AAA Tracking results, you can skip this command
+# Run AAA
+# If you've download AAA tracking results, you can skip this command
 bash run_algorithm.sh
 
-# run HDT. if you've download HDT Tracking results, you can skip this command
+# Run HDT
+# If you've download HDT tracking results, you can skip this command
 bash run_hdt.sh
 
-# run MCCT. if you've download MCCT Tracking results, you can skip this command
+# Run MCCT
+# If you've download MCCT tracking results, you can skip this command
 bash run_mcct.sh
 
-# run Max and Random. if you've download Baselines Tracking results, you can skip this command
+# Run Max and Random
+# If you've download Baselines tracking results, you can skip this command
 bash run_baselines.sh
 
-# evaluate experts and AAA. if you've download Evaluation results, you can skip this command
-bash run_eval.sh
-
-# visualize results
+# Visualize figures and tables in our paper
 python visualize_figure.py
 ```
 
-The code is supposed to run algorithms after running experts for test. However, it is easy to modify the code to do both simultaneously.
+The code is supposed to run algorithms after running experts for test.  
+However, it is easy to modify the code to do both simultaneously.
 
 ## Citation
 

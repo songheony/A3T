@@ -54,7 +54,7 @@ def evaluate(datasets, datasets_name, experts, baselines, algorithm):
             anchor_frame_rets[dataset_name] = ope.get_anchor_frames(algorithm)
 
         for tracker_name in eval_trackers:
-            tracker_dir = save_dir / dataset_name / tracker_name
+            tracker_dir = save_dir / tracker_name / dataset_name
             os.makedirs(tracker_dir, exist_ok=True)
 
             tracking_time = save_pickle(tracker_dir, "tracking_time", ope.eval_times, tracker_name)
