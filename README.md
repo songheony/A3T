@@ -1,4 +1,4 @@
-# AAA: Adaptive Aggregation of Arbitrary Online Trackers <br/> with Theoretical Performance Guarantee
+# AAA: Adaptive Aggregation of Arbitrary Online Trackers with Theoretical Performance Guarantee
 
 [AAA: Adaptive Aggregation of Arbitrary Online Trackers with Theoretical Performance Guarantee](https://arxiv.org/abs/2009.09237)
 
@@ -35,12 +35,11 @@ In this repository, we implemented or edited the following trackers to use as ex
 | SiamR-CNN (CVPR 2020) | [Paper](https://arxiv.org/abs/1911.12836) / [Original Repo](https://github.com/VisualComputingInstitute/SiamR-CNN) |
 | SiamRPN (CVPR 2018)   | [Paper](http://openaccess.thecvf.com/content_cvpr_2018/papers/Li_High_Performance_Visual_CVPR_2018_paper.pdf) / [Original Repo](https://github.com/huanglianghua/siamrpn-pytorch) |
 | SiamRPN++ (CVPR 2019) | [Paper](https://arxiv.org/abs/1812.11703) / [Original Repo](https://github.com/STVIR/pysot) |
-| SPM (CVPR 2019)       | [Paper](https://arxiv.org/abs/1904.04452) / [Original Repo](https://github.com/microsoft/SPM-Tracker) |
+| SPM (CVPR 2019)      | [Paper](https://arxiv.org/abs/1904.04452) / [Original Repo](https://github.com/microsoft/SPM-Tracker) |
 | Staple (CVPR 2016)   | [Paper](https://arxiv.org/abs/1512.01355) / [Original Repo](https://github.com/wwdguu/pyCFTrackers) |
 | THOR (BMVC 2019)     | [Paper](https://arxiv.org/abs/1907.12920) / [Original Repo](https://github.com/xl-sr/THOR) |
 
-[*] Since the original code of DaSiamRPN is for Python2, We've had to modify the code a little bit to be compatible with Python3.
-[*] For RLS-RTMDNet and SPM, We've had to modify the code a little bit to be compatible with Pytorch >= 1.3.
+<sup>For DaSiamRPN, RLS-RTMDNet and SPM, we've modified the code a little bit to be compatible with Python3 and Pytorch >= 1.3.</sup>
 
 ## Datasets
 
@@ -55,7 +54,7 @@ We evaluated the performance of the experts and AAA on the following datasets.
 * [LaSOT](https://arxiv.org/abs/1809.07845)[<https://cis.temple.edu/lasot/download.html>]
 * [Got10K](https://arxiv.org/abs/1810.11981)[<http://got-10k.aitestunion.com/>]
 
-[*] VOT2018 is evaluated in unsupervised experiment as same as other datasets.
+<sup>VOT2018 is evaluated in unsupervised experiment as same as other datasets.</sup>
 
 ## Frameworks
 
