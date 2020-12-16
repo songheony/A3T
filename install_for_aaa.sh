@@ -1,6 +1,6 @@
 # install libraries
 conda install -y pytorch==1.6.0 torchvision==0.7.0 cudatoolkit=10.1 -c pytorch
-pip install python-igraph opencv-python opencv-contrib-python Cython
+pip install python-igraph opencv-python opencv-contrib-python Cython seaborn sympy
 
 # make directory for external libraries
 mkdir external

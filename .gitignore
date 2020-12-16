@@ -115,3 +115,4 @@ weights/
 train_log/
 experiments/
 dump/
+noisy_idx/

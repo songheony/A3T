@@ -1,5 +1,6 @@
 RESULTS_PATH = "tracking_results"
 EVALUATION_PATH = "evaluation_results"
+VISUALIZATION_PATH = "visualization_results"
 
 # Dataset
 GOT10K_PATH = "/home/heonsong/Disk2/Dataset/Got10K"
@@ -11,6 +12,7 @@ TPL_PATH = "/home/heonsong/Disk2/Dataset/TColor128"
 UAV_PATH = "/home/heonsong/Disk2/Dataset/UAV123"
 TRACKINGNET_PATH = "/home/heonsong/Disk2/Dataset/TrackingNet"
 VOT_PATH = "/home/heonsong/Disk2/Dataset/VOT2018"
+OTB_NOISY_PATH = "noisy_idx"
 
 # DaSiamRPN
 DASIAMRPN_MODEL = "weights/DaSiamRPN/SiamRPNOTB.model"

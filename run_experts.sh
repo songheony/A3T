@@ -1,4 +1,4 @@
-datasets=("OTB" "NFS" "UAV" "TPL" "VOT" "LaSOT" "Got10K")
+datasets=("OTB2015" "OTB2015-80%" "NFS" "UAV123" "TColor128" "VOT2018" "LaSOT" "Got10K")
 
 ultra_fast_experts=("DaSiamRPN" "SiamDW" "SiamRPN" "SPM" "THOR")
 for (( j=0; j<${#datasets[@]}; j++ )); do
@@ -14,14 +14,14 @@ for (( j=0; j<${#datasets[@]}; j++ )); do
     done
 done
 
-normal_experts=("ATOM" "DiMP" "KYS" "PrDiMP" "RLS-RTMDNet" "SiamMCF")
+normal_experts=("ATOM" "DiMP" "DROL" "KYS" "PrDiMP" "RLS-RTMDNet" "SiamMCF")
 for (( j=0; j<${#datasets[@]}; j++ )); do
     for (( i=0; i<${#normal_experts[@]}; i++ )); do
         python ./track_expert.py -e ${normal_experts[$i]} -d ${datasets[$j]}
     done
 done
 
-# slow_experts=("DROL" "SiamFC" "SiamR-CNN")
+# slow_experts=("SiamFC" "SiamR-CNN")
 # for (( j=0; j<${#datasets[@]}; j++ )); do
 #     for (( i=0; i<${#slow_experts[@]}; i++ )); do
 #         python ./track_expert.py -e ${slow_experts[$i]} -d ${datasets[$j]}

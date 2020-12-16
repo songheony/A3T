@@ -1,99 +1,39 @@
 import os
-from pathlib import Path
 import pickle
+from pathlib import Path
 import seaborn as sns
-from datasets.otbdataset import OTBDataset
-from datasets.votdataset import VOTDataset
-from datasets.tpldataset import TPLDataset
-from visualize_result import draw_graph, draw_result
-from visualize_eval import (
-    # draw_score_anchor,
-    # make_regret_table,
-    # draw_rank,
-    # draw_scores,
-    # draw_prec_with_thresholds,
-    name2color,
-    draw_rank_all,
-    draw_pie,
-    draw_succ_with_thresholds,
-    make_score_table,
-    draw_curves,
-)
+from select_options import select_datasets
+from evaluations.eval_trackers import evaluate
+from evaluations.ope_benchmark import OPEBenchmark
+from visualizes.draw_figures import draw_pie, draw_result, draw_graph, draw_curves, draw_rank, draw_succ_with_thresholds
+from visualizes.draw_tables import make_score_table
+from path_config import VISUALIZATION_PATH
 
 
-def get_tuning_results(tune_dir):
+def get_tuning_results(tune_dir, modes, thresholds):
     dataset_name = "GOT10K"
-    modes = ["High", "Low", "Mix", "SiamDW", "SiamRPN++"]
+    dataset = select_datasets(dataset_name)
+    ope = OPEBenchmark(dataset)
 
     threshold_successes = {mode: {} for mode in modes}
-    threshold_precisions = {mode: {} for mode in modes}
-    threshold_anchor_successes = {mode: {} for mode in modes}
-    threshold_anchor_precisions = {mode: {} for mode in modes}
-    threshold_offline_successes = {mode: {} for mode in modes}
-    threshold_offline_precisions = {mode: {} for mode in modes}
     threshold_anchors = {mode: {} for mode in modes}
 
     for mode in modes:
-        eval_save = tune_dir / mode / "eval.pkl"
-        (
-            successes,
-            precisions,
-            anchor_frames,
-            anchor_successes,
-            anchor_precisions,
-            offline_successes,
-            offline_precisions,
-        ) = pickle.loads(eval_save.read_bytes())
+        for threshold in thresholds:
+            algorithm_name = f"AAA_{mode}_{threshold:.2f}"
+            success_path = tune_dir / algorithm_name / "success.pkl"
+            success = pickle.loads(success_path.read_bytes())
 
-        for algorithm in successes[dataset_name].keys():
-            if "AAA" in algorithm:
-                algorithm_split_name = algorithm.split("_")[3]
-            else:
-                algorithm_split_name = algorithm.split("_")[2]
+            threshold_successes[mode][threshold] = success
+            anchor_frames = ope.get_anchor_frames(algorithm_name)
+            threshold_anchors[mode][threshold] = anchor_frames
 
-            threshold_successes[mode][algorithm_split_name] = successes[dataset_name][
-                algorithm
-            ]
-            threshold_precisions[mode][algorithm_split_name] = precisions[dataset_name][
-                algorithm
-            ]
-            if "AAA" in algorithm:
-                threshold_anchor_successes[mode][
-                    algorithm_split_name
-                ] = anchor_successes[dataset_name][algorithm]
-                threshold_anchor_precisions[mode][
-                    algorithm_split_name
-                ] = anchor_precisions[dataset_name][algorithm]
-                threshold_offline_successes[mode][
-                    algorithm_split_name
-                ] = offline_successes[dataset_name][algorithm]
-                threshold_offline_precisions[mode][
-                    algorithm_split_name
-                ] = offline_precisions[dataset_name][algorithm]
-                threshold_anchors[mode][algorithm_split_name] = anchor_frames[
-                    dataset_name
-                ][algorithm]
-            else:
-                threshold_anchor_successes = None
-                threshold_anchor_precisions = None
-                threshold_offline_successes = None
-                threshold_offline_precisions = None
-                threshold_anchors = None
-
-    return (
-        threshold_successes,
-        threshold_precisions,
-        threshold_anchor_successes,
-        threshold_anchor_precisions,
-        threshold_offline_successes,
-        threshold_offline_precisions,
-        threshold_anchors,
-    )
+    return threshold_successes, threshold_anchors
 
 
-def figure1(datasets_name, all_experts, all_experts_name, all_successes, save_dir):
+def figure1(datasets_name, all_experts, all_experts_name, all_successes, color_map, save_dir):
     figsize = (10, 5)
-    colors = name2color(all_experts)
+    colors = [color_map[tracker_name] for tracker_name in all_experts]
     sns.set_palette(colors)
     draw_pie(
         datasets_name,
@@ -107,14 +47,13 @@ def figure1(datasets_name, all_experts, all_experts_name, all_successes, save_di
     )
 
 
-def figure2(vot_dataset, high_algorithm, high_experts, save_dir):
+def figure2(vot_dataset, high_algorithm, high_experts, color_map, save_dir):
     target_seqs = ["fish1", "nature"]
-    vis_trackers = high_experts + [high_algorithm]
     draw_result(
         vot_dataset,
         high_algorithm,
         high_experts,
-        name2color(vis_trackers),
+        color_map,
         save_dir / "Figure2",
         target_seqs,
         show=["frame"],
@@ -129,15 +68,15 @@ def figure4(
     high_experts,
     high_successes,
     high_precisions,
+    color_map,
     save_dir,
 ):
     figsize = (20, 5)
-    vis_trackers = high_experts + [high_algorithm]
-    colors = name2color(vis_trackers)
-    sns.set_palette(colors)
     draw_curves(
         datasets_name,
-        vis_trackers,
+        high_algorithm,
+        high_experts,
+        color_map,
         high_successes,
         high_precisions,
         figsize,
@@ -148,7 +87,6 @@ def figure4(
 
 def figure5(
     datasets_name,
-    all_trackers,
     high_algorithm,
     high_baselines,
     high_experts,
@@ -164,18 +102,19 @@ def figure5(
     mix_experts,
     mix_successes,
     mix_precisions,
+    color_map,
     save_dir,
 ):
     figsize = (20, 7)
     high_trackers = high_experts + [high_algorithm]
     low_trackers = low_experts + [low_algorithm]
     mix_trackers = mix_experts + [mix_algorithm]
-    draw_rank_all(
+    draw_rank(
         datasets_name,
         ["High", "Low", "Mix"],
         [high_trackers, low_trackers, mix_trackers],
         [high_successes, low_successes, mix_successes],
-        all_trackers,
+        color_map,
         figsize,
         save_dir,
         legend=True,
@@ -183,15 +122,13 @@ def figure5(
     )
 
 
-def figure6(otb_dataset, tpl_dataset, high_algorithm, high_experts, save_dir):
-    vis_trackers = high_experts + [high_algorithm]
-
+def figure6(otb_dataset, tpl_dataset, high_algorithm, high_experts, color_map, save_dir):
     otb_seqs = ["Girl2"]
     draw_graph(
         otb_dataset,
         high_algorithm,
         high_experts,
-        name2color(vis_trackers),
+        color_map,
         save_dir / "Figure6",
         otb_seqs,
         iserror=True,
@@ -211,7 +148,7 @@ def figure6(otb_dataset, tpl_dataset, high_algorithm, high_experts, save_dir):
         otb_dataset,
         high_algorithm,
         high_experts,
-        name2color(vis_trackers),
+        color_map,
         save_dir / "Figure6",
         otb_seqs,
         iserror=False,
@@ -231,7 +168,7 @@ def figure6(otb_dataset, tpl_dataset, high_algorithm, high_experts, save_dir):
         otb_dataset,
         high_algorithm,
         high_experts,
-        name2color(vis_trackers),
+        color_map,
         save_dir / "Figure6",
         otb_seqs,
         show=["frame"],
@@ -242,7 +179,7 @@ def figure6(otb_dataset, tpl_dataset, high_algorithm, high_experts, save_dir):
         tpl_dataset,
         high_algorithm,
         high_experts,
-        name2color(vis_trackers),
+        color_map,
         save_dir / "Figure6",
         tpl_seqs,
         iserror=True,
@@ -262,7 +199,7 @@ def figure6(otb_dataset, tpl_dataset, high_algorithm, high_experts, save_dir):
         tpl_dataset,
         high_algorithm,
         high_experts,
-        name2color(vis_trackers),
+        color_map,
         save_dir / "Figure6",
         tpl_seqs,
         iserror=False,
@@ -282,7 +219,7 @@ def figure6(otb_dataset, tpl_dataset, high_algorithm, high_experts, save_dir):
         tpl_dataset,
         high_algorithm,
         high_experts,
-        name2color(vis_trackers),
+        color_map,
         save_dir / "Figure6",
         tpl_seqs,
         show=["frame"],
@@ -304,50 +241,46 @@ def figure7(threshold_successes, threshold_anchors, save_dir):
     )
 
 
-def figure8(otb_dataset, high_algorithm, high_mcct_algorithm, high_experts, save_dir):
+def figure8(otb_dataset, high_algorithm, high_mcct_algorithm, high_experts, color_map, save_dir):
     target_seqs = ["Bird1", "Tiger1"]
-    vis_trackers = high_experts + [high_mcct_algorithm]
     draw_result(
         otb_dataset,
         high_mcct_algorithm,
         high_experts,
-        name2color(vis_trackers),
+        color_map,
         save_dir / "Figure8",
         target_seqs,
         show=["frame"],
     )
 
-    vis_trackers = high_experts + [high_algorithm]
     draw_result(
         otb_dataset,
         high_algorithm,
         high_experts,
-        name2color(vis_trackers),
+        color_map,
         save_dir / "Figure8",
         target_seqs,
         show=["frame"],
     )
 
 
-def figure9(otb_dataset, high_algorithm, high_hdt_algorithm, high_experts, save_dir):
+def figure9(otb_dataset, high_algorithm, high_hdt_algorithm, high_experts, color_map, save_dir):
     target_seqs = ["Human4_2", "Skating1"]
-    vis_trackers = high_experts + [high_hdt_algorithm]
     draw_result(
         otb_dataset,
         high_hdt_algorithm,
         high_experts,
-        name2color(vis_trackers),
+        color_map,
         save_dir / "Figure9",
         target_seqs,
         show=["frame"],
     )
 
-    vis_trackers = high_experts + [high_algorithm]
     draw_result(
         otb_dataset,
         high_algorithm,
         high_experts,
-        name2color(vis_trackers),
+        color_map,
         save_dir / "Figure9",
         target_seqs,
         show=["frame"],
@@ -429,11 +362,11 @@ def table4(
     siamdw_precisions,
     save_dir,
 ):
-    eval_trackers = siamdw_experts + siamdw_baselines + [siamdw_algorithm]
+    siamdw_algorithms = siamdw_baselines + [siamdw_algorithm]
     make_score_table(
         datasets_name,
-        eval_trackers,
-        len(siamdw_experts),
+        siamdw_algorithms,
+        siamdw_experts,
         siamdw_successes,
         siamdw_precisions,
         save_dir,
@@ -451,11 +384,11 @@ def table5(
     siamrpn_precisions,
     save_dir,
 ):
-    eval_trackers = siamrpn_experts + siamrpn_baselines + [siamrpn_algorithm]
+    siamrpn_algorithms = siamrpn_baselines + [siamrpn_algorithm]
     make_score_table(
         datasets_name,
-        eval_trackers,
-        len(siamrpn_experts),
+        siamrpn_algorithms,
+        siamrpn_algorithms,
         siamrpn_successes,
         siamrpn_precisions,
         save_dir,
@@ -472,11 +405,10 @@ def table6(
     high_anchor_precisions,
     save_dir,
 ):
-    eval_trackers = high_experts + [high_algorithm]
     make_score_table(
         datasets_name,
-        eval_trackers,
-        len(high_experts),
+        [high_algorithm],
+        high_experts,
         high_anchor_successes,
         high_anchor_precisions,
         save_dir,
@@ -485,136 +417,35 @@ def table6(
     )
 
 
-# def figure_score(datasets_name, high_algorithm, high_experts, high_success_rets, save_dir):
-#     eval_trackers = high_experts + [high_algorithm]
-#     colors = name2color(eval_trackers[::-1])
-#     sns.set_palette(colors)
-#     draw_scores(datasets_name, eval_trackers[::-1], high_success_rets, save_dir, "score")
-
-#     eval_trackers = high_experts
-#     colors = name2color(eval_trackers[::-1])
-#     sns.set_palette(colors)
-#     draw_scores(datasets_name, eval_trackers[::-1], high_success_rets, save_dir, "score_expert_only")
-
-
-# def figure_rank_high(datasets_name, high_algorithm, high_experts, high_successes, save_dir):
-#     figsize = (20, 3)
-#     vis_trackers = high_experts + [high_algorithm]
-#     colors = name2color(vis_trackers)
-#     sns.set_palette(colors)
-#     draw_rank(
-#         datasets_name,
-#         vis_trackers,
-#         high_successes,
-#         figsize,
-#         save_dir,
-#         legend=True,
-#         file_name="Figure_rank_high",
-#     )
-
-
-# def figure_rank_low(
-#     datasets_name,
-#     low_algorithm,
-#     low_baselines,
-#     low_experts,
-#     low_successes,
-#     low_precisions,
-#     save_dir,
-# ):
-#     figsize = (20, 3)
-#     vis_trackers = low_experts + [low_algorithm]
-#     colors = name2color(vis_trackers)
-#     sns.set_palette(colors)
-#     draw_rank(
-#         datasets_name,
-#         vis_trackers,
-#         low_successes,
-#         figsize,
-#         save_dir,
-#         legend=True,
-#         file_name="Figure_rank_low",
-#     )
-
-
-# def figure_rank_mix(
-#     datasets_name,
-#     mix_algorithm,
-#     mix_baselines,
-#     mix_experts,
-#     mix_successes,
-#     mix_precisions,
-#     save_dir,
-# ):
-#     figsize = (20, 3)
-#     vis_trackers = mix_experts + [mix_algorithm]
-#     colors = name2color(vis_trackers)
-#     sns.set_palette(colors)
-#     draw_rank(
-#         datasets_name,
-#         vis_trackers,
-#         mix_successes,
-#         figsize,
-#         save_dir,
-#         legend=True,
-#         file_name="Figure_rank_mix",
-#     )
-
-
-# def table_mix_offline(
-#     datasets_name,
-#     mix_algorithm,
-#     mix_experts,
-#     mix_offline_successes,
-#     mix_offline_precisions,
-#     save_dir,
-# ):
-#     eval_trackers = mix_experts + [mix_algorithm]
-#     make_score_table(
-#         datasets_name,
-#         eval_trackers,
-#         len(mix_experts),
-#         mix_offline_successes,
-#         mix_offline_precisions,
-#         save_dir,
-#         "Table_mix_offline",
-#         isvot=True,
-#     )
-
-
-# def table_mix_regret(datasets_name, mix_algorithm, mix_experts, mix_regrets, save_dir):
-#     eval_trackers = mix_experts + [mix_algorithm]
-#     make_regret_table(
-#         datasets_name, eval_trackers, len(mix_experts), mix_regrets, save_dir, "Table_mix_regret"
-#     )
-
-
-# def figure_hdt_threshold(threshold_precisions, threshold_anchors, save_dir):
-#     figsize = (20, 5)
-#     thresholds = sorted(list(threshold_precisions.values())[0].keys())
-#     modes = threshold_precisions.keys()
-#     draw_prec_with_thresholds(
-#         modes,
-#         thresholds,
-#         threshold_precisions,
-#         threshold_anchors,
-#         figsize,
-#         save_dir,
-#         "Figure_HDT",
-#     )
-
-
-def main(experiments, all_experts, all_experts_name, save_dir, eval_dir, tune_dir):
-    otb = OTBDataset()
-    tpl = TPLDataset()
-    vot = VOTDataset()
+def main(experiments, all_experts, all_experts_name):
+    save_dir = Path(VISUALIZATION_PATH)
+    os.makedirs(save_dir, exist_ok=True)
 
     datasets_name = ["OTB2015", "TColor128", "UAV123", "NFS", "LaSOT", "VOT2018"]
+    datasets = [select_datasets(dataset_name) for dataset_name in datasets_name]
+
+    total_colors = sns.color_palette("hls", len(all_experts) + 2).as_hex()[::-1][1:]
+    color_map = {tracker_name: color for tracker_name, color in zip(all_experts, total_colors[1:])}
+    color_map["MCCT"] = total_colors[0]
+    color_map["HDT"] = total_colors[0]
+    color_map["Random"] = total_colors[0]
+    color_map["Max"] = total_colors[0]
+    color_map["AAA"] = total_colors[0]
 
     # All
-    eval_save = eval_dir / "All" / "eval.pkl"
-    all_successes, _, _, _, _, _, _, _, _ = pickle.loads(eval_save.read_bytes())
-    figure1(datasets_name, all_experts, all_experts_name, all_successes, save_dir)
+    tracking_time_rets, success_rets, precision_rets, norm_precision_rets, anchor_success_rets, anchor_precision_rets, anchor_norm_precision_rets, error_rets, loss_rets, anchor_frame_rets = evaluate(datasets, datasets_name, all_experts, [], None)
+    figure1(datasets_name, all_experts, all_experts_name, success_rets, color_map, save_dir)
+    make_score_table(
+        datasets_name,
+        [],
+        all_experts,
+        success_rets,
+        precision_rets,
+        save_dir,
+        "Table1",
+        drop_dp=True,
+    )
+    exit()
 
     # High
     high_algorithm, high_baselines, high_experts = experiments["High"]
@@ -649,6 +480,8 @@ def main(experiments, all_experts, all_experts_name, save_dir, eval_dir, tune_di
         high_anchor_precisions,
         save_dir,
     )
+
+    vot = select_datasets("VOT")
     figure2(vot, high_algorithm, high_experts, save_dir)
     figure4(
         datasets_name,
@@ -658,6 +491,8 @@ def main(experiments, all_experts, all_experts_name, save_dir, eval_dir, tune_di
         high_precisions,
         save_dir,
     )
+    otb = select_datasets("OTB")
+    tpl = select_datasets("TPL")
     figure6(otb, tpl, high_algorithm, high_experts, save_dir)
     figure8(otb, high_algorithm, high_baselines[1], high_experts, save_dir)
     figure9(otb, high_algorithm, high_baselines[0], high_experts, save_dir)
@@ -715,7 +550,6 @@ def main(experiments, all_experts, all_experts_name, save_dir, eval_dir, tune_di
     # All
     figure5(
         datasets_name,
-        all_experts + ["AAA"],
         high_algorithm,
         high_baselines,
         high_experts,
@@ -785,7 +619,7 @@ def main(experiments, all_experts, all_experts_name, save_dir, eval_dir, tune_di
     )
 
     # Tuning
-    threshold_successes, _, _, _, _, _, threshold_anchors = get_tuning_results(tune_dir)
+    threshold_successes, threshold_anchors = get_tuning_results(tune_dir)
     figure7(threshold_successes, threshold_anchors, save_dir)
 
 
@@ -811,35 +645,28 @@ if __name__ == "__main__":
         "Random_SiamRPN++",
         "Max_SiamRPN++",
     ]
-
     all_experts = [
-        "ATOM",
         "DaSiamRPN",
-        "GradNet",
-        "MemTrack",
         "SiamDW",
-        "SiamFC",
-        "SiamMCF",
         "SiamRPN",
-        "SiamRPN++",
         "SPM",
-        "Staple",
         "THOR",
+        "GradNet",
+        "Ocean",
+        "SiamBAN",
+        "SiamCAR",
+        "SiamFC++",
+        "SiamRPN++",
+        "Staple",
+        "ATOM",
+        "DiMP-50",
+        "DROL",
+        "KYS",
+        "PrDiMP-50",
+        "RLS-RTMDNet",
+        "SiamMCF",
     ]
-    all_experts_name = [
-        "ATOM [29]",
-        "DaSiamRPN [30]",
-        "GradNet [36]",
-        "MemTrack [37]",
-        "SiamDW [38]",
-        "SiamFC [39]",
-        "SiamMCF [31]",
-        "SiamRPN [40]",
-        "SiamRPN++ [32]",
-        "SPM [33]",
-        "Staple [41]",
-        "THOR [34]",
-    ]
+    all_experts_name = all_experts
     high_experts = ["ATOM", "DaSiamRPN", "SiamMCF", "SiamRPN++", "SPM", "THOR"]
     low_experts = ["GradNet", "MemTrack", "SiamDW", "SiamFC", "SiamRPN", "Staple"]
     mix_experts = ["ATOM", "SiamRPN++", "SPM", "MemTrack", "SiamFC", "Staple"]
@@ -871,9 +698,4 @@ if __name__ == "__main__":
         "SiamRPN++": (siamrpn_algorithm, siamrpn_baselines, siamrpn_experts),
     }
 
-    save_dir = Path("./visualization_results")
-    os.makedirs(save_dir, exist_ok=True)
-
-    eval_dir = Path(f"./evaluation_results")
-    tune_dir = Path(f"./tuning_results/AAA")
-    main(experiments, all_experts, all_experts_name, save_dir, eval_dir, tune_dir)
+    main(experiments, all_experts, all_experts_name)

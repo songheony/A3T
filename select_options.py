@@ -1,4 +1,5 @@
 from datasets.otbdataset import OTBDataset
+from datasets.otbnoisydataset import OTBNoisyDataset
 from datasets.votdataset import VOTDataset
 from datasets.tpldataset import TPLDataset
 from datasets.trackingnetdataset import TrackingNetDataset
@@ -225,17 +226,23 @@ def select_algorithms(algorithm_name, experts, **kwargs):
 
 
 def select_datasets(dataset_name):
-    if dataset_name == "OTB":
+    if dataset_name == "OTB2015":
         dataset = OTBDataset()
+    elif dataset_name == "OTB2015-80%":
+        dataset = OTBNoisyDataset(0.8)
+    elif dataset_name == "OTB2015-60%":
+        dataset = OTBNoisyDataset(0.6)
+    elif dataset_name == "OTB2015-40%":
+        dataset = OTBNoisyDataset(0.4)
     elif dataset_name == "NFS":
         dataset = NFSDataset()
-    elif dataset_name == "UAV":
+    elif dataset_name == "UAV123":
         dataset = UAVDataset()
-    elif dataset_name == "TPL":
+    elif dataset_name == "TColor128":
         dataset = TPLDataset()
     elif dataset_name == "TrackingNet":
         dataset = TrackingNetDataset()
-    elif dataset_name == "VOT":
+    elif dataset_name == "VOT2018":
         dataset = VOTDataset()
     elif dataset_name == "LaSOT":
         dataset = LaSOTDataset()

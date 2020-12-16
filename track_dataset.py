@@ -4,10 +4,13 @@ import numpy as np
 from select_options import select_datasets
 
 
-def run_sequence(seq, tracker, experts=None, debug=False):
+def run_sequence(dataset_name, seq, tracker, experts=None, debug=False):
     """Runs a tracker on a sequence."""
 
-    base_results_path = "{}/{}".format(tracker.results_dir, seq.name)
+    dataset_path = "{}/{}".format(tracker.results_dir, dataset_name)
+    os.makedirs(dataset_path, exist_ok=True)
+
+    base_results_path = "{}/{}".format(dataset_path, seq.name)
     results_path = "{}.txt".format(base_results_path)
     times_path = "{}_time.txt".format(base_results_path)
     weights_path = "{}_weight.txt".format(base_results_path)
@@ -19,10 +22,10 @@ def run_sequence(seq, tracker, experts=None, debug=False):
     print("Tracker: {},  Sequence: {}".format(tracker.name, seq.name))
 
     if debug:
-        tracked_bb, offline_bb, weights, exec_times = tracker.run(seq, experts)
+        tracked_bb, offline_bb, weights, exec_times = tracker.run(dataset_name, seq, experts)
     else:
         try:
-            tracked_bb, offline_bb, weights, exec_times = tracker.run(seq, experts)
+            tracked_bb, offline_bb, weights, exec_times = tracker.run(dataset_name, seq, experts)
         except Exception as e:
             print(e)
             return
@@ -48,7 +51,7 @@ def run_sequence(seq, tracker, experts=None, debug=False):
                 pickle.dump(offline_bb, fp)
 
 
-def run_dataset(dataset, trackers, experts=None, debug=False):
+def run_dataset(dataset, dataset_name, trackers, experts=None, debug=False):
     """Runs a list of experts on a dataset.
     args:
         dataset: List of Sequence instances, forming a dataset.
@@ -58,11 +61,11 @@ def run_dataset(dataset, trackers, experts=None, debug=False):
 
     for seq in dataset:
         for tracker_info in trackers:
-            run_sequence(seq, tracker_info, experts=experts, debug=debug)
+            run_sequence(dataset_name, seq, tracker_info, experts=experts, debug=debug)
     print("Done")
 
 
-def run_tracker(tracker, dataset, experts=None, sequence=None, debug=0):
+def run_tracker(tracker, dataset, dataset_name, experts=None, sequence=None, debug=0):
     """Run tracker on sequence or dataset.
     args:
         tracker_name: Name of tracking method.
@@ -75,10 +78,10 @@ def run_tracker(tracker, dataset, experts=None, sequence=None, debug=0):
     if sequence is not None:
         dataset = [dataset[sequence]]
 
-    run_dataset(dataset, [tracker], experts=experts, debug=debug)
+    run_dataset(dataset, dataset_name, [tracker], experts=experts, debug=debug)
 
 
 def run(tracker, dataset_name, experts=None):
     dataset = select_datasets(dataset_name)
 
-    run_tracker(tracker, dataset, experts=experts, debug=False)
+    run_tracker(tracker, dataset, dataset_name, experts=experts, debug=False)

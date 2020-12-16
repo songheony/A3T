@@ -39,7 +39,7 @@ In this repository, we implemented or edited the following trackers to use as ex
 | THOR (BMVC 2019)     | [Paper](https://arxiv.org/abs/1907.12920) / [Original Repo](https://github.com/xl-sr/THOR) |
 | TRASFUST (ACCV 2020)     | [Paper](https://arxiv.org/abs/2007.04108) / [Original Repo](https://github.com/dontfollowmeimcrazy/vot-kd-rl) |
 
-[1] Since the original code of DaSiamRPN is for Python2, We've had to modify the code a little bit to be compatible with Python3.
+[*] Since the original code of DaSiamRPN is for Python2, We've had to modify the code a little bit to be compatible with Python3.
 
 ## Datasets
 
@@ -54,7 +54,7 @@ We evaluated the performance of the experts and AAA on the following datasets.
 * [LaSOT](https://arxiv.org/abs/1809.07845)[<https://cis.temple.edu/lasot/download.html>]
 * [Got10K](https://arxiv.org/abs/1810.11981)[<http://got-10k.aitestunion.com/>]
 
-[2] VOT2018 is evaluated in unsupervised experiment as same as other datasets.
+[*] VOT2018 is evaluated in unsupervised experiment as same as other datasets.
 
 ## Frameworks
 
@@ -142,8 +142,6 @@ And, the path of metafiles in ``path_config.py`` and ``local.py`` file must be e
 
 In order to run experts, you need to install additional libraries.  
 We offer install script to make it easy to run experts:
-
-### Install requirements with Anaconda environment
 
 ```sh
 # Only for Ubuntu

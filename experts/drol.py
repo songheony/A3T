@@ -1,6 +1,8 @@
 import sys
-import cv2
+import random
+import os
 import torch
+import cv2
 import numpy as np
 from base_tracker import BaseTracker
 import path_config
@@ -13,12 +15,23 @@ from pysot.utils.bbox import get_axis_aligned_bbox
 from pysot.utils.model_load import load_pretrain
 
 
+def seed_torch(seed=0):
+    random.seed(seed)
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = True
+
+
 class DROL(BaseTracker):
     def __init__(self):
         super(DROL, self).__init__("DROL")
 
         # load config
         cfg.merge_from_file(path_config.DROL_CONFIG)
+        seed_torch(cfg.TRACK.SEED)
 
         # create model
         model = ModelBuilder()
@@ -28,10 +41,6 @@ class DROL(BaseTracker):
 
         # build tracker
         self.tracker = build_tracker(model)
-
-        # warmup
-        for i in range(10):
-            model.template(torch.FloatTensor(1,3,127,127).cuda())
 
     def initialize(self, image_file, box):
         image = cv2.imread(image_file)
