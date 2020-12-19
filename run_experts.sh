@@ -21,13 +21,6 @@ for (( j=0; j<${#datasets[@]}; j++ )); do
     done
 done
 
-# slow_experts=("SiamFC" "SiamR-CNN")
-# for (( j=0; j<${#datasets[@]}; j++ )); do
-#     for (( i=0; i<${#slow_experts[@]}; i++ )); do
-#         python ./track_expert.py -e ${slow_experts[$i]} -d ${datasets[$j]}
-#     done
-# done
-
 # siamdw_experts=("SiamDW/SiamFCRes22/OTB" "SiamDW/SiamFCIncep22/OTB" "SiamDW/SiamFCNext22/OTB" "SiamDW/SiamRPNRes22/OTB" "SiamDW/SiamFCRes22/VOT" "SiamDW/SiamFCIncep22/VOT" "SiamDW/SiamFCNext22/VOT" "SiamDW/SiamRPNRes22/VOT")
 # for (( j=0; j<${#datasets[@]}; j++ )); do
 #     for (( i=0; i<${#siamdw_experts[@]}; i++ )); do

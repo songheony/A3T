@@ -1,4 +1,4 @@
-datasets=("OTB2015" "OTB2015-80%" "NFS" "UAV123" "TColor128" "VOT2018" "LaSOT")
+datasets=("OTB2015" "OTB2015-80%" "OTB2015-60%" "OTB2015-40%" "OTB2015-20%" "NFS" "UAV123" "TColor128" "VOT2018" "LaSOT" "Got10K")
 
 high_experts=("ATOM" "DaSiamRPN" "SiamMCF" "SiamRPN++" "SPM" "THOR")
 threshold=0.1

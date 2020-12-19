@@ -10,10 +10,10 @@ normal_experts=("ATOM" "DiMP" "DROL" "KYS" "PrDiMP" "SiamMCF")
 python ./track_tuning.py -e ${normal_experts[@]} -n Normal
 python ./track_tuning.py -a HDT -e ${normal_experts[@]} -n Normal
 
-# siamdw_experts=("SiamDW_SiamFCRes22" "SiamDW_SiamFCIncep22" "SiamDW_SiamFCNext22" "SiamDW_SiamRPNRes22" "SiamDW_SiamFCRes22_VOT" "SiamDW_SiamFCIncep22_VOT" "SiamDW_SiamFCNext22_VOT" "SiamDW_SiamRPNRes22_VOT")
+# siamdw_experts=("SiamDW/SiamFCRes22/OTB" "SiamDW/SiamFCIncep22/OTB" "SiamDW/SiamFCNext22/OTB" "SiamDW/SiamRPNRes22/OTB" "SiamDW/SiamFCRes22/VOT" "SiamDW/SiamFCIncep22/VOT" "SiamDW/SiamFCNext22/VOT" "SiamDW/SiamRPNRes22/VOT")
 # python ./track_tuning.py -e ${siamdw_experts[@]} -n SiamDW
 # python ./track_tuning.py -a HDT -e ${siamdw_experts[@]} -n SiamDW
 
-# siamrpn_experts=("SiamRPN++_AlexNet" "SiamRPN++_AlexNet_OTB" "SiamRPN++_ResNet-50" "SiamRPN++_ResNet-50_OTB" "SiamRPN++_ResNet-50_LT" "SiamRPN++_MobileNetV2" "SiamRPN++_SiamMask")
+# siamrpn_experts=("SiamRPN++/AlexNet/VOT" "SiamRPN++/AlexNet/OTB" "SiamRPN++/ResNet-50/VOT" "SiamRPN++/ResNet-50/OTB" "SiamRPN++/ResNet-50/VOTLT" "SiamRPN++/MobileNetV2/VOT" "SiamRPN++/SiamMask/VOT")
 # python ./track_tuning.py -e ${siamrpn_experts[@]} -n SiamRPN++
 # python ./track_tuning.py -a HDT -e ${siamrpn_experts[@]} -n SiamRPN++

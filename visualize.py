@@ -7,10 +7,10 @@ from evaluations.eval_trackers import evaluate
 from evaluations.ope_benchmark import OPEBenchmark
 from visualizes.draw_figures import draw_pie, draw_result, draw_graph, draw_curves, draw_rank, draw_succ_with_thresholds
 from visualizes.draw_tables import make_score_table
-from path_config import VISUALIZATION_PATH
+import path_config
 
 
-def get_tuning_results(tune_dir, modes, thresholds):
+def get_tuning_results(eval_dir, modes, thresholds):
     dataset_name = "GOT10K"
     dataset = select_datasets(dataset_name)
     ope = OPEBenchmark(dataset)
@@ -20,8 +20,8 @@ def get_tuning_results(tune_dir, modes, thresholds):
 
     for mode in modes:
         for threshold in thresholds:
-            algorithm_name = f"AAA_{mode}_{threshold:.2f}"
-            success_path = tune_dir / algorithm_name / "success.pkl"
+            algorithm_name = f"AAA/{mode}/{threshold:.2f}"
+            success_path = eval_dir / algorithm_name / "success.pkl"
             success = pickle.loads(success_path.read_bytes())
 
             threshold_successes[mode][threshold] = success
@@ -418,7 +418,7 @@ def table6(
 
 
 def main(experiments, all_experts, all_experts_name):
-    save_dir = Path(VISUALIZATION_PATH)
+    save_dir = Path(path_config.VISUALIZATION_PATH)
     os.makedirs(save_dir, exist_ok=True)
 
     datasets_name = ["OTB2015", "OTB2015-80%", "OTB2015-60%", "OTB2015-40%", "OTB2015-20%", "TColor128", "UAV123", "NFS", "LaSOT", "VOT2018"]
@@ -619,7 +619,7 @@ def main(experiments, all_experts, all_experts_name):
     )
 
     # Tuning
-    threshold_successes, threshold_anchors = get_tuning_results(tune_dir)
+    threshold_successes, threshold_anchors = get_tuning_results(path_config.EVALUATION_PATH)
     figure7(threshold_successes, threshold_anchors, save_dir)
 
 
@@ -654,7 +654,6 @@ if __name__ == "__main__":
         "KYS",
         "Ocean",
         "PrDiMP-50",
-        # "RLS-RTMDNet",
         "SiamBAN",
         "SiamCAR",
         "SiamDW",
@@ -663,8 +662,6 @@ if __name__ == "__main__":
         "SiamRPN",
         "SiamRPN++",
         "SPM",
-        # "Staple",
-        # "THOR",
     ]
     all_experts_name = [
         "ATOM (CVPR 2019)",
@@ -675,7 +672,6 @@ if __name__ == "__main__":
         "KYS (ECCV 2020)",
         "Ocean (ECCV 2020)",
         "PrDiMP (CVPR 2020)",
-        # "RLS-RTMDNet (CVPR 2020)",
         "SiamBAN (CVPR 2020)",
         "SiamCAR (CVPR 2020)",
         "SiamDW (CVPR 2019)",
@@ -684,8 +680,6 @@ if __name__ == "__main__":
         "SiamRPN (CVPR 2018)",
         "SiamRPN++ (CVPR 2019)",
         "SPM (CVPR 2019)",
-        # "Staple (CVPR 2016)",
-        # "THOR (BMVC 2019)",
     ]
     high_experts = ["ATOM", "DaSiamRPN", "SiamMCF", "SiamRPN++", "SPM", "THOR"]
     low_experts = ["GradNet", "MemTrack", "SiamDW", "SiamFC", "SiamRPN", "Staple"]
