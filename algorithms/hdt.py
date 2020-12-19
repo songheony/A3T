@@ -58,7 +58,7 @@ def nnhedge_weights(r, scale, is_tpami):
 
 class HDT(BaseTracker):
     def __init__(self, n_experts, mode, beta):
-        super(HDT, self).__init__(f"HDT_{mode}_{beta:.2f}")
+        super(HDT, self).__init__(f"HDT/{mode}/{beta:.2f}")
         self.n_experts = n_experts
         self.beta = beta
 

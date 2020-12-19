@@ -9,7 +9,6 @@ from .aaa_util import (
     WAADelayed,
     AnchorDetector,
     calc_overlap,
-    calc_iou_score,
 )
 
 
@@ -17,42 +16,16 @@ class AAA(BaseTracker):
     def __init__(
         self,
         n_experts,
-        mode="Expert",
-        iou_threshold=0.0,
-        feature_threshold=0.0,
-        reset_target=False,
-        only_max=False,
-        use_iou=False,
-        use_feature=True,
-        cost_iou=True,
-        cost_feature=True,
-        cost_score=True,
+        mode="SuperFast",
+        threshold=0.0,
     ):
-        super(AAA, self).__init__(f"AAA_{mode}_{feature_threshold:.2f}")
-
-        # Whether select expert randomly
-        self.random_select = True
-
-        # Whether reset target feature
-        self.reset_target = reset_target
-
-        # Whether reset offline tracker
-        self.reset_offline = True
+        super(AAA, self).__init__(f"AAA/{mode}/{threshold:.2f}")
 
         # The number of experts
         self.n_experts = n_experts
 
         # Anchor extractor
-        self.detector = AnchorDetector(
-            iou_threshold=iou_threshold,
-            feature_threshold=feature_threshold,
-            only_max=only_max,
-            use_iou=use_iou,
-            use_feature=use_feature,
-            cost_iou=cost_iou,
-            cost_feature=cost_feature,
-            cost_score=cost_score,
-        )
+        self.detector = AnchorDetector(threshold=threshold)
 
         # Feature extractor
         use_cuda = torch.cuda.is_available()
@@ -60,7 +33,7 @@ class AAA(BaseTracker):
         self.extractor = FeatureExtractor(device)
 
         # Offline tracker
-        self.offline = ShortestPathTracker(self.detector.cost_function)
+        self.offline = ShortestPathTracker()
 
         # Online learner
         self.learner = WAADelayed()
@@ -72,18 +45,13 @@ class AAA(BaseTracker):
         self.prev_boxes = []
 
         # Extract target image
-        if self.detector.use_feature or self.detector.cost_feature:
-            self.target_feature = self.extractor.extract(image, [box])[0]
-        else:
-            self.target_feature = None
+        self.target_feature = self.extractor.extract(image, [box])[0]
 
         # Init detector with target feature
         self.detector.init(self.target_feature)
 
         # Init offline tracker with target feature
-        self.offline.initialize(
-            {"rect": box, "feature": self.target_feature, "iou_score": 1}
-        )
+        self.offline.initialize(box, self.target_feature)
 
         # Init online learner
         self.learner.init(self.n_experts)
@@ -94,35 +62,17 @@ class AAA(BaseTracker):
         # Save box of experts
         self.prev_boxes.append(boxes)
 
-        # Extract scores from boxes
-        if self.detector.use_iou:
-            iou_scores = calc_iou_score(boxes)
-        else:
-            iou_scores = [0] * self.n_experts
-
         # Extract features from boxes
-        if self.detector.use_feature or self.detector.cost_feature:
-            features = self.extractor.extract(image, boxes)
-        else:
-            features = [None] * self.n_experts
+        features = self.extractor.extract(image, boxes)
 
         # Detect if it is anchor frame
-        detected = self.detector.detect(iou_scores, features)
+        detected, feature_scores = self.detector.detect(features)
         anchor = len(detected) > 0
 
         # If it is anchor frame,
         if anchor:
             # Add only boxes whose score is over than threshold to offline tracker
-            self.offline.track(
-                [
-                    {
-                        "rect": boxes[i],
-                        "feature": features[i],
-                        "iou_score": iou_scores[i],
-                    }
-                    for i in detected
-                ]
-            )
+            self.offline.track(boxes[detected], features[detected], feature_scores[detected])
 
             # Caluclate optimal path
             path = self.offline.run()
@@ -130,30 +80,16 @@ class AAA(BaseTracker):
             # Get the last box's id
             final_box_id = detected[path[-1][1]]
 
-            # Add final box and cut first box properly
-            path = path[1:-1] + [(path[-1][0], final_box_id)]
+            # Edit final box
+            path[-1][1] = final_box_id
 
-            if self.reset_offline:
-                # Reset offline tracker
-                self.offline.initialize(
-                    {
-                        "rect": boxes[final_box_id],
-                        "feature": features[final_box_id],
-                        "iou_score": 1,
-                    }
-                )
-            else:
-                # Get only unevaluated frames' boxes
-                path = path[-len(self.prev_boxes) :]
-
-            if self.reset_target:
-                # Init detector with target feature
-                self.detector.init(features[final_box_id])
+            # Reset offline tracker
+            self.offline.initialize(boxes[final_box_id], features[final_box_id])
 
             # Get offline tracking results
             self.prev_boxes = np.array(self.prev_boxes)
             offline_results = np.array(
-                [self.prev_boxes[(frame, ind[1])] for frame, ind in enumerate(path)]
+                [self.prev_boxes[frame, ind[1]] for frame, ind in enumerate(path)]
             )
 
             # Calc losses of experts
@@ -171,21 +107,13 @@ class AAA(BaseTracker):
         # Otherwise
         else:
             # Add all boxes to offline tracker
-            self.offline.track(
-                [
-                    {"rect": box, "feature": feature, "iou_score": score}
-                    for box, feature, score in zip(boxes, features, iou_scores)
-                ]
-            )
+            self.offline.track(boxes, features, feature_scores)
 
             # No offline result here
             offline_results = None
 
             # Return box with aggrogating experts' box
-            if self.random_select:
-                predict = random.choices(boxes, weights=self.learner.w)
-            else:
-                predict = np.dot(self.learner.w, boxes)
+            predict = random.choices(boxes, weights=self.learner.w)[0]
 
         return predict, offline_results, self.learner.w
 

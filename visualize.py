@@ -421,7 +421,7 @@ def main(experiments, all_experts, all_experts_name):
     save_dir = Path(VISUALIZATION_PATH)
     os.makedirs(save_dir, exist_ok=True)
 
-    datasets_name = ["OTB2015", "OTB2015-80%", "TColor128", "UAV123", "NFS", "LaSOT", "VOT2018"]
+    datasets_name = ["OTB2015", "OTB2015-80%", "OTB2015-60%", "OTB2015-40%", "OTB2015-20%", "TColor128", "UAV123", "NFS", "LaSOT", "VOT2018"]
     datasets = [select_datasets(dataset_name) for dataset_name in datasets_name]
 
     total_colors = sns.color_palette("hls", len(all_experts) + 2).as_hex()[::-1][1:]
@@ -654,7 +654,7 @@ if __name__ == "__main__":
         "KYS",
         "Ocean",
         "PrDiMP-50",
-        "RLS-RTMDNet",
+        # "RLS-RTMDNet",
         "SiamBAN",
         "SiamCAR",
         "SiamDW",
@@ -663,8 +663,8 @@ if __name__ == "__main__":
         "SiamRPN",
         "SiamRPN++",
         "SPM",
-        "Staple",
-        "THOR",
+        # "Staple",
+        # "THOR",
     ]
     all_experts_name = [
         "ATOM (CVPR 2019)",
@@ -675,7 +675,7 @@ if __name__ == "__main__":
         "KYS (ECCV 2020)",
         "Ocean (ECCV 2020)",
         "PrDiMP (CVPR 2020)",
-        "RLS-RTMDNet (CVPR 2020)",
+        # "RLS-RTMDNet (CVPR 2020)",
         "SiamBAN (CVPR 2020)",
         "SiamCAR (CVPR 2020)",
         "SiamDW (CVPR 2019)",
@@ -684,8 +684,8 @@ if __name__ == "__main__":
         "SiamRPN (CVPR 2018)",
         "SiamRPN++ (CVPR 2019)",
         "SPM (CVPR 2019)",
-        "Staple (CVPR 2016)",
-        "THOR (BMVC 2019)",
+        # "Staple (CVPR 2016)",
+        # "THOR (BMVC 2019)",
     ]
     high_experts = ["ATOM", "DaSiamRPN", "SiamMCF", "SiamRPN++", "SPM", "THOR"]
     low_experts = ["GradNet", "MemTrack", "SiamDW", "SiamFC", "SiamRPN", "Staple"]

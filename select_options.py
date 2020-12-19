@@ -68,46 +68,12 @@ def select_expert(tracker_name):
         from experts.siamdw import SiamDW
 
         tracker = SiamDW()
-    elif tracker_name == "SiamDW_SiamFCRes22":
-        from experts.siamdw_siamfcres import SiamDW
+    elif tracker_name.startswith("SiamDW"):
+        from experts.siamdw_group import SiamDWGroup
 
-        tracker = SiamDW()
-    elif tracker_name == "SiamDW_SiamFCIncep22":
-        from experts.siamdw_siamfcincep import SiamDW
+        parameter = tracker_name.split("/")
 
-        tracker = SiamDW()
-    elif tracker_name == "SiamDW_SiamFCNext22":
-        from experts.siamdw_siamfcnext import SiamDW
-
-        tracker = SiamDW()
-    elif tracker_name == "SiamDW_SiamRPNRes22":
-        from experts.siamdw_siamrpnres import SiamDW
-
-        tracker = SiamDW()
-    elif tracker_name == "SiamDW_SiamFCRes22_VOT":
-        from experts.siamdw_siamfcres_vot import SiamDW
-
-        tracker = SiamDW()
-    elif tracker_name == "SiamDW_SiamFCIncep22_VOT":
-        from experts.siamdw_siamfcincep_vot import SiamDW
-
-        tracker = SiamDW()
-    elif tracker_name == "SiamDW_SiamFCNext22_VOT":
-        from experts.siamdw_siamfcnext_vot import SiamDW
-
-        tracker = SiamDW()
-    elif tracker_name == "SiamDW_SiamRPNRes22_VOT":
-        from experts.siamdw_siamrpnres_vot import SiamDW
-
-        tracker = SiamDW()
-    elif tracker_name == "SiamDW_SiamFCRes22_G":
-        from experts.siamdw_siamfcres_g import SiamDW
-
-        tracker = SiamDW()
-    elif tracker_name == "SiamDW_SiamFCRes22W_G":
-        from experts.siamdw_siamfcresw_g import SiamDW
-
-        tracker = SiamDW()
+        tracker = SiamDWGroup(parameter[1], parameter[2])
     elif tracker_name == "SiamFC":
         from experts.siamfc import SiamFC
 
@@ -132,34 +98,12 @@ def select_expert(tracker_name):
         from experts.siamrpnpp import SiamRPNPP
 
         tracker = SiamRPNPP()
-    elif tracker_name == "SiamRPN++_AlexNet":
-        from experts.siamrpnpp_alexnet import SiamRPNPP
+    elif tracker_name.startswith("SiamRPN++"):
+        from experts.siamrpnpp_group import SiamRPNPPGroup
 
-        tracker = SiamRPNPP()
-    elif tracker_name == "SiamRPN++_AlexNet_OTB":
-        from experts.siamrpnpp_alexnet_otb import SiamRPNPP
+        parameter = tracker_name.split("/")
 
-        tracker = SiamRPNPP()
-    elif tracker_name == "SiamRPN++_ResNet-50":
-        from experts.siamrpnpp_resnet import SiamRPNPP
-
-        tracker = SiamRPNPP()
-    elif tracker_name == "SiamRPN++_ResNet-50_OTB":
-        from experts.siamrpnpp_resnet_otb import SiamRPNPP
-
-        tracker = SiamRPNPP()
-    elif tracker_name == "SiamRPN++_ResNet-50_LT":
-        from experts.siamrpnpp_resnet_lt import SiamRPNPP
-
-        tracker = SiamRPNPP()
-    elif tracker_name == "SiamRPN++_MobileNetV2":
-        from experts.siamrpnpp_mobilenetv2 import SiamRPNPP
-
-        tracker = SiamRPNPP()
-    elif tracker_name == "SiamRPN++_SiamMask":
-        from experts.siamrpnpp_siammask import SiamRPNPP
-
-        tracker = SiamRPNPP()
+        tracker = SiamRPNPPGroup(parameter[1], parameter[2])
     elif tracker_name == "SPM":
         from experts.spm import SPM
 
@@ -204,7 +148,7 @@ def select_algorithms(algorithm_name, experts, **kwargs):
     elif algorithm_name == "MCCT":
         from algorithms.mcct import MCCT
 
-        algorithm = MCCT(n_experts, mode, mu=kwargs["feature_threshold"])
+        algorithm = MCCT(n_experts, mode, mu=kwargs["threshold"])
     elif algorithm_name == "Max":
         from algorithms.baseline import Baseline
 
@@ -218,11 +162,7 @@ def select_algorithms(algorithm_name, experts, **kwargs):
     elif algorithm_name == "HDT":
         from algorithms.hdt import HDT
 
-        algorithm = HDT(n_experts, mode, beta=kwargs["feature_threshold"])
-    elif algorithm_name == "HDTC":
-        from algorithms.hdtc import HDTC
-
-        algorithm = HDTC(n_experts, mode, beta=kwargs["feature_threshold"])
+        algorithm = HDT(n_experts, mode, beta=kwargs["threshold"])
     else:
         raise ValueError("Unknown algorithm name")
 
@@ -238,6 +178,8 @@ def select_datasets(dataset_name):
         dataset = OTBNoisyDataset(0.6)
     elif dataset_name == "OTB2015-40%":
         dataset = OTBNoisyDataset(0.4)
+    elif dataset_name == "OTB2015-20%":
+        dataset = OTBNoisyDataset(0.2)
     elif dataset_name == "NFS":
         dataset = NFSDataset()
     elif dataset_name == "UAV123":

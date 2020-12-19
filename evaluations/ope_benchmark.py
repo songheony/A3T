@@ -48,12 +48,12 @@ class OPEBenchmark:
 
         return offline_bb, tracker_weight
 
-    def get_anchor_frames(self, algorithm_name):
+    def get_anchor_frames(self, dataset_name, algorithm_name):
         anchor_frames = {}
         for seq in self.dataset:
             gt_traj = np.array(seq.ground_truth_rect)
             offline_bb, tracker_weight = self.get_algorithm_data(
-                seq.name, algorithm_name
+                dataset_name, seq.name, algorithm_name
             )
             offline_bb.insert(0, [gt_traj[0]])
             anchor_frame = [

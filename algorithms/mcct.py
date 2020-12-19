@@ -17,7 +17,7 @@ class Expert:
 
 class MCCT(BaseTracker):
     def __init__(self, n_experts, mode, mu):
-        super(MCCT, self).__init__(f"MCCT_{mode}_{mu:.2f}")
+        super(MCCT, self).__init__(f"MCCT/{mode}/{mu:.2f}")
 
         self.period = MCCTHOTBConfig().period
         self.expert_num = n_experts

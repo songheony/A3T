@@ -17,8 +17,9 @@ def save_pickle(dir_path, filename, func, *args):
     return data
 
 
-def evaluate(datasets, datasets_name, experts, baselines, algorithm):
-    save_dir = Path(EVALUATION_PATH)
+def evaluate(datasets, datasets_name, experts, baselines, algorithm, save_dir=None):
+    if save_dir is None:
+        save_dir = Path(EVALUATION_PATH)
     os.makedirs(save_dir, exist_ok=True)
 
     if algorithm is not None:
@@ -51,7 +52,7 @@ def evaluate(datasets, datasets_name, experts, baselines, algorithm):
         loss_rets[dataset_name] = {}
 
         if algorithm is not None:
-            anchor_frame_rets[dataset_name] = ope.get_anchor_frames(algorithm)
+            anchor_frame_rets[dataset_name] = ope.get_anchor_frames(dataset_name, algorithm)
 
         for tracker_name in eval_trackers:
             tracker_dir = save_dir / tracker_name / dataset_name

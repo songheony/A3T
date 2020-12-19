@@ -1,8 +1,6 @@
 import sys
+import igraph
 import numpy as np
-
-import graph_tool
-import graph_tool.topology
 import torch
 from torchvision import models
 from torchvision import transforms
@@ -103,23 +101,15 @@ class AnchorDetector:
 
 
 class ShortestPathTracker:
-    def __init__(self):
-        self.g = graph_tool.Graph()
-        self.g.edge_properties["cost"] = self.g.new_edge_property("int")
-
     def initialize(self, box, target_feature):
         self.frame_id = -1
-
-        self.g.clear()
-        self.source = self.g.add_vertex()
-        self.sink = self.g.add_vertex()
+        self.edges = []
+        if len(self.edges) == 0:
+            self.edges.append(("source", f"{self.frame_id}/0", 0))
 
         self.prev_boxes = box[None, :]
         self.prev_features = target_feature[None, :]
         self.prev_feature_scores = np.array([1])
-
-    def get_vertex_id(self, frame, idx):
-        return frame * 100 + idx + 2
 
     def track(self, curr_boxes, curr_features, curr_feature_scores, f2i_factor=10000):
         self.frame_id += 1
@@ -128,31 +118,33 @@ class ShortestPathTracker:
         prob_features = calc_similarity(self.prev_features, curr_features) ** feature_factor
         prob_feature_scores = prob_features * curr_feature_scores
         for prev_idx in range(len(self.prev_boxes)):
-            prev_vertex = self.source if prev_frame_id == -1 else self.get_vertex_id(prev_frame_id, prev_idx)
-
             prob_ious = calc_overlap(self.prev_boxes[prev_idx], curr_boxes)
             costs = -np.log(prob_ious * prob_feature_scores[prev_idx, :] + 1e-7)
             costs = (costs * f2i_factor).astype(int)
             for curr_idx in range(len(curr_boxes)):
-                edge = self.g.add_edge(prev_vertex, self.get_vertex_id(self.frame_id, curr_idx))
-                self.g.edge_properties["cost"][edge] = costs[curr_idx]
-
+                self.edges.append(
+                    (
+                        f"{prev_frame_id}/{prev_idx}",
+                        f"{self.frame_id}/{curr_idx}",
+                        costs[curr_idx],
+                    )
+                )
         self.prev_boxes = curr_boxes
         self.prev_features = curr_features
         self.prev_feature_scores = curr_feature_scores
 
     def run(self):
+        last_edges = self.edges[:]
         for last_idx in range(len(self.prev_boxes)):
-            edge = self.g.add_edge(self.get_vertex_id(self.frame_id, last_idx), self.sink)
-            self.g.edge_properties["cost"][edge] = 0
-
-        path, _ = graph_tool.topology.shortest_path(self.g, self.source, self.sink, weights=self.g.edge_properties["cost"], dag=True)
+            last_edges.append((f"{self.frame_id}/{last_idx}", "sink", 0))
+        g = igraph.Graph.TupleList(last_edges, weights=True, directed=True)
+        path = g.get_shortest_paths(
+            "source", to="sink", weights="weight", mode=igraph.OUT, output="vpath"
+        )
         ids = []
-        for i in path[1:-1]:
-            vertex_id = int(i) - 2
-            frame_id = vertex_id // 100
-            idx = vertex_id % 100
-            ids.append([frame_id, idx])
+        for i in path[0][1:-1]:
+            frame_id, idx = g.vs[i]["name"].split("/")
+            ids.append((int(frame_id), int(idx)))
         return ids
 
 
