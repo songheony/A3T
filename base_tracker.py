@@ -4,7 +4,6 @@ import os
 import numpy as np
 import cv2
 import path_config
-from print_manager import do_not_print
 
 
 class BaseTracker(object):
@@ -31,7 +30,9 @@ class BaseTracker(object):
             boxes = np.zeros((len(experts), len(sequence.ground_truth_rect), 4))
             tracker_times = np.zeros((len(experts), len(sequence.ground_truth_rect)))
             for n, tracker_name in enumerate(experts):
-                results_dir = "{}/{}/{}".format(path_config.RESULTS_PATH, tracker_name, dataset_name)
+                results_dir = "{}/{}/{}".format(
+                    path_config.RESULTS_PATH, tracker_name, dataset_name
+                )
                 base_results_path = "{}/{}".format(results_dir, sequence.name)
                 results_path = "{}.txt".format(base_results_path)
                 tracker_traj = np.loadtxt(results_path, delimiter="\t", dtype=float)
@@ -73,7 +74,6 @@ class BaseTracker(object):
     def _read_image(self, image_file: str):
         return cv2.cvtColor(cv2.imread(image_file), cv2.COLOR_BGR2RGB)
 
-    @do_not_print
     def run(self, dataset_name, seq, trackers):
         """Run tracker on sequence.
         args:

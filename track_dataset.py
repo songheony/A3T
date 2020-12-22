@@ -22,10 +22,14 @@ def run_sequence(dataset_name, seq, tracker, experts=None, debug=False):
     print("Tracker: {},  Sequence: {}".format(tracker.name, seq.name))
 
     if debug:
-        tracked_bb, offline_bb, weights, exec_times = tracker.run(dataset_name, seq, experts)
+        tracked_bb, offline_bb, weights, exec_times = tracker.run(
+            dataset_name, seq, experts
+        )
     else:
         try:
-            tracked_bb, offline_bb, weights, exec_times = tracker.run(dataset_name, seq, experts)
+            tracked_bb, offline_bb, weights, exec_times = tracker.run(
+                dataset_name, seq, experts
+            )
         except Exception as e:
             print(e)
             return

@@ -28,26 +28,24 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--algorithm", default="AAA", type=str)
-    parser.add_argument("-e", "--experts", default=["DaSiamRPN", "SiamDW", "SiamRPN", "SPM"], nargs="+")
+    parser.add_argument(
+        "-e", "--experts", default=["DaSiamRPN", "SiamDW", "SiamRPN", "SPM"], nargs="+"
+    )
     parser.add_argument("-n", "--mode", default="SuperFast", type=str)
     args = parser.parse_args()
 
     if "AAA" in args.algorithm:
         start_point = 0.5
-        end_point = 1.0
+        end_point = 0.8
         thresholds = np.arange(start_point, end_point, 0.01)
     else:
         start_point = 0.1
         end_point = 1.0
-        thresholds = np.arange(start_point, end_point, 0.02)
+        thresholds = np.arange(start_point, end_point, 0.05)
 
     save_dir = Path(f"./{path_config.EVALUATION_PATH}")
     os.makedirs(save_dir, exist_ok=True)
 
     main(
-        args.algorithm,
-        args.experts,
-        thresholds,
-        save_dir,
-        mode=args.mode,
+        args.algorithm, args.experts, thresholds, save_dir, mode=args.mode,
     )

@@ -41,7 +41,7 @@ class OTBNoisyDatasetClass(OTBDatasetClass):
             idxs = np.insert(idxs, 0, 0)
 
             idxs = idxs.astype(int)
-            np.savetxt(idx_path, idxs, fmt='%i')
+            np.savetxt(idx_path, idxs, fmt="%i")
 
         seq.frames = [seq.frames[idx] for idx in idxs]
         seq.ground_truth_rect = seq.ground_truth_rect[idxs]

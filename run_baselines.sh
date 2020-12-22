@@ -1,35 +1,35 @@
 datasets=("OTB2015" "OTB2015-80%" "OTB2015-60%" "OTB2015-40%" "OTB2015-20%" "NFS" "UAV123" "TColor128" "VOT2018" "LaSOT" "Got10K")
-baselines=("Random" "Max")
+baselines=("Random" "Max", "Without delay")
 
-high_experts=("ATOM" "DaSiamRPN" "SiamMCF" "SiamRPN++" "SPM" "THOR")
+super_fast_experts=("DaSiamRPN" "SiamDW" "SiamRPN" "SPM")
 for (( j=0; j<${#datasets[@]}; j++ )); do    
     for (( i=0; i<${#baselines[@]}; i++ )); do
-        python ./track_algorithm.py -a ${baselines[$i]} -n High -d ${datasets[$j]} -e ${high_experts[@]}
+        python ./track_algorithm.py -a ${baselines[$i]} -n SuperFast -d ${datasets[$j]} -e ${super_fast_experts[@]}
     done
 done
 
-low_experts=("GradNet" "MemTrack" "SiamDW" "SiamFC" "SiamRPN" "Staple")
+fast_experts=("GradNet" "Ocean" "SiamBAN" "SiamCAR" "SiamFC++" "SiamRPN++")
 for (( j=0; j<${#datasets[@]}; j++ )); do    
     for (( i=0; i<${#baselines[@]}; i++ )); do
-        python ./track_algorithm.py -a ${baselines[$i]} -n Low -d ${datasets[$j]} -e ${low_experts[@]}
+        python ./track_algorithm.py -a ${baselines[$i]} -n Fast -d ${datasets[$j]} -e ${fast_experts[@]}
     done
 done
 
-mix_experts=("ATOM" "SiamRPN++" "SPM" "MemTrack" "SiamFC" "Staple")
+normal_experts=("ATOM" "DiMP" "DROL" "KYS" "PrDiMP" "SiamMCF")
 for (( j=0; j<${#datasets[@]}; j++ )); do    
     for (( i=0; i<${#baselines[@]}; i++ )); do
-        python ./track_algorithm.py -a ${baselines[$i]} -n Mix -d ${datasets[$j]} -e ${mix_experts[@]}
+        python ./track_algorithm.py -a ${baselines[$i]} -n Normal -d ${datasets[$j]} -e ${normal_experts[@]}
     done
 done
 
-siamdw_experts=("SiamDW_SiamFCRes22" "SiamDW_SiamFCIncep22" "SiamDW_SiamFCNext22" "SiamDW_SiamRPNRes22" "SiamDW_SiamFCRes22_VOT" "SiamDW_SiamFCIncep22_VOT" "SiamDW_SiamFCNext22_VOT" "SiamDW_SiamRPNRes22_VOT")
+siamdw_experts=("SiamDWGroup/SiamFCRes22/OTB" "SiamDWGroup/SiamFCIncep22/OTB" "SiamDWGroup/SiamFCNext22/OTB" "SiamDWGroup/SiamRPNRes22/OTB" "SiamDWGroup/SiamFCRes22/VOT" "SiamDWGroup/SiamFCIncep22/VOT" "SiamDWGroup/SiamFCNext22/VOT" "SiamDWGroup/SiamRPNRes22/VOT")
 for (( j=0; j<${#datasets[@]}; j++ )); do    
     for (( i=0; i<${#baselines[@]}; i++ )); do
         python ./track_algorithm.py -a ${baselines[$i]} -n SiamDW -d ${datasets[$j]} -e ${siamdw_experts[@]}
     done
 done
 
-siamrpn_experts=("SiamRPN++_AlexNet" "SiamRPN++_AlexNet_OTB" "SiamRPN++_ResNet-50" "SiamRPN++_ResNet-50_OTB" "SiamRPN++_ResNet-50_LT" "SiamRPN++_MobileNetV2" "SiamRPN++_SiamMask")
+siamrpn_experts=("SiamRPN++Group/AlexNet/VOT" "SiamRPN++Group/AlexNet/OTB" "SiamRPN++Group/ResNet-50/VOT" "SiamRPN++Group/ResNet-50/OTB" "SiamRPN++Group/ResNet-50/VOTLT" "SiamRPN++Group/MobileNetV2/VOT" "SiamRPN++Group/SiamMask/VOT")
 for (( j=0; j<${#datasets[@]}; j++ )); do    
     for (( i=0; i<${#baselines[@]}; i++ )); do
         python ./track_algorithm.py -a ${baselines[$i]} -n SiamRPN++ -d ${datasets[$j]} -e ${siamrpn_experts[@]}

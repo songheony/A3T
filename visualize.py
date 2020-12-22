@@ -1,11 +1,21 @@
 import os
 import pickle
 from pathlib import Path
+
+import numpy as np
 import seaborn as sns
+
 from select_options import select_datasets
 from evaluations.eval_trackers import evaluate
 from evaluations.ope_benchmark import OPEBenchmark
-from visualizes.draw_figures import draw_pie, draw_result, draw_graph, draw_curves, draw_rank, draw_succ_with_thresholds
+from visualizes.draw_figures import (
+    draw_pie,
+    draw_result,
+    draw_graph,
+    draw_curves,
+    draw_rank,
+    draw_succ_with_thresholds,
+)
 from visualizes.draw_tables import make_score_table
 import path_config
 
@@ -31,7 +41,9 @@ def get_tuning_results(eval_dir, modes, thresholds):
     return threshold_successes, threshold_anchors
 
 
-def figure1(datasets_name, all_experts, all_experts_name, all_successes, color_map, save_dir):
+def figure1(
+    datasets_name, all_experts, all_experts_name, all_successes, color_map, save_dir
+):
     figsize = (10, 5)
     colors = [color_map[tracker_name] for tracker_name in all_experts]
     sns.set_palette(colors)
@@ -122,7 +134,9 @@ def figure5(
     )
 
 
-def figure6(otb_dataset, tpl_dataset, high_algorithm, high_experts, color_map, save_dir):
+def figure6(
+    otb_dataset, tpl_dataset, high_algorithm, high_experts, color_map, save_dir
+):
     otb_seqs = ["Girl2"]
     draw_graph(
         otb_dataset,
@@ -226,9 +240,8 @@ def figure6(otb_dataset, tpl_dataset, high_algorithm, high_experts, color_map, s
     )
 
 
-def figure7(threshold_successes, threshold_anchors, save_dir):
+def figure7(thresholds, threshold_successes, threshold_anchors, save_dir):
     figsize = (20, 5)
-    thresholds = sorted(list(threshold_successes.values())[0].keys())
     modes = threshold_successes.keys()
     draw_succ_with_thresholds(
         modes,
@@ -241,7 +254,9 @@ def figure7(threshold_successes, threshold_anchors, save_dir):
     )
 
 
-def figure8(otb_dataset, high_algorithm, high_mcct_algorithm, high_experts, color_map, save_dir):
+def figure8(
+    otb_dataset, high_algorithm, high_mcct_algorithm, high_experts, color_map, save_dir
+):
     target_seqs = ["Bird1", "Tiger1"]
     draw_result(
         otb_dataset,
@@ -264,7 +279,9 @@ def figure8(otb_dataset, high_algorithm, high_mcct_algorithm, high_experts, colo
     )
 
 
-def figure9(otb_dataset, high_algorithm, high_hdt_algorithm, high_experts, color_map, save_dir):
+def figure9(
+    otb_dataset, high_algorithm, high_hdt_algorithm, high_experts, color_map, save_dir
+):
     target_seqs = ["Human4_2", "Skating1"]
     draw_result(
         otb_dataset,
@@ -417,24 +434,52 @@ def table6(
     )
 
 
-def main(experiments, all_experts, all_experts_name):
+def main(experiments, all_experts, all_experts_name, thresholds):
     save_dir = Path(path_config.VISUALIZATION_PATH)
     os.makedirs(save_dir, exist_ok=True)
 
-    datasets_name = ["OTB2015", "OTB2015-80%", "OTB2015-60%", "OTB2015-40%", "OTB2015-20%", "TColor128", "UAV123", "NFS", "LaSOT", "VOT2018"]
+    datasets_name = [
+        "OTB2015",
+        "OTB2015-80%",
+        "OTB2015-60%",
+        "OTB2015-40%",
+        "OTB2015-20%",
+        "TColor128",
+        "UAV123",
+        "NFS",
+        "LaSOT",
+        "VOT2018",
+    ]
     datasets = [select_datasets(dataset_name) for dataset_name in datasets_name]
 
     total_colors = sns.color_palette("hls", len(all_experts) + 2).as_hex()[::-1][1:]
-    color_map = {tracker_name: color for tracker_name, color in zip(all_experts, total_colors[1:])}
+    color_map = {
+        tracker_name: color
+        for tracker_name, color in zip(all_experts, total_colors[1:])
+    }
     color_map["MCCT"] = total_colors[0]
     color_map["HDT"] = total_colors[0]
     color_map["Random"] = total_colors[0]
     color_map["Max"] = total_colors[0]
+    color_map["Without delay"] = total_colors[0]
     color_map["AAA"] = total_colors[0]
 
     # All
-    tracking_time_rets, success_rets, precision_rets, norm_precision_rets, anchor_success_rets, anchor_precision_rets, anchor_norm_precision_rets, error_rets, loss_rets, anchor_frame_rets = evaluate(datasets, datasets_name, all_experts, [], None)
-    figure1(datasets_name, all_experts, all_experts_name, success_rets, color_map, save_dir)
+    (
+        tracking_time_rets,
+        success_rets,
+        precision_rets,
+        norm_precision_rets,
+        anchor_success_rets,
+        anchor_precision_rets,
+        anchor_norm_precision_rets,
+        error_rets,
+        loss_rets,
+        anchor_frame_rets,
+    ) = evaluate(datasets, datasets_name, all_experts, [], None)
+    figure1(
+        datasets_name, all_experts, all_experts_name, success_rets, color_map, save_dir
+    )
     make_score_table(
         datasets_name,
         [],
@@ -445,105 +490,120 @@ def main(experiments, all_experts, all_experts_name):
         "Table1",
         drop_dp=True,
     )
+
+    # Tuning
+    threshold_successes, threshold_anchors = get_tuning_results(
+        path_config.EVALUATION_PATH, experiments.keys(), thresholds
+    )
+    figure7(thresholds, threshold_successes, threshold_anchors, save_dir)
     exit()
 
-    # High
-    high_algorithm, high_baselines, high_experts = experiments["High"]
-    eval_save = eval_dir / "High" / "eval.pkl"
+    # Super Fast
+    super_fast_algorithm, super_fast_baselines, super_fast_experts = experiments[
+        "SuperFast"
+    ]
     (
-        high_successes,
-        high_precisions,
-        high_tracking_times,
-        high_anchor_frames,
-        high_anchor_successes,
-        high_anchor_precisions,
-        high_offline_successes,
-        high_offline_precisions,
-        high_regret_gts,
-        high_regret_offlines,
-    ) = pickle.loads(eval_save.read_bytes())
+        super_fast_tracking_time_rets,
+        super_fast_success_rets,
+        super_fast_precision_rets,
+        super_fast_norm_precision_rets,
+        super_fast_anchor_success_rets,
+        super_fast_anchor_precision_rets,
+        super_fast_anchor_norm_precision_rets,
+        super_fast_error_rets,
+        super_fast_loss_rets,
+        super_fast_anchor_frame_rets,
+    ) = evaluate(
+        datasets,
+        datasets_name,
+        super_fast_experts,
+        super_fast_baselines,
+        super_fast_algorithm,
+    )
 
     table1(
         datasets_name,
-        high_algorithm,
-        high_baselines,
-        high_experts,
-        high_successes,
-        high_precisions,
+        super_fast_algorithm,
+        super_fast_baselines,
+        super_fast_experts,
+        super_fast_success_rets,
+        super_fast_precision_rets,
         save_dir,
     )
     table6(
         datasets_name,
-        high_algorithm,
-        high_experts,
-        high_anchor_successes,
-        high_anchor_precisions,
+        super_fast_algorithm,
+        super_fast_experts,
+        super_fast_anchor_success_rets,
+        super_fast_anchor_precision_rets,
         save_dir,
     )
 
-    vot = select_datasets("VOT")
-    figure2(vot, high_algorithm, high_experts, save_dir)
-    figure4(
-        datasets_name,
-        high_algorithm,
-        high_experts,
-        high_successes,
-        high_precisions,
-        save_dir,
-    )
-    otb = select_datasets("OTB")
-    tpl = select_datasets("TPL")
-    figure6(otb, tpl, high_algorithm, high_experts, save_dir)
-    figure8(otb, high_algorithm, high_baselines[1], high_experts, save_dir)
-    figure9(otb, high_algorithm, high_baselines[0], high_experts, save_dir)
+    # vot = select_datasets("VOT")
+    # figure2(vot, high_algorithm, high_experts, save_dir)
+    # figure4(
+    #     datasets_name,
+    #     high_algorithm,
+    #     high_experts,
+    #     high_successes,
+    #     high_precisions,
+    #     save_dir,
+    # )
+    # otb = select_datasets("OTB")
+    # tpl = select_datasets("TPL")
+    # figure6(otb, tpl, high_algorithm, high_experts, save_dir)
+    # figure8(otb, high_algorithm, high_baselines[1], high_experts, save_dir)
+    # figure9(otb, high_algorithm, high_baselines[0], high_experts, save_dir)
 
-    # Low
-    low_algorithm, low_baselines, low_experts = experiments["Low"]
-    eval_save = eval_dir / "Low" / "eval.pkl"
+    # Fast
+    fast_algorithm, fast_baselines, fast_experts = experiments["Fast"]
     (
-        low_successes,
-        low_precisions,
-        low_tracking_times,
-        low_anchor_frames,
-        low_anchor_successes,
-        low_anchor_precisions,
-        low_offline_successes,
-        low_offline_precisions,
-        low_regret_gts,
-        low_regret_offlines,
-    ) = pickle.loads(eval_save.read_bytes())
+        fast_tracking_time_rets,
+        fast_success_rets,
+        fast_precision_rets,
+        fast_norm_precision_rets,
+        fast_anchor_success_rets,
+        fast_anchor_precision_rets,
+        fast_anchor_norm_precision_rets,
+        fast_error_rets,
+        fast_loss_rets,
+        fast_anchor_frame_rets,
+    ) = evaluate(datasets, datasets_name, fast_experts, fast_baselines, fast_algorithm)
+
     table2(
         datasets_name,
-        low_algorithm,
-        low_baselines,
-        low_experts,
-        low_successes,
-        low_precisions,
+        fast_algorithm,
+        fast_baselines,
+        fast_experts,
+        fast_success_rets,
+        fast_precision_rets,
         save_dir,
     )
 
-    # Mix
-    mix_algorithm, mix_baselines, mix_experts = experiments["Mix"]
-    eval_save = eval_dir / "Mix" / "eval.pkl"
+    # Normal
+    normal_algorithm, normal_baselines, normal_experts = experiments["Normal"]
     (
-        mix_successes,
-        mix_precisions,
-        mix_tracking_times,
-        mix_anchor_frames,
-        mix_anchor_successes,
-        mix_anchor_precisions,
-        mix_offline_successes,
-        mix_offline_precisions,
-        mix_regret_gts,
-        mix_regret_offlines,
-    ) = pickle.loads(eval_save.read_bytes())
+        normal_tracking_time_rets,
+        normal_success_rets,
+        normal_precision_rets,
+        normal_norm_precision_rets,
+        normal_anchor_success_rets,
+        normal_anchor_precision_rets,
+        normal_anchor_norm_precision_rets,
+        normal_error_rets,
+        normal_loss_rets,
+        normal_anchor_frame_rets,
+    ) = evaluate(
+        datasets, datasets_name, normal_experts, normal_baselines, normal_algorithm
+    )
+
     table3(
         datasets_name,
-        mix_algorithm,
-        mix_baselines,
-        mix_experts,
-        mix_successes,
-        mix_precisions,
+        normal_algorithm,
+        normal_baselines,
+        normal_experts,
+        normal_success_rets,
+        normal_precision_rets,
         save_dir,
     )
 
@@ -618,33 +678,8 @@ def main(experiments, all_experts, all_experts_name):
         save_dir,
     )
 
-    # Tuning
-    threshold_successes, threshold_anchors = get_tuning_results(path_config.EVALUATION_PATH)
-    figure7(threshold_successes, threshold_anchors, save_dir)
-
 
 if __name__ == "__main__":
-    high_algorithm = "AAA_High_0.00_0.69_False_False_False_True_True_True_True"
-    low_algorithm = "AAA_Low_0.00_0.60_False_False_False_True_True_True_True"
-    mix_algorithm = "AAA_Mix_0.00_0.65_False_False_False_True_True_True_True"
-    siamdw_algorithm = "AAA_SiamDW_0.00_0.67_False_False_False_True_True_True_True"
-    siamrpn_algorithm = "AAA_SiamRPN++_0.00_0.61_False_False_False_True_True_True_True"
-
-    high_baselines = ["HDT_High_0.98", "MCCT_High_0.10", "Random_High", "Max_High"]
-    low_baselines = ["HDT_Low_0.32", "MCCT_Low_0.10", "Random_Low", "Max_Low"]
-    mix_baselines = ["HDT_Mix_0.94", "MCCT_Mix_0.10", "Random_Mix", "Max_Mix"]
-    siamdw_baselines = [
-        "HDT_SiamDW_0.98",
-        "MCCT_SiamDW_0.10",
-        "Random_SiamDW",
-        "Max_SiamDW",
-    ]
-    siamrpn_baselines = [
-        "HDT_SiamRPN++_0.74",
-        "MCCT_SiamRPN++_0.10",
-        "Random_SiamRPN++",
-        "Max_SiamRPN++",
-    ]
     all_experts = [
         "ATOM",
         "DaSiamRPN",
@@ -681,35 +716,80 @@ if __name__ == "__main__":
         "SiamRPN++ (CVPR 2019)",
         "SPM (CVPR 2019)",
     ]
-    high_experts = ["ATOM", "DaSiamRPN", "SiamMCF", "SiamRPN++", "SPM", "THOR"]
-    low_experts = ["GradNet", "MemTrack", "SiamDW", "SiamFC", "SiamRPN", "Staple"]
-    mix_experts = ["ATOM", "SiamRPN++", "SPM", "MemTrack", "SiamFC", "Staple"]
+
+    super_fast_algorithm = "AAA/SuperFast/0.69"
+    fast_algorithm = "AAA/Fast/0.60"
+    normal_algorithm = "AAA/Normal/0.65"
+    siamdw_algorithm = "AAA/SiamDW/0.67"
+    siamrpn_algorithm = "AAA/SiamRPN++/0.61"
+
+    super_fast_baselines = [
+        "HDT/SuperFast/0.98",
+        "MCCT/SuperFast/0.10",
+        "Random/SuperFast",
+        "Max/SuperFast",
+        "Without delay/SuperFast",
+    ]
+    fast_baselines = [
+        "HDT/Fast/0.98",
+        "MCCT/Fast/0.10",
+        "Random/Fast",
+        "Max/Fast",
+        "Without delay/Fast",
+    ]
+    normal_baselines = [
+        "HDT/Normal/0.98",
+        "MCCT/Normal/0.10",
+        "Random/Normal",
+        "Max/Normal",
+        "Without delay/Normal",
+    ]
+    siamdw_baselines = [
+        "HDT/SiamDW/0.98",
+        "MCCT/SiamDW/0.10",
+        "Random/SiamDW",
+        "Max/SiamDW",
+        "Without delay/SiamDW",
+    ]
+    siamrpn_baselines = [
+        "HDT/SiamRPN++/0.98",
+        "MCCT/SiamRPN++/0.10",
+        "Random/SiamRPN++",
+        "Max/SiamRPN++",
+        "Without delay/SiamRPN++",
+    ]
+
+    super_fast_experts = ["DaSiamRPN", "SiamDW", "SiamRPN", "SPM"]
+    fast_experts = ["GradNet", "Ocean", "SiamBAN", "SiamCAR", "SiamFC++", "SiamRPN++"]
+    normal_experts = ["ATOM", "DiMP", "DROL", "KYS", "PrDiMP", "SiamMCF"]
     siamdw_experts = [
-        "SiamDW_SiamFCRes22",
-        "SiamDW_SiamFCIncep22",
-        "SiamDW_SiamFCNext22",
-        "SiamDW_SiamRPNRes22",
-        "SiamDW_SiamFCRes22_VOT",
-        "SiamDW_SiamFCIncep22_VOT",
-        "SiamDW_SiamFCNext22_VOT",
-        "SiamDW_SiamRPNRes22_VOT",
+        "SiamDWGroup/SiamFCRes22/OTB",
+        "SiamDWGroup/SiamFCIncep22/OTB",
+        "SiamDWGroup/SiamFCNext22/OTB",
+        "SiamDWGroup/SiamRPNRes22/OTB",
+        "SiamDWGroup/SiamFCRes22/VOT",
+        "SiamDWGroup/SiamFCIncep22/VOT",
+        "SiamDWGroup/SiamFCNext22/VOT",
+        "SiamDWGroup/SiamRPNRes22/VOT",
     ]
     siamrpn_experts = [
-        "SiamRPN++_AlexNet",
-        "SiamRPN++_AlexNet_OTB",
-        "SiamRPN++_ResNet-50",
-        "SiamRPN++_ResNet-50_OTB",
-        "SiamRPN++_ResNet-50_LT",
-        "SiamRPN++_MobileNetV2",
-        "SiamRPN++_SiamMask",
+        "SiamRPN++Group/AlexNet/VOT",
+        "SiamRPN++Group/AlexNet/OTB",
+        "SiamRPN++Group/ResNet-50/VOT",
+        "SiamRPN++Group/ResNet-50/OTB",
+        "SiamRPN++Group/ResNet-50/VOTLT",
+        "SiamRPN++Group/MobileNetV2/VOT",
+        "SiamRPN++Group/SiamMask/VOT",
     ]
 
     experiments = {
-        "High": (high_algorithm, high_baselines, high_experts),
-        "Low": (low_algorithm, low_baselines, low_experts),
-        "Mix": (mix_algorithm, mix_baselines, mix_experts),
+        "SuperFast": (super_fast_algorithm, super_fast_baselines, super_fast_experts),
+        "Fast": (fast_algorithm, fast_baselines, fast_experts),
+        "Normal": (normal_algorithm, normal_baselines, normal_experts),
         "SiamDW": (siamdw_algorithm, siamdw_baselines, siamdw_experts),
         "SiamRPN++": (siamrpn_algorithm, siamrpn_baselines, siamrpn_experts),
     }
 
-    main(experiments, all_experts, all_experts_name)
+    algorithm_thresholds = np.arange(0.5, 1.0, 0.01)
+
+    main(experiments, all_experts, all_experts_name, algorithm_thresholds)

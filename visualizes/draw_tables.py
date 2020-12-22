@@ -11,7 +11,7 @@ def make_score_table(
     save_dir,
     filename=None,
     drop_dp=False,
-    drop_last_dp=False
+    drop_last_dp=False,
 ):
     trackers_name = experts_name + algorithms_name
     mean_succ = np.zeros((len(trackers_name), len(datasets_name)))

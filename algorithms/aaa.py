@@ -14,12 +14,11 @@ from .aaa_util import (
 
 class AAA(BaseTracker):
     def __init__(
-        self,
-        n_experts,
-        mode="SuperFast",
-        threshold=0.0,
+        self, n_experts, mode="SuperFast", threshold=0.0,
     ):
-        super(AAA, self).__init__(f"AAA/{mode}/{threshold:.2f}")
+        super(AAA, self).__init__(
+            f"AAA/{mode}/{threshold:.2f}" if threshold > 0 else "Wihout delay"
+        )
 
         # The number of experts
         self.n_experts = n_experts
@@ -72,7 +71,9 @@ class AAA(BaseTracker):
         # If it is anchor frame,
         if anchor:
             # Add only boxes whose score is over than threshold to offline tracker
-            self.offline.track(boxes[detected], features[detected], feature_scores[detected])
+            self.offline.track(
+                boxes[detected], features[detected], feature_scores[detected]
+            )
 
             # Caluclate optimal path
             path = self.offline.run()

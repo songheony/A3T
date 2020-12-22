@@ -30,14 +30,18 @@ class OPEBenchmark:
         return self.convert_bb_to_center(bboxes) / (gt_wh + 1e-16)
 
     def get_tracker_traj(self, dataset_name, seq_name, tracker_name):
-        results_dir = "{}/{}/{}".format(path_config.RESULTS_PATH, tracker_name, dataset_name)
+        results_dir = "{}/{}/{}".format(
+            path_config.RESULTS_PATH, tracker_name, dataset_name
+        )
         base_results_path = "{}/{}".format(results_dir, seq_name)
         results_path = "{}.txt".format(base_results_path)
         tracker_traj = np.loadtxt(results_path, delimiter="\t")
         return tracker_traj
 
     def get_algorithm_data(self, dataset_name, seq_name, algorithm_name):
-        results_dir = "{}/{}/{}".format(path_config.RESULTS_PATH, algorithm_name, dataset_name)
+        results_dir = "{}/{}/{}".format(
+            path_config.RESULTS_PATH, algorithm_name, dataset_name
+        )
         base_results_path = "{}/{}".format(results_dir, seq_name)
         offline_path = "{}_offline.pkl".format(base_results_path)
         with open(offline_path, "rb") as fp:
@@ -65,7 +69,9 @@ class OPEBenchmark:
     def eval_times(self, dataset_name, tracker_name):
         time_ret = {}
         for seq in self.dataset:
-            results_dir = "{}/{}/{}".format(path_config.RESULTS_PATH, tracker_name, dataset_name)
+            results_dir = "{}/{}/{}".format(
+                path_config.RESULTS_PATH, tracker_name, dataset_name
+            )
             base_results_path = "{}/{}".format(results_dir, seq.name)
             times_path = "{}_time.txt".format(base_results_path)
             tracker_time = np.loadtxt(times_path, delimiter="\t", dtype=float)

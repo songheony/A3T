@@ -52,40 +52,90 @@ def evaluate(datasets, datasets_name, experts, baselines, algorithm, save_dir=No
         loss_rets[dataset_name] = {}
 
         if algorithm is not None:
-            anchor_frame_rets[dataset_name] = ope.get_anchor_frames(dataset_name, algorithm)
+            anchor_frame_rets[dataset_name] = ope.get_anchor_frames(
+                dataset_name, algorithm
+            )
 
         for tracker_name in eval_trackers:
             tracker_dir = save_dir / tracker_name / dataset_name
             os.makedirs(tracker_dir, exist_ok=True)
 
-            tracking_time = save_pickle(tracker_dir, "tracking_time", ope.eval_times, dataset_name, tracker_name)
+            tracking_time = save_pickle(
+                tracker_dir, "tracking_time", ope.eval_times, dataset_name, tracker_name
+            )
             tracking_time_rets[dataset_name][tracker_name] = tracking_time
 
-            success = save_pickle(tracker_dir, "success", ope.eval_success, dataset_name, tracker_name)
+            success = save_pickle(
+                tracker_dir, "success", ope.eval_success, dataset_name, tracker_name
+            )
             success_rets[dataset_name][tracker_name] = success
 
-            precision = save_pickle(tracker_dir, "precision", ope.eval_precision, dataset_name, tracker_name)
+            precision = save_pickle(
+                tracker_dir, "precision", ope.eval_precision, dataset_name, tracker_name
+            )
             precision_rets[dataset_name][tracker_name] = precision
 
-            norm_precision = save_pickle(tracker_dir, "norm_precision", ope.eval_norm_precision, dataset_name, tracker_name)
+            norm_precision = save_pickle(
+                tracker_dir,
+                "norm_precision",
+                ope.eval_norm_precision,
+                dataset_name,
+                tracker_name,
+            )
             norm_precision_rets[dataset_name][tracker_name] = norm_precision
 
             if algorithm is not None:
-                anchor_success = save_pickle(tracker_dir, "anchor_success", ope.eval_success, dataset_name, tracker_name, anchor_frame_rets[dataset_name])
+                anchor_success = save_pickle(
+                    tracker_dir,
+                    "anchor_success",
+                    ope.eval_success,
+                    dataset_name,
+                    tracker_name,
+                    anchor_frame_rets[dataset_name],
+                )
                 anchor_success_rets[dataset_name][tracker_name] = anchor_success
 
-                anchor_precision = save_pickle(tracker_dir, "anchor_precision", ope.eval_precision, dataset_name, tracker_name, anchor_frame_rets[dataset_name])
+                anchor_precision = save_pickle(
+                    tracker_dir,
+                    "anchor_precision",
+                    ope.eval_precision,
+                    dataset_name,
+                    tracker_name,
+                    anchor_frame_rets[dataset_name],
+                )
                 anchor_precision_rets[dataset_name][tracker_name] = anchor_precision
 
-                anchor_norm_precision = save_pickle(tracker_dir, "anchor_norm_precision", ope.eval_norm_precision, dataset_name, tracker_name, anchor_frame_rets[dataset_name])
-                anchor_norm_precision_rets[dataset_name][tracker_name] = anchor_norm_precision
+                anchor_norm_precision = save_pickle(
+                    tracker_dir,
+                    "anchor_norm_precision",
+                    ope.eval_norm_precision,
+                    dataset_name,
+                    tracker_name,
+                    anchor_frame_rets[dataset_name],
+                )
+                anchor_norm_precision_rets[dataset_name][
+                    tracker_name
+                ] = anchor_norm_precision
 
                 if tracker_name != algorithm:
-                    error, loss = save_pickle(tracker_dir, "loss", ope.eval_loss, dataset_name, tracker_name)
+                    error, loss = save_pickle(
+                        tracker_dir, "loss", ope.eval_loss, dataset_name, tracker_name
+                    )
                     error_rets[dataset_name][tracker_name] = error
                     loss_rets[dataset_name][tracker_name] = loss
 
-    return tracking_time_rets, success_rets, precision_rets, norm_precision_rets, anchor_success_rets, anchor_precision_rets, anchor_norm_precision_rets, error_rets, loss_rets, anchor_frame_rets
+    return (
+        tracking_time_rets,
+        success_rets,
+        precision_rets,
+        norm_precision_rets,
+        anchor_success_rets,
+        anchor_precision_rets,
+        anchor_norm_precision_rets,
+        error_rets,
+        loss_rets,
+        anchor_frame_rets,
+    )
 
 
 if __name__ == "__main__":

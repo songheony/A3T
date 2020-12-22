@@ -43,7 +43,9 @@ class SiamDWGroup(BaseTracker):
             net_file = path_config.SIAMDW_CIRESNET22_RPN_MODEL
             info.cls_type = "thinner"
             self.tracker = SiamRPN(info)
-            self.net = models.__dict__[info.arch](anchors_nums=5, cls_type=info.cls_type)
+            self.net = models.__dict__[info.arch](
+                anchors_nums=5, cls_type=info.cls_type
+            )
         else:
             raise ValueError("Invalid backbone")
 

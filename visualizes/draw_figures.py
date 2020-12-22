@@ -102,7 +102,7 @@ def draw_pie(
             specific_names,
             frameon=False,
             loc="center left",
-            bbox_to_anchor=(-0.1, 0.5)
+            bbox_to_anchor=(-0.1, 0.5),
         )
 
     if file_name is None:
@@ -141,7 +141,11 @@ def draw_curves(
                 for v in success_rets[dataset_name][tracker_name].values()
                 if not any(np.isnan(v))
             ]
-            vis_name = tracker_name.split("_")[0] if is_algorithm(tracker_name) else tracker_name
+            vis_name = (
+                tracker_name.split("_")[0]
+                if is_algorithm(tracker_name)
+                else tracker_name
+            )
             line = ax.plot(
                 thresholds,
                 np.mean(value, axis=0),
@@ -170,7 +174,11 @@ def draw_curves(
                 for v in precision_rets[dataset_name][tracker_name].values()
                 if not any(np.isnan(v))
             ]
-            vis_name = tracker_name.split("_")[0] if is_algorithm(tracker_name) else tracker_name
+            vis_name = (
+                tracker_name.split("_")[0]
+                if is_algorithm(tracker_name)
+                else tracker_name
+            )
             ax.plot(
                 thresholds,
                 np.mean(value, axis=0),
@@ -244,10 +252,12 @@ def draw_rank(
                 dataset_name, seq_names, group_trackers[g], group_success_rets[g]
             )
 
-            for t, tracker_name, rank in zip(
-                group_trackers[g], ranks.T
-            ):
-                vis_name = tracker_name.split("_")[0] if is_algorithm(tracker_name) else tracker_name
+            for t, tracker_name, rank in zip(group_trackers[g], ranks.T):
+                vis_name = (
+                    tracker_name.split("_")[0]
+                    if is_algorithm(tracker_name)
+                    else tracker_name
+                )
                 ax.plot(
                     xs,
                     [np.sum(rank == x) / len(seq_names) for x in xs],
@@ -473,7 +483,11 @@ def draw_result(
                 for i in range(len(trackers_name)):
                     box = tracker_trajs[i, :frame]
                     error = 1 - calc_overlap(gt_traj[:frame], box)
-                    tracker_name = trackers_name[i].split("_")[0] if is_algorithm(trackers_name[i]) else trackers_name[i]
+                    tracker_name = (
+                        trackers_name[i].split("_")[0]
+                        if is_algorithm(trackers_name[i])
+                        else trackers_name[i]
+                    )
                     error_ax.plot(
                         range(len(error)),
                         error,
@@ -492,7 +506,9 @@ def draw_result(
             if cond[1]:
                 for i in range(tracker_weight.shape[1]):
                     weight = tracker_weight[:frame, i]
-                    weight_ax.plot(range(len(weight)), weight, color=color_map[trackers_name[i]])
+                    weight_ax.plot(
+                        range(len(weight)), weight, color=color_map[trackers_name[i]]
+                    )
                     weight_ax.set(
                         ylabel="Weight",
                         xlim=(0, len(tracker_weight)),
@@ -555,7 +571,10 @@ def draw_result(
                                     textcoords="offset points",
                                     size=ANNO_SIZE,
                                     color=color_map[trackers_name[i]],
-                                    arrowprops=dict(arrowstyle="->", color=color_map[trackers_name[i]]),
+                                    arrowprops=dict(
+                                        arrowstyle="->",
+                                        color=color_map[trackers_name[i]],
+                                    ),
                                 )
                             elif trackers_name[i] == algorithm_name:
                                 sample_ax.annotate(
@@ -567,7 +586,10 @@ def draw_result(
                                     textcoords="offset points",
                                     size=ANNO_SIZE,
                                     color=color_map[trackers_name[i]],
-                                    arrowprops=dict(arrowstyle="->", color=color_map[trackers_name[i]]),
+                                    arrowprops=dict(
+                                        arrowstyle="->",
+                                        color=color_map[trackers_name[i]],
+                                    ),
                                 )
                         elif vis_best:
                             scores = calc_overlap(
@@ -583,7 +605,10 @@ def draw_result(
                                     textcoords="offset points",
                                     size=ANNO_SIZE,
                                     color=color_map[trackers_name[i]],
-                                    arrowprops=dict(arrowstyle="->", color=color_map[trackers_name[i]]),
+                                    arrowprops=dict(
+                                        arrowstyle="->",
+                                        color=color_map[trackers_name[i]],
+                                    ),
                                 )
 
                     if vis_gt:
@@ -658,7 +683,11 @@ def draw_graph(
             for i in range(len(trackers_name)):
                 box = tracker_trajs[i, :]
                 error = 1 - calc_overlap(gt_traj, box)
-                tracker_name = trackers_name[i].split("_")[0] if is_algorithm(trackers_name[i]) else trackers_name[i]
+                tracker_name = (
+                    trackers_name[i].split("_")[0]
+                    if is_algorithm(trackers_name[i])
+                    else trackers_name[i]
+                )
                 ax.plot(
                     range(len(error)),
                     error,
@@ -672,7 +701,9 @@ def draw_graph(
                 ax.set(ylabel="Error", xlim=(0, len(gt_traj)), ylim=(-0.05, 1.05))
             ax.set_xticks([])
             if legend:
-                ax.legend(ncol=len(trackers_name), frameon=False, bbox_to_anchor=(0.2, 1.1))
+                ax.legend(
+                    ncol=len(trackers_name), frameon=False, bbox_to_anchor=(0.2, 1.1)
+                )
 
         # draw weight graph
         else:

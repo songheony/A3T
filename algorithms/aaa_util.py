@@ -97,7 +97,9 @@ class AnchorDetector:
         self.target_feature = target_feature
 
     def detect(self, features):
-        feature_scores = calc_similarity(self.target_feature, features)[0] ** feature_factor
+        feature_scores = (
+            calc_similarity(self.target_feature, features)[0] ** feature_factor
+        )
         detected = np.where(feature_scores >= self.threshold)[0]
         return detected, feature_scores
 
@@ -125,16 +127,24 @@ class ShortestPathTracker:
         self.frame_id += 1
         prev_frame_id = self.frame_id - 1
 
-        prob_features = calc_similarity(self.prev_features, curr_features) ** feature_factor
+        prob_features = (
+            calc_similarity(self.prev_features, curr_features) ** feature_factor
+        )
         prob_feature_scores = prob_features * curr_feature_scores
         for prev_idx in range(len(self.prev_boxes)):
-            prev_vertex = self.source if prev_frame_id == -1 else self.get_vertex_id(prev_frame_id, prev_idx)
+            prev_vertex = (
+                self.source
+                if prev_frame_id == -1
+                else self.get_vertex_id(prev_frame_id, prev_idx)
+            )
 
             prob_ious = calc_overlap(self.prev_boxes[prev_idx], curr_boxes)
             costs = -np.log(prob_ious * prob_feature_scores[prev_idx, :] + 1e-7)
             costs = (costs * f2i_factor).astype(int)
             for curr_idx in range(len(curr_boxes)):
-                edge = self.g.add_edge(prev_vertex, self.get_vertex_id(self.frame_id, curr_idx))
+                edge = self.g.add_edge(
+                    prev_vertex, self.get_vertex_id(self.frame_id, curr_idx)
+                )
                 self.g.edge_properties["cost"][edge] = costs[curr_idx]
 
         self.prev_boxes = curr_boxes
@@ -143,10 +153,18 @@ class ShortestPathTracker:
 
     def run(self):
         for last_idx in range(len(self.prev_boxes)):
-            edge = self.g.add_edge(self.get_vertex_id(self.frame_id, last_idx), self.sink)
+            edge = self.g.add_edge(
+                self.get_vertex_id(self.frame_id, last_idx), self.sink
+            )
             self.g.edge_properties["cost"][edge] = 0
 
-        path, _ = graph_tool.topology.shortest_path(self.g, self.source, self.sink, weights=self.g.edge_properties["cost"], dag=True)
+        path, _ = graph_tool.topology.shortest_path(
+            self.g,
+            self.source,
+            self.sink,
+            weights=self.g.edge_properties["cost"],
+            dag=True,
+        )
         ids = []
         for i in path[1:-1]:
             vertex_id = int(i) - 2
@@ -189,5 +207,7 @@ class FeatureExtractor:
 
         with torch.no_grad():
             croped_images = croped_images.to(self.device)
-            features = self.extractor(croped_images).view(croped_images.shape[0], -1).detach()
+            features = (
+                self.extractor(croped_images).view(croped_images.shape[0], -1).detach()
+            )
         return features

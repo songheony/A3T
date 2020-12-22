@@ -7,10 +7,8 @@ from datasets.uavdataset import UAVDataset
 from datasets.nfsdataset import NFSDataset
 from datasets.lasotdataset import LaSOTDataset
 from datasets.got10kdataset import GOT10KDatasetVal
-from print_manager import do_not_print
 
 
-@do_not_print
 def select_expert(tracker_name):
     if tracker_name == "ATOM":
         from experts.atom import ATOM
@@ -68,7 +66,7 @@ def select_expert(tracker_name):
         from experts.siamdw import SiamDW
 
         tracker = SiamDW()
-    elif tracker_name.startswith("SiamDW"):
+    elif tracker_name.startswith("SiamDWGroup"):
         from experts.siamdw_group import SiamDWGroup
 
         parameter = tracker_name.split("/")
@@ -98,7 +96,7 @@ def select_expert(tracker_name):
         from experts.siamrpnpp import SiamRPNPP
 
         tracker = SiamRPNPP()
-    elif tracker_name.startswith("SiamRPN++"):
+    elif tracker_name.startswith("SiamRPN++Group"):
         from experts.siamrpnpp_group import SiamRPNPPGroup
 
         parameter = tracker_name.split("/")
@@ -141,10 +139,10 @@ def select_algorithms(algorithm_name, experts, **kwargs):
         from algorithms.aaa import AAA
 
         algorithm = AAA(n_experts, **kwargs)
-    elif algorithm_name == "Average":
-        from algorithms.average import Average
+    elif algorithm_name == "Without delay":
+        from algorithms.aaa import AAA
 
-        algorithm = Average(n_experts, mode)
+        algorithm = AAA(n_experts, mode=kwargs["mode"], threshold=0.0)
     elif algorithm_name == "MCCT":
         from algorithms.mcct import MCCT
 

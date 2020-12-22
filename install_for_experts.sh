@@ -10,10 +10,10 @@ git clone https://github.com/ClementPinard/Pytorch-Correlation-extension.git
 git clone https://github.com/songheony/DaSiamRPN
 git clone https://github.com/shallowtoil/DROL
 git clone https://github.com/LPXTT/GradNet-Tensorflow
-git clone https://github.com/skyoung/MemDTC.git
-git clone https://github.com/skyoung/MemTrack
+# git clone https://github.com/skyoung/MemDTC.git
+# git clone https://github.com/skyoung/MemTrack
 git clone https://github.com/researchmm/TracKit
-git clone https://github.com/songheony/RLS-RTMDNet
+# git clone https://github.com/songheony/RLS-RTMDNet
 git clone https://github.com/hqucv/siamban
 git clone https://github.com/ohhhyeahhh/SiamCAR
 git clone https://github.com/researchmm/SiamDW
@@ -24,8 +24,8 @@ git clone https://github.com/VisualComputingInstitute/SiamR-CNN
 git clone https://github.com/huanglianghua/siamrpn-pytorch
 git clone https://github.com/STVIR/pysot
 git clone https://github.com/songheony/SPM-Tracker
-git clone https://github.com/wwdguu/pyCFTrackers
-git clone https://github.com/xl-sr/THOR
+# git clone https://github.com/wwdguu/pyCFTrackers
+# git clone https://github.com/xl-sr/THOR
 
 # edit network path of ATOM, DiMP, PrDiMP, KYS
 cd pytracking
@@ -47,9 +47,9 @@ python setup.py build_ext --inplace
 cd ../
 
 # For RLS-RTMDNet
-cd RLS-RTMDNet/modules/roi_align
-python setup.py build_ext --inplace
-cd ../../../
+# cd RLS-RTMDNet/modules/roi_align
+# python setup.py build_ext --inplace
+# cd ../../../
 
 # For SiamBAN
 cd siamban
@@ -75,14 +75,14 @@ bash compile.sh
 cd ../
 
 # For Staple
-cd pyCFTrackers/lib/pysot/utils
-python setup.py build_ext --inplace
-cd ../../../../
-cd pyCFTrackers/lib/eco/features/
-python setup.py build_ext --inplace
-cd ../../../../
+# cd pyCFTrackers/lib/pysot/utils
+# python setup.py build_ext --inplace
+# cd ../../../../
+# cd pyCFTrackers/lib/eco/features/
+# python setup.py build_ext --inplace
+# cd ../../../../
 
 # For THOR
-cd THOR
-bash benchmark/make_toolkits.sh
-cd ../
+# cd THOR
+# bash benchmark/make_toolkits.sh
+# cd ../
