@@ -5,7 +5,7 @@ from base_tracker import BaseTracker
 
 class Random(BaseTracker):
     def __init__(self, n_experts, mode):
-        super(Random, self).__init__(f"Random_{mode}")
+        super(Random, self).__init__(f"Random/{mode}")
 
     def initialize(self, image, box):
         pass

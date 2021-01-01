@@ -9,8 +9,6 @@ from torchvision import transforms
 import torch.nn as nn
 import scipy.special as sc
 
-feature_factor = 5
-
 
 def calc_overlap(rect1, rect2):
     r"""Generalized Intersection over Union
@@ -97,17 +95,19 @@ class AnchorDetector:
         self.target_feature = target_feature
 
     def detect(self, features):
-        feature_scores = (
-            calc_similarity(self.target_feature, features)[0] ** feature_factor
-        )
+        feature_scores = calc_similarity(self.target_feature, features)[0]
         detected = np.where(feature_scores >= self.threshold)[0]
         return detected, feature_scores
 
 
 class ShortestPathTracker:
-    def __init__(self):
+    def __init__(self, a=1, b=1, c=1, f2i_factor=10000):
         self.g = graph_tool.Graph()
         self.g.edge_properties["cost"] = self.g.new_edge_property("int")
+        self.a = a
+        self.b = b
+        self.c = c
+        self.f2i_factor = f2i_factor
 
     def initialize(self, box, target_feature):
         self.frame_id = -1
@@ -123,14 +123,13 @@ class ShortestPathTracker:
     def get_vertex_id(self, frame, idx):
         return frame * 100 + idx + 2
 
-    def track(self, curr_boxes, curr_features, curr_feature_scores, f2i_factor=10000):
+    def track(
+        self, curr_boxes, curr_features, curr_feature_scores,
+    ):
         self.frame_id += 1
         prev_frame_id = self.frame_id - 1
 
-        prob_features = (
-            calc_similarity(self.prev_features, curr_features) ** feature_factor
-        )
-        prob_feature_scores = prob_features * curr_feature_scores
+        prob_features = calc_similarity(self.prev_features, curr_features)
         for prev_idx in range(len(self.prev_boxes)):
             prev_vertex = (
                 self.source
@@ -139,8 +138,12 @@ class ShortestPathTracker:
             )
 
             prob_ious = calc_overlap(self.prev_boxes[prev_idx], curr_boxes)
-            costs = -np.log(prob_ious * prob_feature_scores[prev_idx, :] + 1e-7)
-            costs = (costs * f2i_factor).astype(int)
+            costs = (
+                -self.a * np.log(prob_ious + 1e-7)
+                - self.b * np.log(prob_features[prev_idx, :] + 1e-7)
+                - self.c * np.log(curr_feature_scores + 1e-7)
+            )
+            costs = (costs * self.f2i_factor).astype(int)
             for curr_idx in range(len(curr_boxes)):
                 edge = self.g.add_edge(
                     prev_vertex, self.get_vertex_id(self.frame_id, curr_idx)
@@ -180,11 +183,10 @@ class FeatureExtractor:
         model = models.resnet50(pretrained=True)
         feature_map = list(model.children())
         feature_map.pop()
-        self.extractor = nn.Sequential(*feature_map).to(self.device)
-        self.extractor.eval()
+        self.extractor = nn.Sequential(*feature_map).to(self.device).eval()
         self.transform = transforms.Compose(
             [
-                transforms.Scale((224, 224)),
+                transforms.Resize((224, 224)),
                 transforms.ToTensor(),
                 transforms.Normalize(
                     mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)

@@ -20,8 +20,8 @@ from visualizes.draw_tables import make_score_table
 import path_config
 
 
-def get_tuning_results(eval_dir, modes, thresholds):
-    dataset_name = "GOT10K"
+def get_tuning_results(eval_dir, modes, thresholds, offline_bs, offline_cs):
+    dataset_name = "Got10K"
     dataset = select_datasets(dataset_name)
     ope = OPEBenchmark(dataset)
 
@@ -30,13 +30,19 @@ def get_tuning_results(eval_dir, modes, thresholds):
 
     for mode in modes:
         for threshold in thresholds:
-            algorithm_name = f"AAA/{mode}/{threshold:.2f}"
-            success_path = eval_dir / algorithm_name / "success.pkl"
-            success = pickle.loads(success_path.read_bytes())
+            for offline_b in offline_bs:
+                for offline_c in offline_cs:
+                    threshold_name = f"{threshold:.3f}"
+                    offline_name = f"a-1,b-{offline_b},c-{offline_c}"
+                    algorithm_name = f"AAA/{mode}/{threshold_name}/{offline_name}"
+                    success_path = (
+                        Path(eval_dir) / algorithm_name / dataset_name / "success.pkl"
+                    )
+                    success = pickle.loads(success_path.read_bytes())
 
-            threshold_successes[mode][threshold] = success
-            anchor_frames = ope.get_anchor_frames(algorithm_name)
-            threshold_anchors[mode][threshold] = anchor_frames
+                    threshold_successes[mode][offline_name][threshold_name] = success
+                    anchor_frames = ope.get_anchor_frames(dataset_name, algorithm_name)
+                    threshold_anchors[mode][offline_name][threshold_name] = anchor_frames
 
     return threshold_successes, threshold_anchors
 
@@ -313,16 +319,16 @@ def table1(
     high_precisions,
     save_dir,
 ):
-    eval_trackers = high_experts + high_baselines + [high_algorithm]
     make_score_table(
         datasets_name,
-        eval_trackers,
-        len(high_experts),
+        high_baselines + [high_algorithm],
+        high_experts,
         high_successes,
         high_precisions,
         save_dir,
-        "Table1",
-        isvot=True,
+        filename="Table1",
+        drop_dp=False,
+        drop_last_dp=False,
     )
 
 
@@ -335,16 +341,16 @@ def table2(
     low_precisions,
     save_dir,
 ):
-    eval_trackers = low_experts + low_baselines + [low_algorithm]
     make_score_table(
         datasets_name,
-        eval_trackers,
-        len(low_experts),
+        low_baselines + [low_algorithm],
+        low_experts,
         low_successes,
         low_precisions,
         save_dir,
-        "Table2",
-        isvot=True,
+        filename="Table2",
+        drop_dp=False,
+        drop_last_dp=False,
     )
 
 
@@ -357,16 +363,16 @@ def table3(
     mix_precisions,
     save_dir,
 ):
-    eval_trackers = mix_experts + mix_baselines + [mix_algorithm]
     make_score_table(
         datasets_name,
-        eval_trackers,
-        len(mix_experts),
+        mix_baselines + [mix_algorithm],
+        mix_experts,
         mix_successes,
         mix_precisions,
         save_dir,
-        "Table3",
-        isvot=True,
+        filename="Table3",
+        drop_dp=False,
+        drop_last_dp=False,
     )
 
 
@@ -379,16 +385,16 @@ def table4(
     siamdw_precisions,
     save_dir,
 ):
-    siamdw_algorithms = siamdw_baselines + [siamdw_algorithm]
     make_score_table(
         datasets_name,
-        siamdw_algorithms,
+        siamdw_baselines + [siamdw_algorithm],
         siamdw_experts,
         siamdw_successes,
         siamdw_precisions,
         save_dir,
-        "Table4",
-        isvot=True,
+        filename="Table4",
+        drop_dp=False,
+        drop_last_dp=False,
     )
 
 
@@ -401,16 +407,16 @@ def table5(
     siamrpn_precisions,
     save_dir,
 ):
-    siamrpn_algorithms = siamrpn_baselines + [siamrpn_algorithm]
     make_score_table(
         datasets_name,
-        siamrpn_algorithms,
-        siamrpn_algorithms,
+        siamrpn_baselines + [siamrpn_algorithm],
+        siamrpn_experts,
         siamrpn_successes,
         siamrpn_precisions,
         save_dir,
-        "Table5",
-        isvot=True,
+        filename="Table5",
+        drop_dp=False,
+        drop_last_dp=False,
     )
 
 
@@ -429,8 +435,9 @@ def table6(
         high_anchor_successes,
         high_anchor_precisions,
         save_dir,
-        "Table6",
-        isvot=True,
+        filename="Table6",
+        drop_dp=False,
+        drop_last_dp=False,
     )
 
 
@@ -440,10 +447,6 @@ def main(experiments, all_experts, all_experts_name, thresholds):
 
     datasets_name = [
         "OTB2015",
-        "OTB2015-80%",
-        "OTB2015-60%",
-        "OTB2015-40%",
-        "OTB2015-20%",
         "TColor128",
         "UAV123",
         "NFS",
@@ -460,43 +463,43 @@ def main(experiments, all_experts, all_experts_name, thresholds):
     color_map["MCCT"] = total_colors[0]
     color_map["HDT"] = total_colors[0]
     color_map["Random"] = total_colors[0]
-    color_map["Max"] = total_colors[0]
-    color_map["Without delay"] = total_colors[0]
+    color_map["WithoutOffline"] = total_colors[0]
+    color_map["WithoutDelay"] = total_colors[0]
     color_map["AAA"] = total_colors[0]
 
     # All
-    (
-        tracking_time_rets,
-        success_rets,
-        precision_rets,
-        norm_precision_rets,
-        anchor_success_rets,
-        anchor_precision_rets,
-        anchor_norm_precision_rets,
-        error_rets,
-        loss_rets,
-        anchor_frame_rets,
-    ) = evaluate(datasets, datasets_name, all_experts, [], None)
-    figure1(
-        datasets_name, all_experts, all_experts_name, success_rets, color_map, save_dir
-    )
-    make_score_table(
-        datasets_name,
-        [],
-        all_experts,
-        success_rets,
-        precision_rets,
-        save_dir,
-        "Table1",
-        drop_dp=True,
-    )
+    # (
+    #     tracking_time_rets,
+    #     success_rets,
+    #     precision_rets,
+    #     norm_precision_rets,
+    #     anchor_success_rets,
+    #     anchor_precision_rets,
+    #     anchor_norm_precision_rets,
+    #     error_rets,
+    #     loss_rets,
+    #     anchor_frame_rets,
+    # ) = evaluate(datasets, datasets_name, all_experts, [], None)
+    # figure1(
+    #     datasets_name, all_experts, all_experts_name, success_rets, color_map, save_dir
+    # )
+    # make_score_table(
+    #     datasets_name,
+    #     [],
+    #     all_experts,
+    #     success_rets,
+    #     precision_rets,
+    #     save_dir,
+    #     "TableX",
+    #     drop_dp=True,
+    # )
 
     # Tuning
-    threshold_successes, threshold_anchors = get_tuning_results(
-        path_config.EVALUATION_PATH, experiments.keys(), thresholds
-    )
-    figure7(thresholds, threshold_successes, threshold_anchors, save_dir)
-    exit()
+    # target_modes = ["SuperFast", "Fast", "Normal"]
+    # threshold_successes, threshold_anchors = get_tuning_results(
+    #     path_config.EVALUATION_PATH, target_modes, thresholds
+    # )
+    # figure7(thresholds, threshold_successes, threshold_anchors, save_dir)
 
     # Super Fast
     super_fast_algorithm, super_fast_baselines, super_fast_experts = experiments[
@@ -555,6 +558,8 @@ def main(experiments, all_experts, all_experts_name, thresholds):
     # figure8(otb, high_algorithm, high_baselines[1], high_experts, save_dir)
     # figure9(otb, high_algorithm, high_baselines[0], high_experts, save_dir)
 
+    exit()
+
     # Fast
     fast_algorithm, fast_baselines, fast_experts = experiments["Fast"]
     (
@@ -606,6 +611,8 @@ def main(experiments, all_experts, all_experts_name, thresholds):
         normal_precision_rets,
         save_dir,
     )
+
+    exit()
 
     # All
     figure5(
@@ -681,87 +688,92 @@ def main(experiments, all_experts, all_experts_name, thresholds):
 
 if __name__ == "__main__":
     all_experts = [
-        "ATOM",
         "DaSiamRPN",
-        "DiMP-50",
+        "DiMP",
         "DROL",
-        "GradNet",
         "KYS",
         "Ocean",
-        "PrDiMP-50",
+        "PrDiMP",
+        "RPT",
         "SiamBAN",
         "SiamCAR",
         "SiamDW",
         "SiamFC++",
-        "SiamMCF",
         "SiamRPN",
         "SiamRPN++",
         "SPM",
     ]
     all_experts_name = [
-        "ATOM (CVPR 2019)",
         "DaSiamRPN (ECCV 2018)",
         "DiMP (ICCV 2019)",
         "DROL (AAAI 2020)",
-        "GradNet (ICCV 2019)",
         "KYS (ECCV 2020)",
         "Ocean (ECCV 2020)",
         "PrDiMP (CVPR 2020)",
+        "RPT (ECCVW 2020)",
         "SiamBAN (CVPR 2020)",
         "SiamCAR (CVPR 2020)",
         "SiamDW (CVPR 2019)",
         "SiamFC++ (AAAI 2020)",
-        "SiamMCF (ECCVW 2018)",
         "SiamRPN (CVPR 2018)",
         "SiamRPN++ (CVPR 2019)",
         "SPM (CVPR 2019)",
     ]
 
-    super_fast_algorithm = "AAA/SuperFast/0.69"
-    fast_algorithm = "AAA/Fast/0.60"
-    normal_algorithm = "AAA/Normal/0.65"
+    super_fast_algorithm = "AAA/SuperFast/0.54"
+    fast_algorithm = "AAA/Fast/0.68"
+    normal_algorithm = "AAA/Normal/0.50"
     siamdw_algorithm = "AAA/SiamDW/0.67"
     siamrpn_algorithm = "AAA/SiamRPN++/0.61"
 
     super_fast_baselines = [
-        "HDT/SuperFast/0.98",
-        "MCCT/SuperFast/0.10",
         "Random/SuperFast",
-        "Max/SuperFast",
-        "Without delay/SuperFast",
+        "WithoutOffline/SuperFast",
+        "WithoutDelay/SuperFast",
     ]
-    fast_baselines = [
-        "HDT/Fast/0.98",
-        "MCCT/Fast/0.10",
-        "Random/Fast",
-        "Max/Fast",
-        "Without delay/Fast",
-    ]
-    normal_baselines = [
-        "HDT/Normal/0.98",
-        "MCCT/Normal/0.10",
-        "Random/Normal",
-        "Max/Normal",
-        "Without delay/Normal",
-    ]
-    siamdw_baselines = [
-        "HDT/SiamDW/0.98",
-        "MCCT/SiamDW/0.10",
-        "Random/SiamDW",
-        "Max/SiamDW",
-        "Without delay/SiamDW",
-    ]
-    siamrpn_baselines = [
-        "HDT/SiamRPN++/0.98",
-        "MCCT/SiamRPN++/0.10",
-        "Random/SiamRPN++",
-        "Max/SiamRPN++",
-        "Without delay/SiamRPN++",
-    ]
+    fast_baselines = []
+    normal_baselines = []
+    siamdw_baselines = []
+    siamrpn_baselines = []
+    # super_fast_baselines = [
+    #     "HDT/SuperFast/0.98",
+    #     "MCCT/SuperFast/0.10",
+    #     "Random/SuperFast",
+    #     "Max/SuperFast",
+    #     "Without delay/SuperFast",
+    # ]
+    # fast_baselines = [
+    #     "HDT/Fast/0.98",
+    #     "MCCT/Fast/0.10",
+    #     "Random/Fast",
+    #     "Max/Fast",
+    #     "Without delay/Fast",
+    # ]
+    # normal_baselines = [
+    #     "HDT/Normal/0.98",
+    #     "MCCT/Normal/0.10",
+    #     "Random/Normal",
+    #     "Max/Normal",
+    #     "Without delay/Normal",
+    # ]
+    # siamdw_baselines = [
+    #     "HDT/SiamDW/0.98",
+    #     "MCCT/SiamDW/0.10",
+    #     "Random/SiamDW",
+    #     "Max/SiamDW",
+    #     "Without delay/SiamDW",
+    # ]
+    # siamrpn_baselines = [
+    #     "HDT/SiamRPN++/0.98",
+    #     "MCCT/SiamRPN++/0.10",
+    #     "Random/SiamRPN++",
+    #     "Max/SiamRPN++",
+    #     "Without delay/SiamRPN++",
+    # ]
 
     super_fast_experts = ["DaSiamRPN", "SiamDW", "SiamRPN", "SPM"]
-    fast_experts = ["GradNet", "Ocean", "SiamBAN", "SiamCAR", "SiamFC++", "SiamRPN++"]
-    normal_experts = ["ATOM", "DiMP", "DROL", "KYS", "PrDiMP", "SiamMCF"]
+    fast_experts = ["Ocean", "SiamBAN", "SiamCAR", "SiamFC++", "SiamRPN++"]
+    normal_experts = ["DiMP", "DROL", "KYS", "PrDiMP", "RPT"]
     siamdw_experts = [
         "SiamDWGroup/SiamFCRes22/OTB",
         "SiamDWGroup/SiamFCIncep22/OTB",
@@ -790,6 +802,6 @@ if __name__ == "__main__":
         "SiamRPN++": (siamrpn_algorithm, siamrpn_baselines, siamrpn_experts),
     }
 
-    algorithm_thresholds = np.arange(0.5, 1.0, 0.01)
+    algorithm_thresholds = np.arange(0.5, 0.7, 0.01)
 
     main(experiments, all_experts, all_experts_name, algorithm_thresholds)

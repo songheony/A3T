@@ -40,6 +40,10 @@ RLS_RTMDNET_MODEL = "weights/RLS-RTMDNet/rt-mdnet.pth"
 ROAM_FEAT_DIR = ""
 ROAM_MODEL_DIR = ""
 
+# RPT
+RPT_CONFIG = "weights/RPT/config_vot2018_offline.yaml"
+RPT_SNAPSHOT = "weights/RPT/siamreppoints.model"
+
 # SiamBAN
 SIAMBAN_CONFIG = "weights/SiamBAN/siamban_r50_l234_otb/config.yaml"
 SIAMBAN_SNAPSHOT = "weights/SiamBAN/siamban_r50_l234_otb/model.pth"

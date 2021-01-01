@@ -5,9 +5,9 @@ from base_tracker import BaseTracker
 from .aaa_util import FeatureExtractor, AnchorDetector
 
 
-class Max(BaseTracker):
-    def __init__(self, n_experts):
-        super(Max, self).__init__("Max")
+class WithoutOffline(BaseTracker):
+    def __init__(self, n_experts, mode):
+        super(WithoutOffline, self).__init__(f"WithoutOffline/{mode}")
 
         self.n_experts = n_experts
 

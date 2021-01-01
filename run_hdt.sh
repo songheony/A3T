@@ -1,4 +1,4 @@
-datasets=("OTB2015" "OTB2015-80%" "OTB2015-60%" "OTB2015-40%" "OTB2015-20%" "NFS" "UAV123" "TColor128" "VOT2018" "LaSOT" "Got10K")
+datasets=("OTB2015" "NFS" "UAV123" "TColor128" "VOT2018" "LaSOT")
 
 super_fast_experts=("DaSiamRPN" "SiamDW" "SiamRPN" "SPM")
 threshold=0.98 # DP
@@ -6,7 +6,7 @@ for (( j=0; j<${#datasets[@]}; j++ )); do
     python ./track_algorithm.py -a HDT -n SuperFast -d ${datasets[$j]} -e ${super_fast_experts[@]} -r $threshold
 done
 
-fast_experts=("GradNet" "Ocean" "SiamBAN" "SiamCAR" "SiamFC++" "SiamRPN++")
+fast_experts=("Ocean" "SiamBAN" "SiamCAR" "SiamFC++" "SiamRPN++")
 threshold=0.32 # DP
 for (( j=0; j<${#datasets[@]}; j++ )); do
         python ./track_algorithm.py -a HDT -n Fast -d ${datasets[$j]} -e ${fast_experts[@]} -r $threshold

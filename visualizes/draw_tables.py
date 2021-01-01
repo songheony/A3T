@@ -54,10 +54,11 @@ def make_score_table(
 
     for i in range(len(datasets_name)):
         dataset_name = datasets_name[i].replace("%", "\\%")
+        small_colunm = "c|" if i < len(datasets_name) - 1 else "c"
         if drop_dp or (drop_last_dp and i == len(datasets_name) - 1):
-            columns += f" & \\multicolumn{{1}}{{c|}}{{{dataset_name}}}"
+            columns += f" & \\multicolumn{{1}}{{{small_colunm}}}{{{dataset_name}}}"
         else:
-            columns += f" & \\multicolumn{{2}}{{c|}}{{{dataset_name}}}"
+            columns += f" & \\multicolumn{{2}}{{{small_colunm}}}{{{dataset_name}}}"
     latex += f"{columns} \\\\\n"
 
     small_columns = " "

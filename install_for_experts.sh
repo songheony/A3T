@@ -14,6 +14,7 @@ git clone https://github.com/LPXTT/GradNet-Tensorflow
 # git clone https://github.com/skyoung/MemTrack
 git clone https://github.com/researchmm/TracKit
 # git clone https://github.com/songheony/RLS-RTMDNet
+git clone https://github.com/songheony/RPT.git
 git clone https://github.com/hqucv/siamban
 git clone https://github.com/ohhhyeahhh/SiamCAR
 git clone https://github.com/researchmm/SiamDW
@@ -50,6 +51,13 @@ cd ../
 # cd RLS-RTMDNet/modules/roi_align
 # python setup.py build_ext --inplace
 # cd ../../../
+
+# For RPT
+cd RPT
+python setup.py build_ext --inplace
+cd siamreppoints
+python ./setup.py build_ext --inplace
+cd ../../
 
 # For SiamBAN
 cd siamban

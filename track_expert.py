@@ -1,12 +1,5 @@
-import random
-import numpy as np
-import torch
 from track_dataset import run
 from select_options import select_expert
-
-random.seed(42)
-np.random.seed(42)
-torch.random.manual_seed(42)
 
 
 def main(tracker_name, dataset_name):
@@ -19,7 +12,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--expert", default="MemDTC", type=str, help="expert")
+    parser.add_argument("-e", "--expert", default="RPT", type=str, help="expert")
     parser.add_argument("-d", "--dataset", default="OTB2015", type=str, help="dataset")
     args = parser.parse_args()
 

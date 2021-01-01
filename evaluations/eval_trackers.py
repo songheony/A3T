@@ -119,7 +119,12 @@ def evaluate(datasets, datasets_name, experts, baselines, algorithm, save_dir=No
 
                 if tracker_name != algorithm:
                     error, loss = save_pickle(
-                        tracker_dir, "loss", ope.eval_loss, dataset_name, tracker_name
+                        tracker_dir,
+                        "loss",
+                        ope.eval_loss,
+                        dataset_name,
+                        algorithm,
+                        tracker_name,
                     )
                     error_rets[dataset_name][tracker_name] = error
                     loss_rets[dataset_name][tracker_name] = loss

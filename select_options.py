@@ -19,9 +19,9 @@ def select_expert(tracker_name):
 
         tracker = DaSiamRPN()
     elif tracker_name == "DiMP":
-        from experts.dimp import DiMP50
+        from experts.dimp import DiMP
 
-        tracker = DiMP50()
+        tracker = DiMP()
     elif tracker_name == "DROL":
         from experts.drol import DROL
 
@@ -47,13 +47,17 @@ def select_expert(tracker_name):
 
         tracker = Ocean()
     elif tracker_name == "PrDiMP":
-        from experts.prdimp import PrDiMP50
+        from experts.prdimp import PrDiMP
 
-        tracker = PrDiMP50()
+        tracker = PrDiMP()
     elif tracker_name == "RLS-RTMDNet":
         from experts.rls_rtmdnet import RLS_RTMDNet
 
         tracker = RLS_RTMDNet()
+    elif tracker_name == "RPT":
+        from experts.rpt import RPT
+
+        tracker = RPT()
     elif tracker_name == "SiamBAN":
         from experts.siamban import SiamBAN
 
@@ -135,34 +139,33 @@ def select_expert(tracker_name):
 def select_algorithms(algorithm_name, experts, **kwargs):
     n_experts = len(experts)
     mode = kwargs["mode"]
+    threshold = kwargs["threshold"]
     if algorithm_name == "AAA":
         from algorithms.aaa import AAA
 
         algorithm = AAA(n_experts, **kwargs)
-    elif algorithm_name == "Without delay":
+    elif algorithm_name == "WithoutDelay":
         from algorithms.aaa import AAA
 
-        algorithm = AAA(n_experts, mode=kwargs["mode"], threshold=0.0)
-    elif algorithm_name == "MCCT":
-        from algorithms.mcct import MCCT
+        algorithm = AAA(n_experts, mode=mode, threshold=0.0)
+    elif algorithm_name == "WithoutOffline":
+        from algorithms.without_offline import WithoutOffline
 
-        algorithm = MCCT(n_experts, mode, mu=kwargs["threshold"])
-    elif algorithm_name == "Max":
-        from algorithms.baseline import Baseline
-
-        algorithm = Baseline(
-            n_experts, name=f"Max_{mode}", use_iou=False, use_feature=True
-        )
+        algorithm = WithoutOffline(n_experts, mode=mode)
     elif algorithm_name == "Random":
         from algorithms.random import Random
 
-        algorithm = Random(n_experts, mode)
+        algorithm = Random(n_experts, mode=mode)
+    elif algorithm_name == "MCCT":
+        from algorithms.mcct import MCCT
+
+        algorithm = MCCT(n_experts, mode=mode, mu=threshold)
     elif algorithm_name == "HDT":
         from algorithms.hdt import HDT
 
-        algorithm = HDT(n_experts, mode, beta=kwargs["threshold"])
+        algorithm = HDT(n_experts, mode=mode, beta=threshold)
     else:
-        raise ValueError("Unknown algorithm name")
+        raise ValueError(f"Unknown algorithm name: {algorithm_name}")
 
     return algorithm
 
