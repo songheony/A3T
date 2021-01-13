@@ -19,11 +19,13 @@ In this repository, we implemented or edited the following trackers to use as ex
 | DROL (AAAI 2020)      | [Paper](https://arxiv.org/abs/1909.02959) / [Original Repo](https://github.com/shallowtoil/DROL) |
 | GradNet (ICCV 2019)   | [Paper](https://arxiv.org/abs/1909.06800) / [Original Repo](https://github.com/LPXTT/GradNet-Tensorflow) |
 | KYS (ECCV 2020)   | [Paper](https://arxiv.org/abs/2003.11014) / [Original Repo](https://github.com/visionml/pytracking) |
-| MemDTC (TPAMI 2019)  | [Paper](https://arxiv.org/abs/1907.07613) / [Original Repo](https://github.com/skyoung/MemTrack) |
+| MemDTC (TPAMI 2019)  | [Paper](https://arxiv.org/abs/1907.07613) / [Original Repo](https://github.com/skyoung/MemDTC) |
 | MemTrack (ECCV 2018)  | [Paper](https://arxiv.org/abs/1803.07268) / [Original Repo](https://github.com/skyoung/MemTrack) |
 | Ocean (ECCV 2020)     | [Paper](https://arxiv.org/abs/2006.10721) / [Original Repo](https://github.com/researchmm/TracKit) |
 | PrDiMP (CVPR 2020)    | [Paper](https://arxiv.org/abs/2003.12565) / [Original Repo](https://github.com/visionml/pytracking) |
 | RLS-RTMDNet (CVPR 2020)    | [Paper](https://openaccess.thecvf.com/content_CVPR_2020/html/Gao_Recursive_Least-Squares_Estimator-Aided_Online_Learning_for_Visual_Tracking_CVPR_2020_paper.html) / [Original Repo](https://github.com/Amgao/RLS-RTMDNet) |
+| ROAM (CVPR 2020)    | [Paper](https://arxiv.org/abs/1907.12006) / [Original Repo](https://github.com/skyoung/ROAM) |
+| RPT (CVPR 2020)    | [Paper](https://arxiv.org/abs/2008.03467) / [Original Repo](https://github.com/songheony/RPT) |
 | SiamBAN (CVPR 2020)   | [Paper](https://arxiv.org/abs/2003.06761) / [Original Repo](https://github.com/hqucv/siamban) |
 | SiamCAR (CVPR 2020)   | [Paper](https://arxiv.org/abs/1911.07241) / [Original Repo](https://github.com/ohhhyeahhh/SiamCAR) |
 | SiamDW (CVPR 2019)    | [Paper](https://arxiv.org/abs/1901.01660) / [Original Repo](https://github.com/researchmm/SiamDW) |
@@ -37,7 +39,7 @@ In this repository, we implemented or edited the following trackers to use as ex
 | Staple (CVPR 2016)   | [Paper](https://arxiv.org/abs/1512.01355) / [Original Repo](https://github.com/wwdguu/pyCFTrackers) |
 | THOR (BMVC 2019)     | [Paper](https://arxiv.org/abs/1907.12920) / [Original Repo](https://github.com/xl-sr/THOR) |
 
-<sup>For DaSiamRPN, RLS-RTMDNet and SPM, we've modified the code a little bit to be compatible with Python3 and Pytorch >= 1.3.</sup>
+<sup>For DaSiamRPN, RLS-RTMDNet, RPT and SPM, we've slightly modified the code to be compatible with Python3 and Pytorch >= 1.3.</sup>
 
 ## Datasets
 
@@ -92,8 +94,8 @@ initial_bbox = [x, y, w, h]  # left x, top y, width, height of the initial targe
 n_experts = 6  # the number of experts you are using
 
 # define AAA
-theta = 0.69  # you can tune this hyperparameter by running run_tuning.sh
-algorithm = AAA(n_experts, mode="LOG_DIR", feature_threshold=theta)
+theta, gamma = 0.92, 11  # you can tune hyperparameters by running run_tuning.sh
+algorithm = AAA(n_experts, mode="LOG_DIR", threshold=theta, feature_factor=gamma)
 
 # initialize AAA
 algorith.initialize(img_paths[0], initial_bbox)
@@ -117,7 +119,7 @@ img_paths = []  # list of image file paths
 initial_bbox = [x, y, w, h]  # left x, top y, width, height of the initial target bbox
 
 # define Expert
-tracker_name = "ATOM"
+tracker_name = "DiMP"
 tracker = select_expert(tracker_name)
 
 # initialize Expert
@@ -185,7 +187,7 @@ bash run_hdt.sh
 # If you've download MCCT tracking results, you can skip this command
 bash run_mcct.sh
 
-# Run Max and Random
+# Run simple baselines
 # If you've download Baselines tracking results, you can skip this command
 bash run_baselines.sh
 

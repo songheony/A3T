@@ -6,27 +6,48 @@ pip install matplotlib pandas tqdm visdom scikit-image tikzplotlib pycocotools l
 cd external
 
 # clone experts
-git clone https://github.com/ClementPinard/Pytorch-Correlation-extension.git
+# ATOM
+git clone https://github.com/ClementPinard/Pytorch-Correlation-extension
+# DaSiamRPN
 git clone https://github.com/songheony/DaSiamRPN
+# DROL
 git clone https://github.com/shallowtoil/DROL
+# GradNet
 git clone https://github.com/LPXTT/GradNet-Tensorflow
-# git clone https://github.com/skyoung/MemDTC.git
-# git clone https://github.com/skyoung/MemTrack
+# MemDTC
+git clone https://github.com/skyoung/MemDTC
+# MemTrack
+git clone https://github.com/skyoung/MemTrack
+# Ocean
 git clone https://github.com/researchmm/TracKit
-# git clone https://github.com/songheony/RLS-RTMDNet
-git clone https://github.com/songheony/RPT.git
+# ROAM
+git clone https://github.com/skyoung/ROAM
+# RPT
+git clone https://github.com/songheony/RPT
+# SiamBAN
 git clone https://github.com/hqucv/siamban
+# SiamCAR
 git clone https://github.com/ohhhyeahhh/SiamCAR
+# SiamDW
 git clone https://github.com/researchmm/SiamDW
+# SiamFC
 git clone https://github.com/got-10k/siamfc
+# SiamFC++
 git clone https://github.com/MegviiDetection/video_analyst
+# SiamMCF
 git clone https://github.com/hmorimitsu/siam-mcf
+# SiamR-CNN
 git clone https://github.com/VisualComputingInstitute/SiamR-CNN
+# SiamRPN
 git clone https://github.com/huanglianghua/siamrpn-pytorch
+# SiamRPN++
 git clone https://github.com/STVIR/pysot
+# SPM
 git clone https://github.com/songheony/SPM-Tracker
-# git clone https://github.com/wwdguu/pyCFTrackers
-# git clone https://github.com/xl-sr/THOR
+# Staple
+git clone https://github.com/wwdguu/pyCFTrackers
+# THOR
+git clone https://github.com/xl-sr/THOR
 
 # edit network path of ATOM, DiMP, PrDiMP, KYS
 cd pytracking
@@ -48,9 +69,9 @@ python setup.py build_ext --inplace
 cd ../
 
 # For RLS-RTMDNet
-# cd RLS-RTMDNet/modules/roi_align
-# python setup.py build_ext --inplace
-# cd ../../../
+cd RLS-RTMDNet/modules/roi_align
+python setup.py build_ext --inplace
+cd ../../../
 
 # For RPT
 cd RPT
@@ -83,14 +104,14 @@ bash compile.sh
 cd ../
 
 # For Staple
-# cd pyCFTrackers/lib/pysot/utils
-# python setup.py build_ext --inplace
-# cd ../../../../
-# cd pyCFTrackers/lib/eco/features/
-# python setup.py build_ext --inplace
-# cd ../../../../
+cd pyCFTrackers/lib/pysot/utils
+python setup.py build_ext --inplace
+cd ../../../../
+cd pyCFTrackers/lib/eco/features/
+python setup.py build_ext --inplace
+cd ../../../../
 
 # For THOR
-# cd THOR
-# bash benchmark/make_toolkits.sh
-# cd ../
+cd THOR
+bash benchmark/make_toolkits.sh
+cd ../
