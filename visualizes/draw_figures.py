@@ -9,6 +9,7 @@ import matplotlib.transforms as mtrans
 from matplotlib.ticker import MultipleLocator
 
 from algorithms.aaa_util import calc_overlap
+from visualizes.draw_tables import get_mean_succ, get_mean_ratio
 
 plt.rcParams.update({"font.size": 12})
 sns.set()
@@ -20,6 +21,10 @@ ANNO_SIZE = 20
 
 def minmax(x):
     return (x - np.min(x)) / (np.max(x) - np.min(x))
+
+
+def diffmean(x):
+    return x - np.mean(x)
 
 
 def is_algorithm(tracker_name):
@@ -339,46 +344,37 @@ def draw_rank(
 
 
 def draw_succ_with_thresholds(
-    modes, thresholds, success_rets, anchor_frames, figsize, save_dir, file_name=None
+    modes,
+    thresholds,
+    success_rets,
+    anchor_frames,
+    gt_trajs,
+    figsize,
+    save_dir,
+    file_name=None,
 ):
     fig, axes = plt.subplots(nrows=2, ncols=1, figsize=figsize, sharex=True)
     fig.add_subplot(111, frameon=False)
 
     lines = []
 
-    mean_succ = np.zeros((len(thresholds), len(modes)))
-    mean_ratio = np.zeros((len(thresholds), len(modes)))
-    for i, tracker_name in enumerate(thresholds):
-        for j, dataset_name in enumerate(modes):
-            succ = [
-                v
-                for v in success_rets[dataset_name][tracker_name].values()
-                if not np.any(np.isnan(v))
-            ]
-            mean_succ[i, j] = np.mean(succ)
-
-            if anchor_frames is not None:
-                ratio = [
-                    sum(v) / len(v)
-                    for v in anchor_frames[dataset_name][tracker_name].values()
-                    if not np.any(np.isnan(v))
-                ]
-                mean_ratio[i, j] = np.mean(ratio)
-            else:
-                mean_ratio[i, j] = 1
+    mean_succ = get_mean_succ(thresholds, modes, success_rets)
+    mean_ratio = get_mean_ratio(thresholds, modes, anchor_frames, gt_trajs)
 
     for i, mode_name in enumerate(modes):
         # draw success plot
         ax = axes[0]
 
+        values = diffmean(mean_succ[:, i])
         line = ax.plot(
-            thresholds, minmax(mean_succ[:, i]), label=mode_name, linewidth=LINE_WIDTH
+            thresholds, values, label=mode_name, linewidth=LINE_WIDTH
         )[0]
         lines.append(line)
 
+        max_threshold = np.argmax(values)
         ax.plot(
-            thresholds[np.argmax(mean_succ[:, i])],
-            1,
+            thresholds[max_threshold],
+            values[max_threshold],
             "o",
             ms=10,
             mec=line.get_color(),
@@ -386,7 +382,7 @@ def draw_succ_with_thresholds(
             mew=2,
         )
 
-    axes[0].set_ylabel("Normalized AUC")
+    axes[0].set_ylabel("Diff AUC")
 
     if anchor_frames is not None:
         for i, mode_name in enumerate(modes):
@@ -651,7 +647,6 @@ def draw_graph(
     color_map,
     save_dir,
     target_seqs=None,
-    iserror=False,
     legend=False,
     sframes=[],
 ):
@@ -663,31 +658,12 @@ def draw_graph(
         seq_dir = save_dir / seq.name
         os.makedirs(save_dir, exist_ok=True)
 
-        gt_traj = np.array(seq.ground_truth_rect)
-        tracker_trajs = np.array(
-            [
-                dataset.get_tracker_traj(seq.name, tracker_name)
-                for tracker_name in trackers_name
-            ]
-        )
-
-        offline_bb, tracker_weight = dataset.get_algorithm_data(
-            seq.name, algorithm_name
-        )
-
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(20, 1))
         fig.add_subplot(111, frameon=False)
 
         # draw error graph
         if iserror:
             for i in range(len(trackers_name)):
-                box = tracker_trajs[i, :]
-                error = 1 - calc_overlap(gt_traj, box)
-                tracker_name = (
-                    trackers_name[i].split("_")[0]
-                    if is_algorithm(trackers_name[i])
-                    else trackers_name[i]
-                )
                 ax.plot(
                     range(len(error)),
                     error,

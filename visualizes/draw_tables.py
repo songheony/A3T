@@ -2,20 +2,8 @@ import numpy as np
 from sympy import preview
 
 
-def make_score_table(
-    datasets_name,
-    algorithms_name,
-    experts_name,
-    success_rets,
-    precision_rets,
-    save_dir,
-    filename=None,
-    drop_dp=False,
-    drop_last_dp=False,
-):
-    trackers_name = experts_name + algorithms_name
+def get_mean_succ(trackers_name, datasets_name, success_rets):
     mean_succ = np.zeros((len(trackers_name), len(datasets_name)))
-    mean_prec = np.zeros((len(trackers_name), len(datasets_name)))
     for i, tracker_name in enumerate(trackers_name):
         for j, dataset_name in enumerate(datasets_name):
             succ = [
@@ -25,25 +13,61 @@ def make_score_table(
             ]
             mean_succ[i, j] = np.mean(succ)
 
-            if not drop_dp:
-                prec = [
-                    v
-                    for v in precision_rets[dataset_name][tracker_name].values()
-                    if not np.any(np.isnan(v))
-                ]
-                mean_prec[i, j] = np.mean(prec, axis=0)[20]
+    return mean_succ
+
+
+def get_mean_prec(trackers_name, datasets_name, precision_rets):
+    mean_prec = np.zeros((len(trackers_name), len(datasets_name)))
+    for i, tracker_name in enumerate(trackers_name):
+        for j, dataset_name in enumerate(datasets_name):
+            prec = [
+                v
+                for v in precision_rets[dataset_name][tracker_name].values()
+                if not np.any(np.isnan(v))
+            ]
+            mean_prec[i, j] = np.mean(prec, axis=0)[20]
+
+    return mean_prec
+
+
+def get_mean_ratio(trackers_name, datasets_name, anchor_frames, gt_trajs):
+    mean_ratio = np.zeros((len(trackers_name), len(datasets_name)))
+    for i, tracker_name in enumerate(trackers_name):
+        for j, dataset_name in enumerate(datasets_name):
+            ratio = [
+                len(v) / len(gt_trajs[k])
+                for k, v in anchor_frames[dataset_name][tracker_name].items()
+            ]
+            mean_ratio[i, j] = np.mean(ratio)
+
+    return mean_ratio
+
+
+def get_mean_fps(trackers_name, datasets_name, tracking_time_rets):
+    mean_fps = np.zeros((len(trackers_name), len(datasets_name)))
+    for i, tracker_name in enumerate(trackers_name):
+        for j, dataset_name in enumerate(datasets_name):
+            fps = [
+                1 / v
+                for v in tracking_time_rets[dataset_name][tracker_name].values()
+            ]
+            mean_fps[i, j] = np.mean(fps)
+
+    return mean_fps
+
+
+def make_score_table(
+    datasets_name, algorithms_name, experts_name, mean_values, save_dir, filename=None,
+):
+    trackers_name = experts_name + algorithms_name
+    metrics_name = sorted(mean_values.keys())
 
     latex = "\\begin{table*}\n"
     latex += "\\centering\n"
     latex += "\\begin{threeparttable}\n"
 
     header = "c"
-    if drop_dp:
-        num_header = len(datasets_name)
-    elif drop_last_dp:
-        num_header = len(datasets_name) * 2 - 1
-    else:
-        num_header = len(datasets_name) * 2
+    num_header = len(datasets_name) * len(metrics_name)
     for i in range(num_header):
         header += "|c"
 
@@ -55,36 +79,24 @@ def make_score_table(
     for i in range(len(datasets_name)):
         dataset_name = datasets_name[i].replace("%", "\\%")
         small_colunm = "c|" if i < len(datasets_name) - 1 else "c"
-        if drop_dp or (drop_last_dp and i == len(datasets_name) - 1):
-            columns += f" & \\multicolumn{{1}}{{{small_colunm}}}{{{dataset_name}}}"
-        else:
-            columns += f" & \\multicolumn{{2}}{{{small_colunm}}}{{{dataset_name}}}"
+        columns += f" & \\multicolumn{{{len(metrics_name)}}}{{{small_colunm}}}{{{dataset_name}}}"
     latex += f"{columns} \\\\\n"
 
     small_columns = " "
     for i in range(len(datasets_name)):
-        if drop_dp or (drop_last_dp and i == len(datasets_name) - 1):
-            small_columns += " & AUC"
-        else:
-            small_columns += " & AUC & DP"
+        for j in range(len(metrics_name)):
+            small_columns += f" & {metrics_name[j]}"
     latex += f"{small_columns} \\\\\n"
     latex += "\\hline\\hline\n"
 
     for i in range(len(trackers_name)):
-        if i == experts_name:
+        if i == len(experts_name):
             latex += "\\hdashline\n"
 
-        if (i >= len(experts_name)) and ("_" in trackers_name[i]):
-            line = trackers_name[i][: trackers_name[i].index("_")]
-        else:
-            line = trackers_name[i].replace("_", "\\_")
-
+        line = trackers_name[i]
         for j in range(len(datasets_name)):
-            if drop_dp or (drop_last_dp and i == len(datasets_name) - 1):
-                values = [mean_succ]
-            else:
-                values = [mean_succ, mean_prec]
-            for value in values:
+            for metric_name in metrics_name:
+                value = mean_values[metric_name]
                 sorted_idx = np.argsort(value[:, j])
                 if i == sorted_idx[-1]:
                     line += f" & {{\\color{{red}} \\textbf{{{value[i, j]:0.2f}}}}}"

@@ -1,4 +1,3 @@
-import sys
 import numpy as np
 
 import graph_tool
@@ -55,35 +54,32 @@ def calc_similarity(feature1, feature2):
 
 class WAADelayed:
     def __init__(self):
-        self.init_w = True
+        pass
 
     def init(self, n):
         self.w = np.ones(n) / n
-        self.est_D = 1
-        self.real_D = 0
-
-    """
-    gradient_losses should be n * len(dt)
-    """
+        self.Z = 1
+        self.TD = 0
+        self.lnN = np.log(len(self.w))
 
     def update(self, gradient_losses):
-        # check the number of element
-        assert gradient_losses.shape[0] == len(self.w)
+        """
+        gradient_losses should be n * len(dt)
+        """
+        # add t
+        self.TD += gradient_losses.shape[1]
 
-        self.real_D += gradient_losses.shape[1]
+        # add D
+        self.TD += ((gradient_losses.shape[1] + 1) * gradient_losses.shape[1]) // 2
 
-        for i in range(1, gradient_losses.shape[1] + 1):
-            self.real_D += i
-            if self.est_D < self.real_D:
-                self.est_D *= 2
-                if self.init_w:
-                    self.w = np.ones(len(self.w)) / len(self.w)
+        # update estimated Z
+        while self.Z < self.TD:
+            self.Z *= 2
 
-        lr = np.sqrt(self.est_D * np.log(len(self.w)))
-
+        lr = np.sqrt(self.lnN / self.Z)
         changes = lr * gradient_losses.sum(axis=1)
-        temp = np.log(self.w + sys.float_info.min) - changes
-        self.w = np.exp(temp - sc.logsumexp(temp))
+        log_multiple = np.log(self.w + 1e-14) - changes
+        self.w = np.exp(log_multiple - sc.logsumexp(log_multiple))
 
 
 class AnchorDetector:
@@ -101,12 +97,11 @@ class AnchorDetector:
 
 
 class ShortestPathTracker:
-    def __init__(self, a=1, b=1, c=1, f2i_factor=10000):
+    def __init__(self, feature_factor=1, f2i_factor=10000):
         self.g = graph_tool.Graph()
         self.g.edge_properties["cost"] = self.g.new_edge_property("int")
-        self.a = a
-        self.b = b
-        self.c = c
+
+        self.feature_factor = feature_factor
         self.f2i_factor = f2i_factor
 
     def initialize(self, box, target_feature):
@@ -118,10 +113,15 @@ class ShortestPathTracker:
 
         self.prev_boxes = box[None, :]
         self.prev_features = target_feature[None, :]
-        self.prev_feature_scores = np.array([1])
 
     def get_vertex_id(self, frame, idx):
         return frame * 100 + idx + 2
+
+    def get_node_idx(self, vertex_id):
+        vertex_id = vertex_id - 2
+        frame_id = vertex_id // 100
+        idx = vertex_id % 100
+        return frame_id, idx
 
     def track(
         self, curr_boxes, curr_features, curr_feature_scores,
@@ -129,30 +129,29 @@ class ShortestPathTracker:
         self.frame_id += 1
         prev_frame_id = self.frame_id - 1
 
-        prob_features = calc_similarity(self.prev_features, curr_features)
+        prob_prev_similarity = calc_similarity(self.prev_features, curr_features)
+        prob_similarity = prob_prev_similarity * curr_feature_scores
+        cost_similarity = -np.log(prob_similarity + 1e-7)
         for prev_idx in range(len(self.prev_boxes)):
+            prob_iou = calc_overlap(self.prev_boxes[prev_idx], curr_boxes)
+            cost_iou = -np.log(prob_iou + 1e-7)
+            costs = cost_iou + self.feature_factor * cost_similarity[prev_idx]
+
             prev_vertex = (
                 self.source
                 if prev_frame_id == -1
                 else self.get_vertex_id(prev_frame_id, prev_idx)
             )
-
-            prob_ious = calc_overlap(self.prev_boxes[prev_idx], curr_boxes)
-            costs = (
-                -self.a * np.log(prob_ious + 1e-7)
-                - self.b * np.log(prob_features[prev_idx, :] + 1e-7)
-                - self.c * np.log(curr_feature_scores + 1e-7)
-            )
-            costs = (costs * self.f2i_factor).astype(int)
             for curr_idx in range(len(curr_boxes)):
                 edge = self.g.add_edge(
                     prev_vertex, self.get_vertex_id(self.frame_id, curr_idx)
                 )
-                self.g.edge_properties["cost"][edge] = costs[curr_idx]
+                self.g.edge_properties["cost"][edge] = int(
+                    costs[curr_idx] * self.f2i_factor
+                )
 
         self.prev_boxes = curr_boxes
         self.prev_features = curr_features
-        self.prev_feature_scores = curr_feature_scores
 
     def run(self):
         for last_idx in range(len(self.prev_boxes)):
@@ -170,9 +169,7 @@ class ShortestPathTracker:
         )
         ids = []
         for i in path[1:-1]:
-            vertex_id = int(i) - 2
-            frame_id = vertex_id // 100
-            idx = vertex_id % 100
+            frame_id, idx = self.get_node_idx(int(i))
             ids.append([frame_id, idx])
         return ids
 

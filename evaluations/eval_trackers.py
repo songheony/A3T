@@ -39,7 +39,7 @@ def evaluate(datasets, datasets_name, experts, baselines, algorithm, save_dir=No
     anchor_frame_rets = {}
 
     for dataset, dataset_name in zip(datasets, datasets_name):
-        ope = OPEBenchmark(dataset)
+        ope = OPEBenchmark(dataset, dataset_name)
 
         tracking_time_rets[dataset_name] = {}
         success_rets[dataset_name] = {}
@@ -52,35 +52,29 @@ def evaluate(datasets, datasets_name, experts, baselines, algorithm, save_dir=No
         loss_rets[dataset_name] = {}
 
         if algorithm is not None:
-            anchor_frame_rets[dataset_name] = ope.get_anchor_frames(
-                dataset_name, algorithm
-            )
+            anchor_frame_rets[dataset_name] = ope.get_anchor_frames(algorithm)
 
         for tracker_name in eval_trackers:
             tracker_dir = save_dir / tracker_name / dataset_name
             os.makedirs(tracker_dir, exist_ok=True)
 
             tracking_time = save_pickle(
-                tracker_dir, "tracking_time", ope.eval_times, dataset_name, tracker_name
+                tracker_dir, "tracking_time", ope.eval_times, tracker_name
             )
             tracking_time_rets[dataset_name][tracker_name] = tracking_time
 
             success = save_pickle(
-                tracker_dir, "success", ope.eval_success, dataset_name, tracker_name
+                tracker_dir, "success", ope.eval_success, tracker_name
             )
             success_rets[dataset_name][tracker_name] = success
 
             precision = save_pickle(
-                tracker_dir, "precision", ope.eval_precision, dataset_name, tracker_name
+                tracker_dir, "precision", ope.eval_precision, tracker_name
             )
             precision_rets[dataset_name][tracker_name] = precision
 
             norm_precision = save_pickle(
-                tracker_dir,
-                "norm_precision",
-                ope.eval_norm_precision,
-                dataset_name,
-                tracker_name,
+                tracker_dir, "norm_precision", ope.eval_norm_precision, tracker_name,
             )
             norm_precision_rets[dataset_name][tracker_name] = norm_precision
 
@@ -89,7 +83,6 @@ def evaluate(datasets, datasets_name, experts, baselines, algorithm, save_dir=No
                     tracker_dir,
                     "anchor_success",
                     ope.eval_success,
-                    dataset_name,
                     tracker_name,
                     anchor_frame_rets[dataset_name],
                 )
@@ -99,7 +92,6 @@ def evaluate(datasets, datasets_name, experts, baselines, algorithm, save_dir=No
                     tracker_dir,
                     "anchor_precision",
                     ope.eval_precision,
-                    dataset_name,
                     tracker_name,
                     anchor_frame_rets[dataset_name],
                 )
@@ -109,7 +101,6 @@ def evaluate(datasets, datasets_name, experts, baselines, algorithm, save_dir=No
                     tracker_dir,
                     "anchor_norm_precision",
                     ope.eval_norm_precision,
-                    dataset_name,
                     tracker_name,
                     anchor_frame_rets[dataset_name],
                 )
@@ -117,17 +108,11 @@ def evaluate(datasets, datasets_name, experts, baselines, algorithm, save_dir=No
                     tracker_name
                 ] = anchor_norm_precision
 
-                if tracker_name != algorithm:
-                    error, loss = save_pickle(
-                        tracker_dir,
-                        "loss",
-                        ope.eval_loss,
-                        dataset_name,
-                        algorithm,
-                        tracker_name,
-                    )
-                    error_rets[dataset_name][tracker_name] = error
-                    loss_rets[dataset_name][tracker_name] = loss
+                error, loss = save_pickle(
+                    tracker_dir, "loss", ope.eval_loss, algorithm, tracker_name,
+                )
+                error_rets[dataset_name][tracker_name] = error
+                loss_rets[dataset_name][tracker_name] = loss
 
     return (
         tracking_time_rets,

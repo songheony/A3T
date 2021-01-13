@@ -15,8 +15,9 @@ class OPEBenchmark:
                 should the same format like VOT
     """
 
-    def __init__(self, dataset):
+    def __init__(self, dataset, dataset_name):
         self.dataset = dataset
+        self.dataset_name = dataset_name
 
     def convert_bb_to_center(self, bboxes):
         return np.array(
@@ -29,18 +30,18 @@ class OPEBenchmark:
     def convert_bb_to_norm_center(self, bboxes, gt_wh):
         return self.convert_bb_to_center(bboxes) / (gt_wh + 1e-16)
 
-    def get_tracker_traj(self, dataset_name, seq_name, tracker_name):
+    def get_tracker_traj(self, seq_name, tracker_name):
         results_dir = "{}/{}/{}".format(
-            path_config.RESULTS_PATH, tracker_name, dataset_name
+            path_config.RESULTS_PATH, tracker_name, self.dataset_name
         )
         base_results_path = "{}/{}".format(results_dir, seq_name)
         results_path = "{}.txt".format(base_results_path)
         tracker_traj = np.loadtxt(results_path, delimiter="\t")
         return tracker_traj
 
-    def get_algorithm_data(self, dataset_name, seq_name, algorithm_name):
+    def get_algorithm_data(self, seq_name, algorithm_name):
         results_dir = "{}/{}/{}".format(
-            path_config.RESULTS_PATH, algorithm_name, dataset_name
+            path_config.RESULTS_PATH, algorithm_name, self.dataset_name
         )
         base_results_path = "{}/{}".format(results_dir, seq_name)
         offline_path = "{}_offline.pkl".format(base_results_path)
@@ -52,12 +53,12 @@ class OPEBenchmark:
 
         return offline_bb, tracker_weight
 
-    def get_anchor_frames(self, dataset_name, algorithm_name):
+    def get_anchor_frames(self, algorithm_name):
         anchor_frames = {}
         for seq in self.dataset:
             gt_traj = np.array(seq.ground_truth_rect)
             offline_bb, tracker_weight = self.get_algorithm_data(
-                dataset_name, seq.name, algorithm_name
+                seq.name, algorithm_name
             )
             offline_bb.insert(0, [gt_traj[0]])
             anchor_frame = [
@@ -66,11 +67,19 @@ class OPEBenchmark:
             anchor_frames[seq.name] = anchor_frame
         return anchor_frames
 
-    def eval_times(self, dataset_name, tracker_name):
+    def get_gt_trajs(self):
+        gt_trajs = {}
+        for seq in self.dataset:
+            gt_traj = np.array(seq.ground_truth_rect)
+            gt_trajs[seq.name] = gt_traj
+
+        return gt_trajs
+
+    def eval_times(self, tracker_name):
         time_ret = {}
         for seq in self.dataset:
             results_dir = "{}/{}/{}".format(
-                path_config.RESULTS_PATH, tracker_name, dataset_name
+                path_config.RESULTS_PATH, tracker_name, self.dataset_name
             )
             base_results_path = "{}/{}".format(results_dir, seq.name)
             times_path = "{}_time.txt".format(base_results_path)
@@ -78,11 +87,11 @@ class OPEBenchmark:
             time_ret[seq.name] = np.mean(tracker_time[1:])
         return time_ret
 
-    def eval_success(self, dataset_name, tracker_name, anchor_frames=None):
+    def eval_success(self, tracker_name, anchor_frames=None):
         success_ret = {}
         for seq in self.dataset:
             gt_traj = np.array(seq.ground_truth_rect)
-            tracker_traj = self.get_tracker_traj(dataset_name, seq.name, tracker_name)
+            tracker_traj = self.get_tracker_traj(seq.name, tracker_name)
 
             if anchor_frames is not None:
                 gt_traj = gt_traj[anchor_frames[seq.name], :]
@@ -96,11 +105,11 @@ class OPEBenchmark:
                 success_ret[seq.name] = np.nan
         return success_ret
 
-    def eval_precision(self, dataset_name, tracker_name, anchor_frames=None):
+    def eval_precision(self, tracker_name, anchor_frames=None):
         precision_ret = {}
         for seq in self.dataset:
             gt_traj = np.array(seq.ground_truth_rect)
-            tracker_traj = self.get_tracker_traj(dataset_name, seq.name, tracker_name)
+            tracker_traj = self.get_tracker_traj(seq.name, tracker_name)
 
             if anchor_frames is not None:
                 gt_traj = gt_traj[anchor_frames[seq.name], :]
@@ -119,11 +128,11 @@ class OPEBenchmark:
                 precision_ret[seq.name] = np.nan
         return precision_ret
 
-    def eval_norm_precision(self, dataset_name, tracker_name, anchor_frames=None):
+    def eval_norm_precision(self, tracker_name, anchor_frames=None):
         norm_precision_ret = {}
         for seq in self.dataset:
             gt_traj = np.array(seq.ground_truth_rect)
-            tracker_traj = self.get_tracker_traj(dataset_name, seq.name, tracker_name)
+            tracker_traj = self.get_tracker_traj(seq.name, tracker_name)
 
             if anchor_frames is not None:
                 gt_traj = gt_traj[anchor_frames[seq.name], :]
@@ -146,15 +155,15 @@ class OPEBenchmark:
                 norm_precision_ret[seq.name] = np.nan
         return norm_precision_ret
 
-    def eval_loss(self, dataset_name, algorithm_name, tracker_name):
+    def eval_loss(self, algorithm_name, tracker_name):
         error_ret = {}
         loss_ret = {}
         for seq in self.dataset:
             gt_traj = np.array(seq.ground_truth_rect)
-            tracker_traj = self.get_tracker_traj(dataset_name, seq.name, tracker_name)
+            tracker_traj = self.get_tracker_traj(seq.name, tracker_name)
 
             offline_bb, tracker_weight = self.get_algorithm_data(
-                dataset_name, seq.name, algorithm_name
+                seq.name, algorithm_name
             )
 
             # flat offilne results

@@ -138,8 +138,6 @@ def select_expert(tracker_name):
 
 def select_algorithms(algorithm_name, experts, **kwargs):
     n_experts = len(experts)
-    mode = kwargs["mode"]
-    threshold = kwargs["threshold"]
     if algorithm_name == "AAA":
         from algorithms.aaa import AAA
 
@@ -147,23 +145,24 @@ def select_algorithms(algorithm_name, experts, **kwargs):
     elif algorithm_name == "WithoutDelay":
         from algorithms.aaa import AAA
 
-        algorithm = AAA(n_experts, mode=mode, threshold=0.0)
+        kwargs["threshold"] = 0
+        algorithm = AAA(n_experts, **kwargs)
     elif algorithm_name == "WithoutOffline":
         from algorithms.without_offline import WithoutOffline
 
-        algorithm = WithoutOffline(n_experts, mode=mode)
+        algorithm = WithoutOffline(n_experts, mode=kwargs["mode"])
     elif algorithm_name == "Random":
         from algorithms.random import Random
 
-        algorithm = Random(n_experts, mode=mode)
+        algorithm = Random(n_experts, mode=kwargs["mode"])
     elif algorithm_name == "MCCT":
         from algorithms.mcct import MCCT
 
-        algorithm = MCCT(n_experts, mode=mode, mu=threshold)
+        algorithm = MCCT(n_experts, mode=kwargs["mode"], mu=kwargs["threshold"])
     elif algorithm_name == "HDT":
         from algorithms.hdt import HDT
 
-        algorithm = HDT(n_experts, mode=mode, beta=threshold)
+        algorithm = HDT(n_experts, mode=kwargs["mode"], beta=kwargs["threshold"])
     else:
         raise ValueError(f"Unknown algorithm name: {algorithm_name}")
 

@@ -70,20 +70,27 @@ def run_dataset(dataset, dataset_name, trackers, experts=None, threads=0, debug=
         experts: List of Tracker instances.
         debug: Debug level.
     """
-    multiprocessing.set_start_method('spawn', force=True)
+    multiprocessing.set_start_method("spawn", force=True)
 
     if threads == 0:
         for seq in dataset:
             for tracker_info in trackers:
-                run_sequence(dataset_name, seq, tracker_info, experts=experts, debug=debug)
+                run_sequence(
+                    dataset_name, seq, tracker_info, experts=experts, debug=debug
+                )
     else:
-        param_list = [(dataset_name, seq, tracker_info, experts, debug) for seq, tracker_info in product(dataset, trackers)]
+        param_list = [
+            (dataset_name, seq, tracker_info, experts, debug)
+            for seq, tracker_info in product(dataset, trackers)
+        ]
         with multiprocessing.Pool(processes=threads) as pool:
             pool.starmap(run_sequence, param_list)
-    print('Done')
+    print("Done")
 
 
 def run(tracker, dataset_name, experts=None):
     dataset = select_datasets(dataset_name)
 
-    run_dataset(dataset, dataset_name, [tracker], experts=experts, debug=False)
+    run_dataset(
+        dataset, dataset_name, [tracker], experts=experts, threads=0, debug=False
+    )

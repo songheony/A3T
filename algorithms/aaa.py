@@ -18,14 +18,12 @@ class AAA(BaseTracker):
         n_experts,
         mode="SuperFast",
         threshold=0.0,
-        offline_a=1,
-        offline_b=1,
-        offline_c=1,
+        feature_factor=1,
     ):
         super(AAA, self).__init__(
-            f"AAA/{mode}/{threshold:.3f}/a-{offline_a},b-{offline_b},c-{offline_c}"
+            f"AAA/{mode}/{threshold:.2f}/{feature_factor}"
             if threshold > 0
-            else f"WithoutDelay/{mode}/a-{offline_a},b-{offline_b},c-{offline_c}"
+            else f"WithoutDelay/{mode}/{feature_factor}"
         )
 
         # The number of experts
@@ -40,7 +38,7 @@ class AAA(BaseTracker):
         self.extractor = FeatureExtractor(device)
 
         # Offline tracker
-        self.offline = ShortestPathTracker(a=offline_a, b=offline_b, c=offline_c)
+        self.offline = ShortestPathTracker(feature_factor)
 
         # Online learner
         self.learner = WAADelayed()
@@ -96,7 +94,7 @@ class AAA(BaseTracker):
             self.offline.initialize(boxes[final_box_id], features[final_box_id])
 
             # Get offline tracking results
-            self.prev_boxes = np.array(self.prev_boxes)
+            self.prev_boxes = np.stack(self.prev_boxes)
             offline_results = np.array(
                 [self.prev_boxes[frame, ind[1]] for frame, ind in enumerate(path)]
             )
