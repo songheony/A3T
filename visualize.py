@@ -339,7 +339,7 @@ def score_table(
     mean_values = {
         "AUC": get_mean_succ(trackers, datasets_name, successes),
         "DP": get_mean_prec(trackers, datasets_name, precisions),
-        "FPS": get_mean_fps(trackers, datasets_name, tracking_times)
+        "FPS": get_mean_fps(trackers, datasets_name, tracking_times),
     }
     make_score_table(
         datasets_name,
@@ -427,7 +427,7 @@ def main(experiments, all_experts, all_experts_name):
         superfast_precision_rets,
         superfast_tracking_time_rets,
         save_dir,
-        filename="Table1"
+        filename="Table1",
     )
 
     # Table6
@@ -440,7 +440,7 @@ def main(experiments, all_experts, all_experts_name):
         superfast_anchor_precision_rets,
         superfast_tracking_time_rets,
         save_dir,
-        filename="Table6"
+        filename="Table6",
     )
     exit()
 
@@ -485,7 +485,7 @@ def main(experiments, all_experts, all_experts_name):
         fast_precision_rets,
         fast_tracking_time_rets,
         save_dir,
-        filename="Table2"
+        filename="Table2",
     )
 
     # Normal
@@ -515,7 +515,7 @@ def main(experiments, all_experts, all_experts_name):
         normal_precision_rets,
         normal_tracking_time_rets,
         save_dir,
-        filename="Table3"
+        filename="Table3",
     )
 
     exit()
@@ -563,7 +563,7 @@ def main(experiments, all_experts, all_experts_name):
         siamdw_precision_rets,
         siamdw_tracking_time_rets,
         save_dir,
-        filename="Table4"
+        filename="Table4",
     )
 
     # SiamRPN++
@@ -593,14 +593,17 @@ def main(experiments, all_experts, all_experts_name):
         siamrpn_precision_rets,
         siamrpn_tracking_time_rets,
         save_dir,
-        filename="Table5"
+        filename="Table5",
     )
 
     # Tuning
     target_modes = ["SuperFast", "Fast", "Normal"]
-    threshold_successes, threshold_anchor_successes, threshold_anchors, gt_trajs = get_tuning_results(
-        path_config.EVALUATION_PATH, target_modes
-    )
+    (
+        threshold_successes,
+        threshold_anchor_successes,
+        threshold_anchors,
+        gt_trajs,
+    ) = get_tuning_results(path_config.EVALUATION_PATH, target_modes)
     thresholds = sorted(list(threshold_successes[target_modes[0]].keys()))
     figure7(thresholds, threshold_successes, threshold_anchors, gt_trajs, save_dir)
 

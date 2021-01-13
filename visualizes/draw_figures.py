@@ -366,9 +366,7 @@ def draw_succ_with_thresholds(
         ax = axes[0]
 
         values = diffmean(mean_succ[:, i])
-        line = ax.plot(
-            thresholds, values, label=mode_name, linewidth=LINE_WIDTH
-        )[0]
+        line = ax.plot(thresholds, values, label=mode_name, linewidth=LINE_WIDTH)[0]
         lines.append(line)
 
         max_threshold = np.argmax(values)

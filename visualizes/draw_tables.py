@@ -48,8 +48,7 @@ def get_mean_fps(trackers_name, datasets_name, tracking_time_rets):
     for i, tracker_name in enumerate(trackers_name):
         for j, dataset_name in enumerate(datasets_name):
             fps = [
-                1 / v
-                for v in tracking_time_rets[dataset_name][tracker_name].values()
+                1 / v for v in tracking_time_rets[dataset_name][tracker_name].values()
             ]
             mean_fps[i, j] = np.mean(fps)
 

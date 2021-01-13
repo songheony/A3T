@@ -14,11 +14,7 @@ from .aaa_util import (
 
 class AAA(BaseTracker):
     def __init__(
-        self,
-        n_experts,
-        mode="SuperFast",
-        threshold=0.0,
-        feature_factor=1,
+        self, n_experts, mode="SuperFast", threshold=0.0, feature_factor=1,
     ):
         super(AAA, self).__init__(
             f"AAA/{mode}/{threshold:.2f}/{feature_factor}"

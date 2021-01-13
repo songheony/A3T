@@ -13,7 +13,9 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--algorithm", default="AAA", type=str)
-    parser.add_argument("-e", "--experts", default=["DaSiamRPN", "SiamDW", "SiamRPN", "SPM"], nargs="+")
+    parser.add_argument(
+        "-e", "--experts", default=["DaSiamRPN", "SiamDW", "SiamRPN", "SPM"], nargs="+"
+    )
     parser.add_argument("-d", "--dataset", default="OTB2015", type=str)
     parser.add_argument("-m", "--mode", default="SuperFast", type=str)
     parser.add_argument("-t", "--threshold", default=0.0, type=float)
@@ -26,5 +28,5 @@ if __name__ == "__main__":
         args.dataset,
         mode=args.mode,
         threshold=args.threshold,
-        feature_factor=args.feature_factor
+        feature_factor=args.feature_factor,
     )

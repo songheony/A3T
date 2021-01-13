@@ -30,9 +30,7 @@ def main(algorithm_name, experts, save_dir, mode):
                 threshold=threshold,
                 feature_factor=feature_factor,
             )
-            run_dataset(
-                dataset, dataset_name, [algorithm], experts=experts, threads=8
-            )
+            run_dataset(dataset, dataset_name, [algorithm], experts=experts, threads=8)
             algorithms.append(algorithm.name)
 
             (
@@ -46,16 +44,10 @@ def main(algorithm_name, experts, save_dir, mode):
                 error_rets,
                 loss_rets,
                 anchor_frame_rets,
-            ) = evaluate(
-                [dataset], [dataset_name], [], [], algorithm.name, save_dir
-            )
+            ) = evaluate([dataset], [dataset_name], [], [], algorithm.name, save_dir)
 
-            auc = get_mean_succ([algorithm.name], [dataset_name], success_rets)[
-                0
-            ][0]
-            prec = get_mean_prec(
-                [algorithm.name], [dataset_name], precision_rets
-            )[0][0]
+            auc = get_mean_succ([algorithm.name], [dataset_name], success_rets)[0][0]
+            prec = get_mean_prec([algorithm.name], [dataset_name], precision_rets)[0][0]
             print(f"AUC: {auc}, DP: {prec}")
 
 
