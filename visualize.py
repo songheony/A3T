@@ -1,8 +1,5 @@
 import os
-import pickle
 from pathlib import Path
-
-import numpy as np
 import seaborn as sns
 
 from select_options import select_datasets
@@ -20,50 +17,67 @@ from visualizes.draw_tables import (
     get_mean_succ,
     get_mean_prec,
     get_mean_fps,
+    get_mean_ratio,
     make_score_table,
+    make_rank_table,
 )
 import path_config
 
 
-def get_tuning_results(eval_dir, modes):
+def get_tuning_results(eval_dir, algorithm_name, modes):
     dataset_name = "Got10K"
     dataset = select_datasets(dataset_name)
     ope = OPEBenchmark(dataset, dataset_name)
 
-    thresholds = [0.85, 0.86, 0.87, 0.88, 0.89, 0.90, 0.91, 0.92, 0.93, 0.94]
-    feature_factor = 11
+    if algorithm_name == "AAA":
+        thresholds = [0.70, 0.71, 0.72, 0.73, 0.74, 0.75, 0.76, 0.77, 0.78, 0.79, 0.80]
+    elif algorithm_name == "HDT":
+        thresholds = [0.90, 0.92, 0.94, 0.96, 0.98, 1.00]
 
     threshold_successes = {mode: {} for mode in modes}
+    threshold_precisions = {mode: {} for mode in modes}
     threshold_anchor_successes = {mode: {} for mode in modes}
     threshold_anchors = {mode: {} for mode in modes}
 
     for mode in modes:
         for threshold in thresholds:
-            parameter_name = f"{threshold:.2f}/{feature_factor}"
+            parameter_name = f"{threshold:.2f}"
+            if parameter_name in threshold_successes[mode].keys():
+                continue
 
-            if threshold == 0:
-                algorithm_name = f"WithoutDelay/{mode}/{feature_factor}"
-            else:
-                algorithm_name = f"AAA/{mode}/{parameter_name}"
+            name = f"{algorithm_name}/{mode}/{parameter_name}"
 
-            success_path = (
-                Path(eval_dir) / algorithm_name / dataset_name / "success.pkl"
-            )
-            success = pickle.loads(success_path.read_bytes())
+            (
+                tracking_time_rets,
+                success_rets,
+                precision_rets,
+                norm_precision_rets,
+                anchor_success_rets,
+                anchor_precision_rets,
+                anchor_norm_precision_rets,
+                error_rets,
+                loss_rets,
+                anchor_frame_rets,
+            ) = evaluate([dataset], [dataset_name], [], [], name,)
 
-            anchor_success_path = (
-                Path(eval_dir) / algorithm_name / dataset_name / "anchor_success.pkl"
-            )
-            anchor_success = pickle.loads(anchor_success_path.read_bytes())
-
-            anchor_frames = ope.get_anchor_frames(algorithm_name)
-            threshold_successes[mode][parameter_name] = success
-            threshold_anchor_successes[mode][parameter_name] = anchor_success
-            threshold_anchors[mode][parameter_name] = anchor_frames
+            threshold_successes[mode][parameter_name] = success_rets[dataset_name][name]
+            threshold_precisions[mode][parameter_name] = precision_rets[dataset_name][
+                name
+            ]
+            threshold_anchor_successes[mode][parameter_name] = anchor_success_rets[
+                dataset_name
+            ][name]
+            threshold_anchors[mode][parameter_name] = anchor_frame_rets[dataset_name]
 
     gt_trajs = ope.get_gt_trajs()
 
-    return threshold_successes, threshold_anchor_successes, threshold_anchors, gt_trajs
+    return (
+        threshold_successes,
+        threshold_precisions,
+        threshold_anchor_successes,
+        threshold_anchors,
+        gt_trajs,
+    )
 
 
 def figure1(
@@ -84,18 +98,19 @@ def figure1(
     )
 
 
-def figure2(vot_dataset, high_algorithm, high_experts, color_map, save_dir):
+def figure2(vot_dataset, all_experts, color_map, save_dir):
     target_seqs = ["fish1", "nature"]
     draw_result(
         vot_dataset,
-        high_algorithm,
-        high_experts,
+        "VOT2018",
+        None,
+        all_experts,
         color_map,
         save_dir / "Figure2",
         target_seqs,
         show=["frame"],
-        gt=True,
-        best=True,
+        vis_gt=True,
+        vis_best=True,
     )
 
 
@@ -159,6 +174,7 @@ def figure6(
     otb_seqs = ["Girl2"]
     draw_graph(
         otb_dataset,
+        "OTB2015",
         high_algorithm,
         high_experts,
         color_map,
@@ -179,6 +195,7 @@ def figure6(
     )
     draw_graph(
         otb_dataset,
+        "OTB2015",
         high_algorithm,
         high_experts,
         color_map,
@@ -199,6 +216,7 @@ def figure6(
     )
     draw_result(
         otb_dataset,
+        "OTB2015",
         high_algorithm,
         high_experts,
         color_map,
@@ -210,6 +228,7 @@ def figure6(
     tpl_seqs = ["tpl_Yo_yos_ce1"]
     draw_graph(
         tpl_dataset,
+        "TColor128",
         high_algorithm,
         high_experts,
         color_map,
@@ -230,6 +249,7 @@ def figure6(
     )
     draw_graph(
         tpl_dataset,
+        "TColor128",
         high_algorithm,
         high_experts,
         color_map,
@@ -250,6 +270,7 @@ def figure6(
     )
     draw_result(
         tpl_dataset,
+        "TColor128",
         high_algorithm,
         high_experts,
         color_map,
@@ -324,6 +345,38 @@ def figure9(
     )
 
 
+def figure10(
+    datasets,
+    datasets_name,
+    superfast_algorithm,
+    superfast_experts,
+    fast_algorithm,
+    fast_experts,
+    normal_algorithm,
+    normal_experts,
+    save_dir,
+):
+    rank_table(
+        datasets,
+        datasets_name,
+        superfast_algorithm,
+        superfast_experts,
+        save_dir,
+        "SuperFast_Offline",
+    )
+    rank_table(
+        datasets, datasets_name, fast_algorithm, fast_experts, save_dir, "Fast_Offline"
+    )
+    rank_table(
+        datasets,
+        datasets_name,
+        normal_algorithm,
+        normal_experts,
+        save_dir,
+        "Normal_Offline",
+    )
+
+
 def score_table(
     datasets_name,
     algorithm,
@@ -334,13 +387,20 @@ def score_table(
     tracking_times,
     save_dir,
     filename,
+    metrics=["AUC", "DP", "FPS"],
 ):
     trackers = experts + baselines + [algorithm]
-    mean_values = {
-        "AUC": get_mean_succ(trackers, datasets_name, successes),
-        "DP": get_mean_prec(trackers, datasets_name, precisions),
-        "FPS": get_mean_fps(trackers, datasets_name, tracking_times),
-    }
+
+    mean_values = {}
+    if "AUC" in metrics:
+        mean_values["AUC"] = get_mean_succ(trackers, datasets_name, successes).round(3)
+    if "DP" in metrics:
+        mean_values["DP"] = get_mean_prec(trackers, datasets_name, precisions).round(3)
+    if "FPS" in metrics:
+        mean_values["FPS"] = (
+            get_mean_fps(trackers, datasets_name, tracking_times).round(0).astype(int)
+        )
+
     make_score_table(
         datasets_name,
         baselines + [algorithm],
@@ -351,21 +411,62 @@ def score_table(
     )
 
 
+def threshold_table(
+    algorithm_name,
+    thresholds,
+    threshold_successes,
+    threshold_precisions,
+    threshold_anchor_successes,
+    threshold_anchors,
+    gt_trajs,
+    save_dir,
+):
+    modes = list(threshold_successes.keys())
+    mean_values = {
+        "AUC": get_mean_succ(thresholds, modes, threshold_successes).round(3),
+        "DP": get_mean_prec(thresholds, modes, threshold_precisions).round(3),
+        "Anchor": get_mean_succ(thresholds, modes, threshold_anchor_successes).round(3),
+        "Ratio": get_mean_ratio(thresholds, modes, threshold_anchors, gt_trajs).round(
+            2
+        ),
+    }
+    make_score_table(
+        modes,
+        thresholds,
+        [],
+        mean_values,
+        save_dir,
+        filename=f"Threshold_{algorithm_name}",
+    )
+
+
+def rank_table(
+    datasets, datasets_name, algorithm_name, experts_name, save_dir, filename
+):
+    error_rets = {}
+    loss_rets = {}
+    for dataset, dataset_name in zip(datasets, datasets_name):
+        ope = OPEBenchmark(dataset, dataset_name)
+
+        _error_rets = {}
+        _loss_rets = {}
+        for expert_name in experts_name:
+            error_ret, loss_ret = ope.eval_loss(algorithm_name, expert_name)
+            _error_rets[expert_name] = error_ret
+            _loss_rets[expert_name] = loss_ret
+        error_rets[dataset_name] = _error_rets
+        loss_rets[dataset_name] = _loss_rets
+
+    make_rank_table(
+        datasets_name, experts_name, error_rets, loss_rets, save_dir, filename
+    )
+
+
 def main(experiments, all_experts, all_experts_name):
     save_dir = Path(path_config.VISUALIZATION_PATH)
     os.makedirs(save_dir, exist_ok=True)
 
-    datasets_name = [
-        "OTB2015",
-        "TColor128",
-        "UAV123",
-        "NFS",
-        "LaSOT",
-        "VOT2018",
-    ]
-    datasets = [select_datasets(dataset_name) for dataset_name in datasets_name]
-
-    total_colors = sns.color_palette("hls", len(all_experts) + 2).as_hex()[::-1][1:]
+    total_colors = sns.color_palette("hls", len(all_experts) + 1).as_hex()[::-1]
     color_map = {
         tracker_name: color
         for tracker_name, color in zip(all_experts, total_colors[1:])
@@ -377,22 +478,35 @@ def main(experiments, all_experts, all_experts_name):
     color_map["WithoutDelay"] = total_colors[0]
     color_map["AAA"] = total_colors[0]
 
+    datasets_name = [
+        "OTB2015",
+        "TColor128",
+        "UAV123",
+        "NFS",
+        "LaSOT",
+        "VOT2018",
+    ]
+    datasets = [select_datasets(dataset_name) for dataset_name in datasets_name]
+
     # All
-    # (
-    #     tracking_time_rets,
-    #     success_rets,
-    #     precision_rets,
-    #     norm_precision_rets,
-    #     anchor_success_rets,
-    #     anchor_precision_rets,
-    #     anchor_norm_precision_rets,
-    #     error_rets,
-    #     loss_rets,
-    #     anchor_frame_rets,
-    # ) = evaluate(datasets, datasets_name, all_experts, [], None)
-    # figure1(
-    #     datasets_name, all_experts, all_experts_name, success_rets, color_map, save_dir
-    # )
+    (
+        tracking_time_rets,
+        success_rets,
+        precision_rets,
+        norm_precision_rets,
+        anchor_success_rets,
+        anchor_precision_rets,
+        anchor_norm_precision_rets,
+        error_rets,
+        loss_rets,
+        anchor_frame_rets,
+    ) = evaluate(datasets, datasets_name, all_experts, [], None)
+    figure1(
+        datasets_name, all_experts, all_experts_name, success_rets, color_map, save_dir
+    )
+
+    # vot = select_datasets("VOT2018")
+    # figure2(vot, all_experts, color_map, save_dir)
 
     # Super Fast
     superfast_algorithm, superfast_baselines, superfast_experts = experiments[
@@ -437,28 +551,26 @@ def main(experiments, all_experts, all_experts_name):
         [],
         superfast_experts,
         superfast_anchor_success_rets,
-        superfast_anchor_precision_rets,
-        superfast_tracking_time_rets,
+        None,
+        None,
         save_dir,
         filename="Table6",
+        metrics=["AUC"],
     )
-    exit()
 
-    # vot = select_datasets("VOT")
-    # figure2(vot, high_algorithm, high_experts, save_dir)
-    # figure4(
-    #     datasets_name,
-    #     high_algorithm,
-    #     high_experts,
-    #     high_successes,
-    #     high_precisions,
-    #     save_dir,
-    # )
-    # otb = select_datasets("OTB")
-    # tpl = select_datasets("TPL")
-    # figure6(otb, tpl, high_algorithm, high_experts, save_dir)
-    # figure8(otb, high_algorithm, high_baselines[1], high_experts, save_dir)
-    # figure9(otb, high_algorithm, high_baselines[0], high_experts, save_dir)
+    # # figure4(
+    # #     datasets_name,
+    # #     high_algorithm,
+    # #     high_experts,
+    # #     high_successes,
+    # #     high_precisions,
+    # #     save_dir,
+    # # )
+    # # otb = select_datasets("OTB")
+    # # tpl = select_datasets("TPL")
+    # # figure6(otb, tpl, high_algorithm, high_experts, save_dir)
+    # # figure8(otb, high_algorithm, high_baselines[1], high_experts, save_dir)
+    # # figure9(otb, high_algorithm, high_baselines[0], high_experts, save_dir)
 
     # Fast
     fast_algorithm, fast_baselines, fast_experts = experiments["Fast"]
@@ -486,6 +598,20 @@ def main(experiments, all_experts, all_experts_name):
         fast_tracking_time_rets,
         save_dir,
         filename="Table2",
+    )
+
+    # Table7
+    score_table(
+        datasets_name,
+        fast_algorithm,
+        [],
+        fast_experts,
+        fast_anchor_success_rets,
+        None,
+        None,
+        save_dir,
+        filename="Table7",
+        metrics=["AUC"],
     )
 
     # Normal
@@ -518,7 +644,19 @@ def main(experiments, all_experts, all_experts_name):
         filename="Table3",
     )
 
-    exit()
+    # Table8
+    score_table(
+        datasets_name,
+        normal_algorithm,
+        [],
+        normal_experts,
+        normal_anchor_success_rets,
+        None,
+        None,
+        save_dir,
+        filename="Table8",
+        metrics=["AUC"],
+    )
 
     # Figure5
     figure5(
@@ -533,6 +671,19 @@ def main(experiments, all_experts, all_experts_name):
         normal_experts,
         normal_success_rets,
         color_map,
+        save_dir,
+    )
+
+    # Figure10
+    figure10(
+        datasets,
+        datasets_name,
+        superfast_algorithm,
+        superfast_experts,
+        fast_algorithm,
+        fast_experts,
+        normal_algorithm,
+        normal_experts,
         save_dir,
     )
 
@@ -596,16 +747,22 @@ def main(experiments, all_experts, all_experts_name):
         filename="Table5",
     )
 
-    # Tuning
-    target_modes = ["SuperFast", "Fast", "Normal"]
-    (
-        threshold_successes,
-        threshold_anchor_successes,
-        threshold_anchors,
-        gt_trajs,
-    ) = get_tuning_results(path_config.EVALUATION_PATH, target_modes)
-    thresholds = sorted(list(threshold_successes[target_modes[0]].keys()))
-    figure7(thresholds, threshold_successes, threshold_anchors, gt_trajs, save_dir)
+    # Tuning - AAA
+    # target_modes = ["SuperFast", "Fast", "Normal"]
+    # (
+    #     threshold_successes, threshold_precisions, threshold_anchor_successes, threshold_anchors, gt_trajs
+    # ) = get_tuning_results(path_config.EVALUATION_PATH, "AAA", target_modes)
+    # thresholds = list(threshold_successes[target_modes[0]].keys())
+    # threshold_table("AAA", thresholds, threshold_successes, threshold_precisions, threshold_anchor_successes, threshold_anchors, gt_trajs, save_dir)
+    # figure7(thresholds, threshold_successes, threshold_anchors, gt_trajs, save_dir)
+
+    # Tuning-HDT
+    # target_modes = ["SuperFast", "Fast", "Normal", "SiamDW", "SiamRPN++"]
+    # (
+    #     threshold_successes, threshold_precisions, threshold_anchor_successes, threshold_anchors, gt_trajs
+    # ) = get_tuning_results(path_config.EVALUATION_PATH, "HDT", target_modes)
+    # thresholds = list(threshold_successes[target_modes[0]].keys())
+    # threshold_table("HDT", thresholds, threshold_successes, threshold_precisions, threshold_anchor_successes, threshold_anchors, gt_trajs, save_dir)
 
 
 if __name__ == "__main__":
@@ -642,56 +799,42 @@ if __name__ == "__main__":
         "SPM (CVPR 2019)",
     ]
 
-    super_fast_algorithm = "AAA/SuperFast/0.88/11"
-    fast_algorithm = "AAA/Fast/0.92/11"
-    normal_algorithm = "AAA/Normal/0.87/11"
-    siamdw_algorithm = "AAA/SiamDW/0.67"
-    siamrpn_algorithm = "AAA/SiamRPN++/0.61"
+    super_fast_algorithm = "AAA/SuperFast/0.70"
+    fast_algorithm = "AAA/Fast/0.72"
+    normal_algorithm = "AAA/Normal/0.74"
+    siamdw_algorithm = "AAA/SiamDW/0.73"
+    siamrpn_algorithm = "AAA/SiamRPN++/0.75"
 
     super_fast_baselines = [
-        # "Random/SuperFast",
-        # "WithoutOffline/SuperFast",
-        # "WithoutDelay/SuperFast",
+        "Random/SuperFast",
+        "HDT/SuperFast/1.00",
+        "MCCT/SuperFast/0.10",
+        "WithoutDelay/SuperFast",
     ]
-    fast_baselines = []
-    normal_baselines = []
-    siamdw_baselines = []
-    siamrpn_baselines = []
-    # super_fast_baselines = [
-    #     "HDT/SuperFast/0.98",
-    #     "MCCT/SuperFast/0.10",
-    #     "Random/SuperFast",
-    #     "Max/SuperFast",
-    #     "Without delay/SuperFast",
-    # ]
-    # fast_baselines = [
-    #     "HDT/Fast/0.98",
-    #     "MCCT/Fast/0.10",
-    #     "Random/Fast",
-    #     "Max/Fast",
-    #     "Without delay/Fast",
-    # ]
-    # normal_baselines = [
-    #     "HDT/Normal/0.98",
-    #     "MCCT/Normal/0.10",
-    #     "Random/Normal",
-    #     "Max/Normal",
-    #     "Without delay/Normal",
-    # ]
-    # siamdw_baselines = [
-    #     "HDT/SiamDW/0.98",
-    #     "MCCT/SiamDW/0.10",
-    #     "Random/SiamDW",
-    #     "Max/SiamDW",
-    #     "Without delay/SiamDW",
-    # ]
-    # siamrpn_baselines = [
-    #     "HDT/SiamRPN++/0.98",
-    #     "MCCT/SiamRPN++/0.10",
-    #     "Random/SiamRPN++",
-    #     "Max/SiamRPN++",
-    #     "Without delay/SiamRPN++",
-    # ]
+    fast_baselines = [
+        "Random/Fast",
+        "HDT/Fast/0.96",
+        "MCCT/Fast/0.10",
+        "WithoutDelay/Fast",
+    ]
+    normal_baselines = [
+        "Random/Normal",
+        "HDT/Normal/0.05",
+        "MCCT/Normal/0.10",
+        "WithoutDelay/Normal",
+    ]
+    siamdw_baselines = [
+        "Random/SiamDW",
+        "HDT/SiamDW/0.05",
+        "MCCT/SiamDW/0.10",
+        "WithoutDelay/SiamDW",
+    ]
+    siamrpn_baselines = [
+        "Random/SiamRPN++",
+        "HDT/SiamRPN++/0.05",
+        "MCCT/SiamRPN++/0.10",
+        "WithoutDelay/SiamRPN++",
+    ]
 
     super_fast_experts = ["DaSiamRPN", "SiamDW", "SiamRPN", "SPM"]
     fast_experts = ["Ocean", "SiamBAN", "SiamCAR", "SiamFC++", "SiamRPN++"]

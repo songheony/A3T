@@ -9,7 +9,8 @@ import matplotlib.transforms as mtrans
 from matplotlib.ticker import MultipleLocator
 
 from algorithms.aaa_util import calc_overlap
-from visualizes.draw_tables import get_mean_succ, get_mean_ratio
+from evaluations import ope_benchmark
+from visualizes.draw_tables import get_mean_succ, get_mean_ratio, calc_rank
 
 plt.rcParams.update({"font.size": 12})
 sns.set()
@@ -17,10 +18,6 @@ sns.set_style("whitegrid")
 LINE_WIDTH = 2
 BOX_WIDTH = 10
 ANNO_SIZE = 20
-
-
-def minmax(x):
-    return (x - np.min(x)) / (np.max(x) - np.min(x))
 
 
 def diffmean(x):
@@ -32,22 +29,6 @@ def is_algorithm(tracker_name):
         if tracker_name.startswith(algorithm):
             return True
     return False
-
-
-def calc_rank(dataset_name, seq_names, trackers, rets):
-    ranks = []
-    for seq_name in seq_names:
-        value = np.mean(
-            [rets[dataset_name][tracker_name][seq_name] for tracker_name in trackers],
-            axis=1,
-        )
-        temp = value.argsort()
-        rank = np.empty_like(temp)
-        rank[temp] = np.arange(len(value))
-        rank = len(trackers) - rank
-        ranks.append(rank)
-    ranks = np.array(ranks)
-    return ranks
 
 
 def draw_pie(
@@ -242,11 +223,10 @@ def draw_rank(
     )
     fig.add_subplot(111, frameon=False)
 
-    xs = list(range(1, len(group_trackers[0]) + 1))
-
     alphabets = ["a", "b", "c"]
 
     for g in range(len(group_names)):
+        xs = list(range(1, len(group_trackers[g]) + 1))
         for i, dataset_name in enumerate(datasets):
             ax = axes[g, i]
 
@@ -257,9 +237,9 @@ def draw_rank(
                 dataset_name, seq_names, group_trackers[g], group_success_rets[g]
             )
 
-            for t, tracker_name, rank in zip(group_trackers[g], ranks.T):
+            for tracker_name, rank in zip(group_trackers[g], ranks.T):
                 vis_name = (
-                    tracker_name.split("_")[0]
+                    tracker_name.split("/")[0]
                     if is_algorithm(tracker_name)
                     else tracker_name
                 )
@@ -283,12 +263,13 @@ def draw_rank(
 
             # ax.yaxis.set_major_formatter(FormatStrFormatter("%.1f"))
             ax.yaxis.set_major_locator(MultipleLocator(0.1))
-            ax.set_xticks([1, len(group_trackers[g]) // 2 + 1, len(group_trackers[g])])
+            # ax.set_xticks([1, len(group_trackers[g]) // 2 + 1, len(group_trackers[g])])
+            ax.set_xticks([1, len(group_trackers[g])])
             if g == len(group_names) - 1:
                 ax.set_xticklabels(
                     [
                         "1(Best)",
-                        str(len(group_trackers[g]) // 2 + 1),
+                        # str(len(group_trackers[g]) // 2 + 1),
                         f"{len(group_trackers[g])}(Worst)",
                     ]
                 )
@@ -296,11 +277,7 @@ def draw_rank(
                 ax.set_xticklabels([])
             if g == 0:
                 ax.set_title(dataset_name, y=1.2)
-            # if i == len(datasets) - 1:
-            #     ax.yaxis.set_label_position("right")
-            #     ax.set_ylabel(f"({alphabets[g]}) In {group_names[g]} group")
             if i == 0:
-                # ax.yaxis.set_label_position("right")
                 ax.set_ylabel(f"({alphabets[g]}) {group_names[g]} group")
 
     # hide tick and tick label of the big axes
@@ -366,6 +343,7 @@ def draw_succ_with_thresholds(
         ax = axes[0]
 
         values = diffmean(mean_succ[:, i])
+        # values = mean_succ[:, i]
         line = ax.plot(thresholds, values, label=mode_name, linewidth=LINE_WIDTH)[0]
         lines.append(line)
 
@@ -420,6 +398,7 @@ def draw_succ_with_thresholds(
 
 def draw_result(
     dataset,
+    dataset_name,
     algorithm_name,
     experts_name,
     color_map,
@@ -429,7 +408,13 @@ def draw_result(
     vis_gt=True,
     vis_best=False,
 ):
-    trackers_name = experts_name + [algorithm_name]
+    ope = ope_benchmark.OPEBenchmark(dataset, dataset_name)
+
+    if algorithm_name is not None:
+        trackers_name = experts_name + [algorithm_name]
+    else:
+        trackers_name = experts_name
+
     for seq in dataset:
         if (target_seqs is not None) and (seq.name not in target_seqs):
             continue
@@ -440,13 +425,13 @@ def draw_result(
         gt_traj = np.array(seq.ground_truth_rect)
         tracker_trajs = np.array(
             [
-                dataset.get_tracker_traj(seq.name, tracker_name)
+                ope.get_tracker_traj(seq.name, tracker_name)
                 for tracker_name in trackers_name
             ]
         )
 
         if algorithm_name is not None:
-            offline_bb, tracker_weight = dataset.get_algorithm_data(
+            offline_bb, tracker_weight = ope.get_algorithm_data(
                 seq.name, algorithm_name
             )
 
@@ -478,7 +463,7 @@ def draw_result(
                     box = tracker_trajs[i, :frame]
                     error = 1 - calc_overlap(gt_traj[:frame], box)
                     tracker_name = (
-                        trackers_name[i].split("_")[0]
+                        trackers_name[i].split("/")[0]
                         if is_algorithm(trackers_name[i])
                         else trackers_name[i]
                     )
@@ -540,13 +525,14 @@ def draw_result(
                 else:
                     # draw tracking bbox
                     for i in range(len(trackers_name)):
+                        tracker_name = trackers_name[i].split("/")[0]
                         box = tracker_trajs[i, frame]
                         rect = patches.Rectangle(
                             (box[0], box[1]),
                             box[2],
                             box[3],
                             linewidth=BOX_WIDTH,
-                            edgecolor=color_map[trackers_name[i]],
+                            edgecolor=color_map[tracker_name],
                             facecolor="none",
                             alpha=1,
                         )
@@ -557,32 +543,30 @@ def draw_result(
                                 np.argmax(tracker_weight[frame - 1]) == i
                             ):
                                 sample_ax.annotate(
-                                    trackers_name[i],
+                                    tracker_name,
                                     xy=(box[0], box[1]),
                                     xycoords="data",
                                     weight="bold",
                                     xytext=(-50, 10),
                                     textcoords="offset points",
                                     size=ANNO_SIZE,
-                                    color=color_map[trackers_name[i]],
+                                    color=color_map[tracker_name],
                                     arrowprops=dict(
-                                        arrowstyle="->",
-                                        color=color_map[trackers_name[i]],
+                                        arrowstyle="->", color=color_map[tracker_name],
                                     ),
                                 )
                             elif trackers_name[i] == algorithm_name:
                                 sample_ax.annotate(
-                                    trackers_name[i].split("_")[0],
+                                    tracker_name,
                                     xy=(box[0] + box[2], box[1]),
                                     xycoords="data",
                                     weight="bold",
                                     xytext=(10, 10),
                                     textcoords="offset points",
                                     size=ANNO_SIZE,
-                                    color=color_map[trackers_name[i]],
+                                    color=color_map[tracker_name],
                                     arrowprops=dict(
-                                        arrowstyle="->",
-                                        color=color_map[trackers_name[i]],
+                                        arrowstyle="->", color=color_map[tracker_name],
                                     ),
                                 )
                         elif vis_best:
@@ -591,7 +575,7 @@ def draw_result(
                             )
                             if np.argmax(scores) == i:
                                 sample_ax.annotate(
-                                    trackers_name[i],
+                                    tracker_name,
                                     xy=(box[0], box[1]),
                                     xycoords="data",
                                     weight="bold",
@@ -640,15 +624,26 @@ def draw_result(
 
 def draw_graph(
     dataset,
+    dataset_name,
     algorithm_name,
     experts_name,
     color_map,
     save_dir,
     target_seqs=None,
+    iserror=True,
     legend=False,
     sframes=[],
 ):
+    ope = ope_benchmark.OPEBenchmark(dataset, dataset_name)
     trackers_name = experts_name + [algorithm_name]
+
+    error_rets = {}
+    loss_rets = {}
+    for tracker_name in trackers_name:
+        error_ret, loss_ret = ope.eval_loss(algorithm_name, tracker_name)
+        error_rets[tracker_name] = error_ret
+        loss_rets[tracker_name] = loss_ret
+
     for seq in dataset:
         if (target_seqs is not None) and (seq.name not in target_seqs):
             continue
@@ -656,12 +651,15 @@ def draw_graph(
         seq_dir = save_dir / seq.name
         os.makedirs(save_dir, exist_ok=True)
 
+        offline_bb, tracker_weight = ope.get_algorithm_data(seq.name, algorithm_name)
+
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(20, 1))
         fig.add_subplot(111, frameon=False)
 
         # draw error graph
         if iserror:
             for i in range(len(trackers_name)):
+                error = error_rets[trackers_name[i]][seq.name]
                 ax.plot(
                     range(len(error)),
                     error,
@@ -672,7 +670,7 @@ def draw_graph(
                     else LINE_WIDTH,
                     alpha=0.8 if is_algorithm(tracker_name) else 1,
                 )
-                ax.set(ylabel="Error", xlim=(0, len(gt_traj)), ylim=(-0.05, 1.05))
+                ax.set(ylabel="Error", xlim=(0, len(error)), ylim=(-0.05, 1.05))
             ax.set_xticks([])
             if legend:
                 ax.legend(
@@ -698,7 +696,7 @@ def draw_graph(
 
         if algorithm_name.startswith("AAA"):
             # draw anchor line
-            for i in range(len(gt_traj)):
+            for i in range(len(tracker_weight)):
                 if offline_bb[i - 1] is not None:
                     ax.axvline(
                         x=i, color="gray", linestyle="--", linewidth=0.1, alpha=0.3

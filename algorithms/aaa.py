@@ -14,12 +14,10 @@ from .aaa_util import (
 
 class AAA(BaseTracker):
     def __init__(
-        self, n_experts, mode="SuperFast", threshold=0.0, feature_factor=1,
+        self, n_experts, mode="SuperFast", threshold=0.0,
     ):
         super(AAA, self).__init__(
-            f"AAA/{mode}/{threshold:.2f}/{feature_factor}"
-            if threshold > 0
-            else f"WithoutDelay/{mode}/{feature_factor}"
+            f"AAA/{mode}/{threshold:.2f}" if threshold > 0 else f"WithoutDelay/{mode}"
         )
 
         # The number of experts
@@ -34,7 +32,7 @@ class AAA(BaseTracker):
         self.extractor = FeatureExtractor(device)
 
         # Offline tracker
-        self.offline = ShortestPathTracker(feature_factor)
+        self.offline = ShortestPathTracker()
 
         # Online learner
         self.learner = WAADelayed()
@@ -46,7 +44,7 @@ class AAA(BaseTracker):
         self.prev_boxes = []
 
         # Extract target image
-        self.target_feature = self.extractor.extract(image, [box])[0]
+        self.target_feature = self.extractor.extract(image, [box])
 
         # Init detector with target feature
         self.detector.init(self.target_feature)

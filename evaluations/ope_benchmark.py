@@ -91,16 +91,20 @@ class OPEBenchmark:
         success_ret = {}
         for seq in self.dataset:
             gt_traj = np.array(seq.ground_truth_rect)
+            valid_idx = ~np.isnan(gt_traj)[:, 0]
             tracker_traj = self.get_tracker_traj(seq.name, tracker_name)
 
             if anchor_frames is not None:
-                gt_traj = gt_traj[anchor_frames[seq.name], :]
-                tracker_traj = tracker_traj[anchor_frames[seq.name], :]
+                anchor_frame_idx = np.zeros((len(gt_traj)), dtype=bool)
+                anchor_frame_idx[anchor_frames[seq.name]] = 1
+                valid_idx = valid_idx * anchor_frame_idx
 
-            n_frame = len(gt_traj)
+            n_frame = sum(valid_idx)
 
             if n_frame > 0:
-                success_ret[seq.name] = success_overlap(gt_traj, tracker_traj, n_frame)
+                success_ret[seq.name] = success_overlap(
+                    gt_traj[valid_idx], tracker_traj[valid_idx], n_frame
+                )
             else:
                 success_ret[seq.name] = np.nan
         return success_ret
@@ -109,17 +113,19 @@ class OPEBenchmark:
         precision_ret = {}
         for seq in self.dataset:
             gt_traj = np.array(seq.ground_truth_rect)
+            valid_idx = ~np.isnan(gt_traj)[:, 0]
             tracker_traj = self.get_tracker_traj(seq.name, tracker_name)
 
             if anchor_frames is not None:
-                gt_traj = gt_traj[anchor_frames[seq.name], :]
-                tracker_traj = tracker_traj[anchor_frames[seq.name], :]
+                anchor_frame_idx = np.zeros((len(gt_traj)), dtype=bool)
+                anchor_frame_idx[anchor_frames[seq.name]] = 1
+                valid_idx = valid_idx * anchor_frame_idx
 
-            n_frame = len(gt_traj)
+            n_frame = sum(valid_idx)
 
             if n_frame > 0:
-                gt_center = self.convert_bb_to_center(gt_traj)
-                tracker_center = self.convert_bb_to_center(tracker_traj)
+                gt_center = self.convert_bb_to_center(gt_traj[valid_idx])
+                tracker_center = self.convert_bb_to_center(tracker_traj[valid_idx])
                 thresholds = np.arange(0, 51, 1)
                 precision_ret[seq.name] = success_error(
                     gt_center, tracker_center, thresholds, n_frame
@@ -132,20 +138,22 @@ class OPEBenchmark:
         norm_precision_ret = {}
         for seq in self.dataset:
             gt_traj = np.array(seq.ground_truth_rect)
+            valid_idx = ~np.isnan(gt_traj)[:, 0]
             tracker_traj = self.get_tracker_traj(seq.name, tracker_name)
 
             if anchor_frames is not None:
-                gt_traj = gt_traj[anchor_frames[seq.name], :]
-                tracker_traj = tracker_traj[anchor_frames[seq.name], :]
+                anchor_frame_idx = np.zeros((len(gt_traj)), dtype=bool)
+                anchor_frame_idx[anchor_frames[seq.name]] = 1
+                valid_idx = valid_idx * anchor_frame_idx
 
-            n_frame = len(gt_traj)
+            n_frame = sum(valid_idx)
 
             if n_frame > 0:
                 gt_center_norm = self.convert_bb_to_norm_center(
-                    gt_traj, gt_traj[:, 2:4]
+                    gt_traj[valid_idx], gt_traj[valid_idx, 2:4]
                 )
                 tracker_center_norm = self.convert_bb_to_norm_center(
-                    tracker_traj, gt_traj[:, 2:4]
+                    tracker_traj[valid_idx], gt_traj[valid_idx, 2:4]
                 )
                 thresholds = np.arange(0, 51, 1) / 100
                 norm_precision_ret[seq.name] = success_error(
@@ -160,6 +168,7 @@ class OPEBenchmark:
         loss_ret = {}
         for seq in self.dataset:
             gt_traj = np.array(seq.ground_truth_rect)
+            valid_idx = ~np.isnan(gt_traj)[:, 0]
             tracker_traj = self.get_tracker_traj(seq.name, tracker_name)
 
             offline_bb, tracker_weight = self.get_algorithm_data(
@@ -170,11 +179,16 @@ class OPEBenchmark:
             offline_results = [gt_traj[0]]
             for box in offline_bb:
                 if box is not None:
-                    offline_results += box.tolist()
+                    if isinstance(box, np.ndarray):
+                        offline_results += box.tolist()
+                    else:
+                        offline_results += box
             offline_results = np.array(offline_results)
 
             # calc
-            error_ret[seq.name] = np.sum(1 - calc_overlap(gt_traj, tracker_traj))
+            error_ret[seq.name] = np.sum(
+                1 - calc_overlap(gt_traj[valid_idx], tracker_traj[valid_idx])
+            )
             valid_results = tracker_traj[: len(offline_results)]
             if len(offline_results) > 0:
                 loss_ret[seq.name] = np.sum(

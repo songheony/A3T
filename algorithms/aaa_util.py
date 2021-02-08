@@ -19,34 +19,37 @@ def calc_overlap(rect1, rect2):
         rect2 = rect2[None, :]
 
     left = np.maximum(rect1[:, 0], rect2[:, 0])
-    left_min = np.minimum(rect1[:, 0], rect2[:, 0])
     right = np.minimum(rect1[:, 0] + rect1[:, 2], rect2[:, 0] + rect2[:, 2])
-    right_max = np.maximum(rect1[:, 0] + rect1[:, 2], rect2[:, 0] + rect2[:, 2])
     top = np.maximum(rect1[:, 1], rect2[:, 1])
-    top_min = np.minimum(rect1[:, 1], rect2[:, 1])
     bottom = np.minimum(rect1[:, 1] + rect1[:, 3], rect2[:, 1] + rect2[:, 3])
-    bottom_max = np.maximum(rect1[:, 1] + rect1[:, 3], rect2[:, 1] + rect2[:, 3])
 
     intersect = np.maximum(0, right - left) * np.maximum(0, bottom - top)
     union = rect1[:, 2] * rect1[:, 3] + rect2[:, 2] * rect2[:, 3] - intersect
     iou = np.clip(intersect / union, 0, 1)
-    closure = np.maximum(0, right_max - left_min) * np.maximum(0, bottom_max - top_min)
+
+    left_min = np.minimum(rect1[:, 0], rect2[:, 0])
+    right_max = np.maximum(rect1[:, 0] + rect1[:, 2], rect2[:, 0] + rect2[:, 2])
+    top_min = np.minimum(rect1[:, 1], rect2[:, 1])
+    bottom_max = np.maximum(rect1[:, 1] + rect1[:, 3], rect2[:, 1] + rect2[:, 3])
+    closure_width = np.maximum(0, right_max - left_min)
+    closure_height = np.maximum(0, bottom_max - top_min)
+
+    closure = closure_width * closure_height
     g_iou = iou - (closure - union) / closure
+
     g_iou = (1 + g_iou) / 2
-    g_iou = np.nan_to_num(g_iou)
     return g_iou
 
 
 def calc_similarity(feature1, feature2):
     with torch.no_grad():
         if feature1.ndim == 1:
-            feature1 = feature1[None, :]
+            feature1 = feature1.unsqueeze(0)
         if feature2.ndim == 1:
-            feature2 = feature2[None, :]
-
+            feature2 = feature2.unsqueeze(0)
         dot_product = torch.matmul(feature1, feature2.T)
-        norm_feature1 = torch.norm(feature1, dim=1, keepdim=True)
-        norm_feature2 = torch.norm(feature2, dim=1, keepdim=True).T
+        norm_feature1 = torch.norm(feature1, dim=1, keepdim=True) + 1e-7
+        norm_feature2 = torch.norm(feature2, dim=1, keepdim=True).T + 1e-7
         sim = dot_product / norm_feature1 / norm_feature2
         score = (1 + sim) / 2
     return score.cpu().numpy()
@@ -97,11 +100,10 @@ class AnchorDetector:
 
 
 class ShortestPathTracker:
-    def __init__(self, feature_factor=1, f2i_factor=10000):
+    def __init__(self, f2i_factor=10000):
         self.g = graph_tool.Graph()
         self.g.edge_properties["cost"] = self.g.new_edge_property("int")
 
-        self.feature_factor = feature_factor
         self.f2i_factor = f2i_factor
 
     def initialize(self, box, target_feature):
@@ -112,7 +114,7 @@ class ShortestPathTracker:
         self.sink = self.g.add_vertex()
 
         self.prev_boxes = box[None, :]
-        self.prev_features = target_feature[None, :]
+        self.prev_features = target_feature
 
     def get_vertex_id(self, frame, idx):
         return frame * 100 + idx + 2
@@ -130,13 +132,10 @@ class ShortestPathTracker:
         prev_frame_id = self.frame_id - 1
 
         prob_prev_similarity = calc_similarity(self.prev_features, curr_features)
-        prob_similarity = prob_prev_similarity * curr_feature_scores
-        cost_similarity = -np.log(prob_similarity + 1e-7)
+        cost_feature = -np.log(prob_prev_similarity + 1e-7)
+        cost_template = -np.log(curr_feature_scores + 1e-7)
+        costs = cost_feature + cost_template
         for prev_idx in range(len(self.prev_boxes)):
-            prob_iou = calc_overlap(self.prev_boxes[prev_idx], curr_boxes)
-            cost_iou = -np.log(prob_iou + 1e-7)
-            costs = cost_iou + self.feature_factor * cost_similarity[prev_idx]
-
             prev_vertex = (
                 self.source
                 if prev_frame_id == -1
@@ -147,7 +146,7 @@ class ShortestPathTracker:
                     prev_vertex, self.get_vertex_id(self.frame_id, curr_idx)
                 )
                 self.g.edge_properties["cost"][edge] = int(
-                    costs[curr_idx] * self.f2i_factor
+                    costs[prev_idx, curr_idx] * self.f2i_factor
                 )
 
         self.prev_boxes = curr_boxes
@@ -177,10 +176,9 @@ class ShortestPathTracker:
 class FeatureExtractor:
     def __init__(self, device):
         self.device = device
-        model = models.resnet50(pretrained=True)
+        model = models.resnet18(pretrained=True)
         feature_map = list(model.children())
-        feature_map.pop()
-        self.extractor = nn.Sequential(*feature_map).to(self.device).eval()
+        self.extractor = nn.Sequential(*feature_map[:-2]).to(self.device).eval()
         self.transform = transforms.Compose(
             [
                 transforms.Resize((224, 224)),
@@ -194,12 +192,15 @@ class FeatureExtractor:
     def extract(self, image, bboxes):
         features = []
         croped_images = []
-        for bbox in bboxes:
-            max_x = min(image.size[0], bbox[0] + bbox[2])
-            max_y = min(image.size[1], bbox[1] + bbox[3])
-            min_x = max(0, bbox[0])
-            min_y = max(0, bbox[1])
-            croped_image = image.crop((min_x, min_y, max_x, max_y))
+
+        norm_bboxes = np.array(bboxes)
+        norm_bboxes[:, 2:] += norm_bboxes[:, :2]
+        norm_bboxes[:, 0] = np.maximum(norm_bboxes[:, 0], 0)
+        norm_bboxes[:, 1] = np.maximum(norm_bboxes[:, 1], 0)
+        norm_bboxes[:, 2] = np.minimum(norm_bboxes[:, 2], image.size[0])
+        norm_bboxes[:, 3] = np.minimum(norm_bboxes[:, 3], image.size[1])
+        for bbox in norm_bboxes:
+            croped_image = image.crop(bbox)
             croped_image = self.transform(croped_image)
             croped_images.append(croped_image)
         croped_images = torch.stack(croped_images)

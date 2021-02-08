@@ -24,7 +24,7 @@ def run_sequence(dataset_name, seq, tracker, experts=None, debug=False):
     weights_path = "{}_weight.txt".format(base_results_path)
     offline_path = "{}_offline.pkl".format(base_results_path)
 
-    if not debug and os.path.isfile(results_path):
+    if os.path.isfile(results_path):
         return
 
     print("Tracker: {},  Sequence: {}".format(tracker.name, seq.name))
