@@ -36,6 +36,8 @@ def evaluate(datasets, datasets_name, experts, baselines, algorithm, save_dir=No
     anchor_norm_precision_rets = {}
     error_rets = {}
     loss_rets = {}
+    offline_success_rets = {}
+    offline_precision_rets = {}
     anchor_frame_rets = {}
 
     for dataset, dataset_name in zip(datasets, datasets_name):
@@ -50,6 +52,8 @@ def evaluate(datasets, datasets_name, experts, baselines, algorithm, save_dir=No
         anchor_norm_precision_rets[dataset_name] = {}
         error_rets[dataset_name] = {}
         loss_rets[dataset_name] = {}
+        offline_success_rets[dataset_name] = {}
+        offline_precision_rets[dataset_name] = {}
 
         if algorithm is not None:
             anchor_frame_rets[dataset_name] = ope.get_anchor_frames(algorithm)
@@ -124,6 +128,8 @@ def evaluate(datasets, datasets_name, experts, baselines, algorithm, save_dir=No
         anchor_norm_precision_rets,
         error_rets,
         loss_rets,
+        offline_success_rets,
+        offline_precision_rets,
         anchor_frame_rets,
     )
 

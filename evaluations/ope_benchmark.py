@@ -198,3 +198,50 @@ class OPEBenchmark:
                 loss_ret[seq.name] = np.nan
 
         return error_ret, loss_ret
+
+    def eval_offline(self, algorithm_name, tracker_name):
+        success_ret = {}
+        precision_ret = {}
+        for seq in self.dataset:
+            gt_traj = np.array(seq.ground_truth_rect)
+            offline_bb, tracker_weight = self.get_algorithm_data(
+                seq.name, algorithm_name
+            )
+            tracker_traj = self.get_tracker_traj(seq.name, tracker_name)
+
+            # flat offilne results
+            offline_results = [gt_traj[0]]
+            for box in offline_bb:
+                if box is not None:
+                    if isinstance(box, np.ndarray):
+                        offline_results += box.tolist()
+                    else:
+                        offline_results += box
+            offline_results = np.array(offline_results)
+
+            valid_gt_traj = gt_traj[:len(offline_results)]
+            valid_tracker_traj = tracker_traj[:len(offline_results)]
+            valid_idx = ~np.isnan(valid_gt_traj)[:, 0]
+            n_frame = sum(valid_idx)
+
+            if algorithm_name == tracker_name:
+                success_ret[seq.name] = success_overlap(
+                    valid_gt_traj[valid_idx], offline_results[valid_idx], n_frame
+                )
+                gt_center = self.convert_bb_to_center(valid_gt_traj[valid_idx])
+                tracker_center = self.convert_bb_to_center(offline_results[valid_idx])
+                thresholds = np.arange(0, 51, 1)
+                precision_ret[seq.name] = success_error(
+                    gt_center, tracker_center, thresholds, n_frame
+                )
+            else:
+                success_ret[seq.name] = success_overlap(
+                    valid_gt_traj[valid_idx], valid_tracker_traj[valid_idx], n_frame
+                )
+                gt_center = self.convert_bb_to_center(valid_gt_traj[valid_idx])
+                tracker_center = self.convert_bb_to_center(valid_tracker_traj[valid_idx])
+                thresholds = np.arange(0, 51, 1)
+                precision_ret[seq.name] = success_error(
+                    gt_center, tracker_center, thresholds, n_frame
+                )
+        return success_ret, precision_ret

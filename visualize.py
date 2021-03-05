@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import numpy as np
 import seaborn as sns
 
 from select_options import select_datasets
@@ -24,18 +25,14 @@ from visualizes.draw_tables import (
 import path_config
 
 
-def get_tuning_results(eval_dir, algorithm_name, modes):
-    dataset_name = "Got10K"
+def get_parameter_results(eval_dir, algorithm_name, modes):
+    dataset_name = "OTB2015"
     dataset = select_datasets(dataset_name)
     ope = OPEBenchmark(dataset, dataset_name)
 
-    if algorithm_name == "AAA":
-        thresholds = [0.70, 0.71, 0.72, 0.73, 0.74, 0.75, 0.76, 0.77, 0.78, 0.79, 0.80]
-    elif algorithm_name == "HDT":
-        thresholds = [0.90, 0.92, 0.94, 0.96, 0.98, 1.00]
+    thresholds = [0.70, 0.71, 0.72, 0.73, 0.74, 0.75, 0.76, 0.77, 0.78, 0.79]
 
     threshold_successes = {mode: {} for mode in modes}
-    threshold_precisions = {mode: {} for mode in modes}
     threshold_anchor_successes = {mode: {} for mode in modes}
     threshold_anchors = {mode: {} for mode in modes}
 
@@ -57,13 +54,12 @@ def get_tuning_results(eval_dir, algorithm_name, modes):
                 anchor_norm_precision_rets,
                 error_rets,
                 loss_rets,
+                offline_success_rets,
+                offline_precision_rets,
                 anchor_frame_rets,
             ) = evaluate([dataset], [dataset_name], [], [], name,)
 
             threshold_successes[mode][parameter_name] = success_rets[dataset_name][name]
-            threshold_precisions[mode][parameter_name] = precision_rets[dataset_name][
-                name
-            ]
             threshold_anchor_successes[mode][parameter_name] = anchor_success_rets[
                 dataset_name
             ][name]
@@ -73,7 +69,6 @@ def get_tuning_results(eval_dir, algorithm_name, modes):
 
     return (
         threshold_successes,
-        threshold_precisions,
         threshold_anchor_successes,
         threshold_anchors,
         gt_trajs,
@@ -116,21 +111,21 @@ def figure2(vot_dataset, all_experts, color_map, save_dir):
 
 def figure4(
     datasets_name,
-    high_algorithm,
-    high_experts,
-    high_successes,
-    high_precisions,
+    superfast_algorithm,
+    superfast_experts,
+    superfast_successes,
+    superfast_precisions,
     color_map,
     save_dir,
 ):
     figsize = (20, 5)
     draw_curves(
         datasets_name,
-        high_algorithm,
-        high_experts,
+        superfast_algorithm,
+        superfast_experts,
         color_map,
-        high_successes,
-        high_precisions,
+        superfast_successes,
+        superfast_precisions,
         figsize,
         save_dir,
         file_name="Figure4",
@@ -280,13 +275,14 @@ def figure6(
     )
 
 
-def figure7(thresholds, threshold_successes, threshold_anchors, gt_trajs, save_dir):
-    figsize = (20, 5)
+def figure7(thresholds, threshold_successes, threshold_anchor_successes, threshold_anchors, gt_trajs, save_dir):
+    figsize = (15, 8)
     modes = threshold_successes.keys()
     draw_succ_with_thresholds(
         modes,
         thresholds,
         threshold_successes,
+        threshold_anchor_successes,
         threshold_anchors,
         gt_trajs,
         figsize,
@@ -345,38 +341,6 @@ def figure9(
     )
 
 
-def figure10(
-    datasets,
-    datasets_name,
-    superfast_algorithm,
-    superfast_experts,
-    fast_algorithm,
-    fast_experts,
-    normal_algorithm,
-    normal_experts,
-    save_dir,
-):
-    rank_table(
-        datasets,
-        datasets_name,
-        superfast_algorithm,
-        superfast_experts,
-        save_dir,
-        "SuperFast_Offline",
-    )
-    rank_table(
-        datasets, datasets_name, fast_algorithm, fast_experts, save_dir, "Fast_Offline"
-    )
-    rank_table(
-        datasets,
-        datasets_name,
-        normal_algorithm,
-        normal_experts,
-        save_dir,
-        "Normal_Offline",
-    )
-
-
 def score_table(
     datasets_name,
     algorithm,
@@ -387,9 +351,30 @@ def score_table(
     tracking_times,
     save_dir,
     filename,
-    metrics=["AUC", "DP", "FPS"],
+    metrics=["AUC", "DP"],
+    with_best=True,
 ):
-    trackers = experts + baselines + [algorithm]
+
+    algorithms = [algorithm]
+    if with_best:
+        for dataset_name in datasets_name:
+            seq_names = sorted(successes[dataset_name][algorithm].keys())
+            successes[dataset_name]["Best expert"] = dict()
+            precisions[dataset_name]["Best expert"] = dict()
+            tracking_times[dataset_name]["Best expert"] = dict()
+            for seq_name in seq_names:
+                max_score = 0
+                for expert_name in experts:
+                    score = np.mean(successes[dataset_name][expert_name][seq_name])
+                    if max_score < score:
+                        successes[dataset_name]["Best expert"][seq_name] = score
+                        precisions[dataset_name]["Best expert"][seq_name] = precisions[dataset_name][expert_name][seq_name]
+                        tracking_times[dataset_name]["Best expert"][seq_name] = tracking_times[dataset_name][expert_name][seq_name]
+                        max_score = score
+
+        algorithms += ["Best expert"]
+
+    trackers = experts + baselines + algorithms
 
     mean_values = {}
     if "AUC" in metrics:
@@ -403,7 +388,7 @@ def score_table(
 
     make_score_table(
         datasets_name,
-        baselines + [algorithm],
+        baselines + algorithms,
         experts,
         mean_values,
         save_dir,
@@ -415,7 +400,6 @@ def threshold_table(
     algorithm_name,
     thresholds,
     threshold_successes,
-    threshold_precisions,
     threshold_anchor_successes,
     threshold_anchors,
     gt_trajs,
@@ -424,7 +408,6 @@ def threshold_table(
     modes = list(threshold_successes.keys())
     mean_values = {
         "AUC": get_mean_succ(thresholds, modes, threshold_successes).round(3),
-        "DP": get_mean_prec(thresholds, modes, threshold_precisions).round(3),
         "Anchor": get_mean_succ(thresholds, modes, threshold_anchor_successes).round(3),
         "Ratio": get_mean_ratio(thresholds, modes, threshold_anchors, gt_trajs).round(
             2
@@ -437,28 +420,6 @@ def threshold_table(
         mean_values,
         save_dir,
         filename=f"Threshold_{algorithm_name}",
-    )
-
-
-def rank_table(
-    datasets, datasets_name, algorithm_name, experts_name, save_dir, filename
-):
-    error_rets = {}
-    loss_rets = {}
-    for dataset, dataset_name in zip(datasets, datasets_name):
-        ope = OPEBenchmark(dataset, dataset_name)
-
-        _error_rets = {}
-        _loss_rets = {}
-        for expert_name in experts_name:
-            error_ret, loss_ret = ope.eval_loss(algorithm_name, expert_name)
-            _error_rets[expert_name] = error_ret
-            _loss_rets[expert_name] = loss_ret
-        error_rets[dataset_name] = _error_rets
-        loss_rets[dataset_name] = _loss_rets
-
-    make_rank_table(
-        datasets_name, experts_name, error_rets, loss_rets, save_dir, filename
     )
 
 
@@ -499,6 +460,8 @@ def main(experiments, all_experts, all_experts_name):
         anchor_norm_precision_rets,
         error_rets,
         loss_rets,
+        offline_success_rets,
+        offline_precision_rets,
         anchor_frame_rets,
     ) = evaluate(datasets, datasets_name, all_experts, [], None)
     figure1(
@@ -522,6 +485,8 @@ def main(experiments, all_experts, all_experts_name):
         superfast_anchor_norm_precision_rets,
         superfast_error_rets,
         superfast_loss_rets,
+        superfast_offline_success_rets,
+        superfast_offline_precision_rets,
         superfast_anchor_frame_rets,
     ) = evaluate(
         datasets,
@@ -544,6 +509,21 @@ def main(experiments, all_experts, all_experts_name):
         filename="Table1",
     )
 
+    # Table1_FPS
+    score_table(
+        datasets_name,
+        superfast_algorithm,
+        superfast_baselines,
+        superfast_experts,
+        superfast_success_rets,
+        superfast_precision_rets,
+        superfast_tracking_time_rets,
+        save_dir,
+        filename="Table1_FPS",
+        metrics=["FPS"],
+        with_best=False,
+    )
+
     # Table6
     score_table(
         datasets_name,
@@ -556,16 +536,24 @@ def main(experiments, all_experts, all_experts_name):
         save_dir,
         filename="Table6",
         metrics=["AUC"],
+        with_best=False,
     )
 
-    # # figure4(
-    # #     datasets_name,
-    # #     high_algorithm,
-    # #     high_experts,
-    # #     high_successes,
-    # #     high_precisions,
-    # #     save_dir,
-    # # )
+    # Table 9
+    make_rank_table(
+        datasets_name, superfast_experts, superfast_error_rets, superfast_loss_rets, save_dir, "Table9"
+    )
+
+    figure4(
+        datasets_name,
+        superfast_algorithm,
+        superfast_experts,
+        superfast_success_rets,
+        superfast_precision_rets,
+        color_map,
+        save_dir,
+    )
+
     # # otb = select_datasets("OTB")
     # # tpl = select_datasets("TPL")
     # # figure6(otb, tpl, high_algorithm, high_experts, save_dir)
@@ -584,6 +572,8 @@ def main(experiments, all_experts, all_experts_name):
         fast_anchor_norm_precision_rets,
         fast_error_rets,
         fast_loss_rets,
+        fast_offline_success_rets,
+        fast_offline_precision_rets,
         fast_anchor_frame_rets,
     ) = evaluate(datasets, datasets_name, fast_experts, fast_baselines, fast_algorithm)
 
@@ -600,6 +590,21 @@ def main(experiments, all_experts, all_experts_name):
         filename="Table2",
     )
 
+    # Table2 FPS
+    score_table(
+        datasets_name,
+        fast_algorithm,
+        fast_baselines,
+        fast_experts,
+        fast_success_rets,
+        fast_precision_rets,
+        fast_tracking_time_rets,
+        save_dir,
+        filename="Table2_FPS",
+        metrics=["FPS"],
+        with_best=False,
+    )
+
     # Table7
     score_table(
         datasets_name,
@@ -612,6 +617,12 @@ def main(experiments, all_experts, all_experts_name):
         save_dir,
         filename="Table7",
         metrics=["AUC"],
+        with_best=False,
+    )
+
+    # Table 10
+    make_rank_table(
+        datasets_name, fast_experts, fast_error_rets, fast_loss_rets, save_dir, "Table10"
     )
 
     # Normal
@@ -626,6 +637,8 @@ def main(experiments, all_experts, all_experts_name):
         normal_anchor_norm_precision_rets,
         normal_error_rets,
         normal_loss_rets,
+        normal_offline_success_rets,
+        normal_offline_precision_rets,
         normal_anchor_frame_rets,
     ) = evaluate(
         datasets, datasets_name, normal_experts, normal_baselines, normal_algorithm
@@ -644,6 +657,21 @@ def main(experiments, all_experts, all_experts_name):
         filename="Table3",
     )
 
+    # Table3 FPS
+    score_table(
+        datasets_name,
+        normal_algorithm,
+        normal_baselines,
+        normal_experts,
+        normal_success_rets,
+        normal_precision_rets,
+        normal_tracking_time_rets,
+        save_dir,
+        filename="Table3_FPS",
+        metrics=["FPS"],
+        with_best=False,
+    )
+
     # Table8
     score_table(
         datasets_name,
@@ -656,6 +684,12 @@ def main(experiments, all_experts, all_experts_name):
         save_dir,
         filename="Table8",
         metrics=["AUC"],
+        with_best=False,
+    )
+
+    # Table 11
+    make_rank_table(
+        datasets_name, normal_experts, normal_error_rets, normal_loss_rets, save_dir, "Table11"
     )
 
     # Figure5
@@ -674,19 +708,6 @@ def main(experiments, all_experts, all_experts_name):
         save_dir,
     )
 
-    # Figure10
-    figure10(
-        datasets,
-        datasets_name,
-        superfast_algorithm,
-        superfast_experts,
-        fast_algorithm,
-        fast_experts,
-        normal_algorithm,
-        normal_experts,
-        save_dir,
-    )
-
     # SiamDW
     siamdw_algorithm, siamdw_baselines, siamdw_experts = experiments["SiamDW"]
     (
@@ -699,6 +720,8 @@ def main(experiments, all_experts, all_experts_name):
         siamdw_anchor_norm_precision_rets,
         siamdw_error_rets,
         siamdw_loss_rets,
+        siamdw_offline_success_rets,
+        siamdw_offline_precision_rets,
         siamdw_anchor_frame_rets,
     ) = evaluate(
         datasets, datasets_name, siamdw_experts, siamdw_baselines, siamdw_algorithm
@@ -717,6 +740,21 @@ def main(experiments, all_experts, all_experts_name):
         filename="Table4",
     )
 
+    # Table4 FPS
+    score_table(
+        datasets_name,
+        siamdw_algorithm,
+        siamdw_baselines,
+        siamdw_experts,
+        siamdw_success_rets,
+        siamdw_precision_rets,
+        siamdw_tracking_time_rets,
+        save_dir,
+        filename="Table4_FPS",
+        metrics=["FPS"],
+        with_best=False,
+    )
+
     # SiamRPN++
     siamrpn_algorithm, siamrpn_baselines, siamrpn_experts = experiments["SiamRPN++"]
     (
@@ -729,6 +767,8 @@ def main(experiments, all_experts, all_experts_name):
         siamrpn_anchor_norm_precision_rets,
         siamrpn_error_rets,
         siamrpn_loss_rets,
+        siamrpn_offline_success_rets,
+        siamrpn_offline_precision_rets,
         siamrpn_anchor_frame_rets,
     ) = evaluate(
         datasets, datasets_name, siamrpn_experts, siamrpn_baselines, siamrpn_algorithm
@@ -746,6 +786,29 @@ def main(experiments, all_experts, all_experts_name):
         save_dir,
         filename="Table5",
     )
+
+    # Table5 FPS
+    score_table(
+        datasets_name,
+        siamrpn_algorithm,
+        siamrpn_baselines,
+        siamrpn_experts,
+        siamrpn_success_rets,
+        siamrpn_precision_rets,
+        siamrpn_tracking_time_rets,
+        save_dir,
+        filename="Table5_FPS",
+        metrics=["FPS"],
+        with_best=False,
+    )
+
+    # Parameters
+    target_modes = ["SuperFast", "Fast", "Normal", "SiamDW", "SiamRPN++"]
+    (
+        threshold_successes, threshold_anchor_successes, threshold_anchors, gt_trajs
+    ) = get_parameter_results(path_config.EVALUATION_PATH, "AAA", target_modes)
+    thresholds = list(threshold_successes[target_modes[0]].keys())
+    figure7(thresholds, threshold_successes, threshold_anchor_successes, threshold_anchors, gt_trajs, save_dir)
 
     # Tuning - AAA
     # target_modes = ["SuperFast", "Fast", "Normal"]
@@ -807,31 +870,31 @@ if __name__ == "__main__":
 
     super_fast_baselines = [
         "Random/SuperFast",
-        "HDT/SuperFast/1.00",
+        "HDT/SuperFast/0.65",
         "MCCT/SuperFast/0.10",
         "WithoutDelay/SuperFast",
     ]
     fast_baselines = [
         "Random/Fast",
-        "HDT/Fast/0.96",
+        "HDT/Fast/0.65",
         "MCCT/Fast/0.10",
         "WithoutDelay/Fast",
     ]
     normal_baselines = [
         "Random/Normal",
-        "HDT/Normal/0.05",
+        "HDT/Normal/0.65",
         "MCCT/Normal/0.10",
         "WithoutDelay/Normal",
     ]
     siamdw_baselines = [
         "Random/SiamDW",
-        "HDT/SiamDW/0.05",
+        "HDT/SiamDW/0.65",
         "MCCT/SiamDW/0.10",
         "WithoutDelay/SiamDW",
     ]
     siamrpn_baselines = [
         "Random/SiamRPN++",
-        "HDT/SiamRPN++/0.05",
+        "HDT/SiamRPN++/0.65",
         "MCCT/SiamRPN++/0.10",
         "WithoutDelay/SiamRPN++",
     ]

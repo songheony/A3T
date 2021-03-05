@@ -6,6 +6,13 @@ def minmax(x):
     return (x - np.min(x)) / (np.max(x) - np.min(x))
 
 
+def is_algorithm(tracker_name):
+    for algorithm in ["HDT", "MCCT", "Random", "WithoutDelay", "AAA"]:
+        if tracker_name.startswith(algorithm):
+            return True
+    return False
+
+
 def calc_rank(dataset_name, seq_names, trackers, rets, mean=True):
     ranks = []
     for seq_name in seq_names:
@@ -104,33 +111,50 @@ def make_score_table(
     latex += f"\\begin{{tabular}}{{{header}}}\n"
     latex += "\\hline\n"
 
-    columns = "\\multirow{2}{*}{Tracker}"
+    if len(metrics_name) > 1:
+        columns = "\\multirow{2}{*}{Tracker}"
+    else:
+        columns = "Tracker"
 
     for i in range(len(datasets_name)):
         dataset_name = datasets_name[i].replace("%", "\\%")
-        small_colunm = "c|" if i < len(datasets_name) - 1 else "c"
-        columns += f" & \\multicolumn{{{len(metrics_name)}}}{{{small_colunm}}}{{{dataset_name}}}"
+        if len(metrics_name) > 1:
+            small_colunm = "c|" if i < len(datasets_name) - 1 else "c"
+            columns += f" & \\multicolumn{{{len(metrics_name)}}}{{{small_colunm}}}{{{dataset_name}}}"
+        else:
+            columns += f" & {dataset_name}"
     latex += f"{columns} \\\\\n"
 
-    small_columns = " "
-    for i in range(len(datasets_name)):
-        for j in range(len(metrics_name)):
-            small_columns += f" & {metrics_name[j]}"
-    latex += f"{small_columns} \\\\\n"
+    if len(metrics_name) > 1:
+        small_columns = " "
+        for i in range(len(datasets_name)):
+            for j in range(len(metrics_name)):
+                small_columns += f" & {metrics_name[j]}"
+        latex += f"{small_columns} \\\\\n"
     latex += "\\hline\\hline\n"
 
     for i in range(len(trackers_name)):
-        if i == len(experts_name):
+        if i == len(experts_name) or trackers_name[i] == "Best expert":
             latex += "\\hdashline\n"
 
-        line = trackers_name[i].replace("_", "\\_")
+        if is_algorithm(trackers_name[i]):
+            line = trackers_name[i].split("/")[0]
+            if line == "WithoutDelay":
+                line = "AAA w/o delay"
+        else:
+            line = trackers_name[i]
+            line = line.replace("Group", "")
         for j in range(len(datasets_name)):
             for metric_name in metrics_name:
                 value = mean_values[metric_name]
                 if metric_name == "FPS":
                     line += f" & {value[i, j]}"
                 else:
-                    sorted_idx = np.argsort(value[:, j])
+                    if "Best expert" in trackers_name:
+                        sorted_idx = np.argsort(value[:-1, j])
+                    else:
+                        sorted_idx = np.argsort(value[:, j])
+
                     if i == sorted_idx[-1]:
                         line += f" & {{\\color{{red}} \\textbf{{{value[i, j]}}}}}"
                     elif i == sorted_idx[-2]:

@@ -1,7 +1,5 @@
 import numpy as np
 
-import graph_tool
-import graph_tool.topology
 import torch
 from torchvision import models
 from torchvision import transforms
@@ -100,76 +98,48 @@ class AnchorDetector:
 
 
 class ShortestPathTracker:
-    def __init__(self, f2i_factor=10000):
-        self.g = graph_tool.Graph()
-        self.g.edge_properties["cost"] = self.g.new_edge_property("int")
-
-        self.f2i_factor = f2i_factor
+    def __init__(self):
+        pass
 
     def initialize(self, box, target_feature):
         self.frame_id = -1
 
-        self.g.clear()
-        self.source = self.g.add_vertex()
-        self.sink = self.g.add_vertex()
-
         self.prev_boxes = box[None, :]
         self.prev_features = target_feature
-
-    def get_vertex_id(self, frame, idx):
-        return frame * 100 + idx + 2
-
-    def get_node_idx(self, vertex_id):
-        vertex_id = vertex_id - 2
-        frame_id = vertex_id // 100
-        idx = vertex_id % 100
-        return frame_id, idx
+        self.shortest_cost = None
+        self.shortest_path = None
 
     def track(
         self, curr_boxes, curr_features, curr_feature_scores,
     ):
         self.frame_id += 1
-        prev_frame_id = self.frame_id - 1
 
         prob_prev_similarity = calc_similarity(self.prev_features, curr_features)
         cost_feature = -np.log(prob_prev_similarity + 1e-7)
         cost_template = -np.log(curr_feature_scores + 1e-7)
         costs = cost_feature + cost_template
-        for prev_idx in range(len(self.prev_boxes)):
-            prev_vertex = (
-                self.source
-                if prev_frame_id == -1
-                else self.get_vertex_id(prev_frame_id, prev_idx)
-            )
+
+        if self.shortest_path is None:
+            self.shortest_path = [[[self.frame_id, curr_idx]] for curr_idx in range(len(curr_boxes))]
+            self.shortest_cost = costs[0, :]
+        else:
+            new_shortest_path = [[[self.frame_id, curr_idx]] for curr_idx in range(len(curr_boxes))]
+            new_shortest_cost = np.zeros_like(self.shortest_cost)
             for curr_idx in range(len(curr_boxes)):
-                edge = self.g.add_edge(
-                    prev_vertex, self.get_vertex_id(self.frame_id, curr_idx)
-                )
-                self.g.edge_properties["cost"][edge] = int(
-                    costs[prev_idx, curr_idx] * self.f2i_factor
-                )
+                shortest_prev_idx = np.argmin(self.shortest_cost + costs[:, curr_idx])
+                new_shortest_path[curr_idx] = self.shortest_path[shortest_prev_idx] + new_shortest_path[curr_idx]
+                new_shortest_cost[curr_idx] = self.shortest_cost[shortest_prev_idx] + costs[shortest_prev_idx, curr_idx]
+            self.shortest_path = new_shortest_path
+            self.shortest_cost = new_shortest_cost
 
         self.prev_boxes = curr_boxes
         self.prev_features = curr_features
 
-    def run(self):
-        for last_idx in range(len(self.prev_boxes)):
-            edge = self.g.add_edge(
-                self.get_vertex_id(self.frame_id, last_idx), self.sink
-            )
-            self.g.edge_properties["cost"][edge] = 0
+    def run(self, valid_idx):
+        shortest_idx = np.argmin(self.shortest_cost[valid_idx])
+        shortest_idx = valid_idx[shortest_idx]
 
-        path, _ = graph_tool.topology.shortest_path(
-            self.g,
-            self.source,
-            self.sink,
-            weights=self.g.edge_properties["cost"],
-            dag=True,
-        )
-        ids = []
-        for i in path[1:-1]:
-            frame_id, idx = self.get_node_idx(int(i))
-            ids.append([frame_id, idx])
+        ids = self.shortest_path[shortest_idx]
         return ids
 
 

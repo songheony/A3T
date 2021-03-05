@@ -1,10 +1,7 @@
 import os
 from pathlib import Path
-import numpy as np
 from track_dataset import run_dataset
 from select_options import select_algorithms, select_datasets
-from evaluations.eval_trackers import evaluate
-from visualizes.draw_tables import get_mean_succ, get_mean_prec
 import path_config
 
 
@@ -14,41 +11,17 @@ def main(algorithm_name, experts, save_dir, mode):
     dataset = select_datasets(dataset_name)
 
     if algorithm_name == "AAA":
-        thresholds = [0.85, 0.86, 0.87, 0.88, 0.89, 0.90, 0.91, 0.92, 0.93, 0.94]
-        feature_factors = [1, 3, 5, 7, 9, 11, 13]
+        thresholds = [0.70, 0.71, 0.72, 0.73, 0.74, 0.75, 0.76, 0.77, 0.78, 0.79]
     elif algorithm_name == "HDT":
-        thresholds = np.linspace(0.0, 1.0, 11)
-    elif algorithm_name == "MCCT":
-        thresholds = np.linspace(0.0, 1.0, 11)
+        thresholds = [0.00, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95]
 
     for threshold in thresholds:
-        for feature_factor in feature_factors:
-            algorithm = select_algorithms(
-                algorithm_name,
-                experts,
-                mode=mode,
-                threshold=threshold,
-                feature_factor=feature_factor,
-            )
-            run_dataset(dataset, dataset_name, [algorithm], experts=experts, threads=8)
-            algorithms.append(algorithm.name)
 
-            (
-                tracking_time_rets,
-                success_rets,
-                precision_rets,
-                norm_precision_rets,
-                anchor_success_rets,
-                anchor_precision_rets,
-                anchor_norm_precision_rets,
-                error_rets,
-                loss_rets,
-                anchor_frame_rets,
-            ) = evaluate([dataset], [dataset_name], [], [], algorithm.name, save_dir)
-
-            auc = get_mean_succ([algorithm.name], [dataset_name], success_rets)[0][0]
-            prec = get_mean_prec([algorithm.name], [dataset_name], precision_rets)[0][0]
-            print(f"AUC: {auc}, DP: {prec}")
+        algorithm = select_algorithms(
+            algorithm_name, experts, mode=mode, threshold=threshold,
+        )
+        run_dataset(dataset, dataset_name, [algorithm], experts=experts, threads=8)
+        algorithms.append(algorithm.name)
 
 
 if __name__ == "__main__":

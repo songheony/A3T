@@ -34,6 +34,9 @@ class AAA(BaseTracker):
         # Offline tracker
         self.offline = ShortestPathTracker()
 
+        # If offline tracker is reset
+        self.reset_offline = True
+
         # Online learner
         self.learner = WAADelayed()
 
@@ -72,35 +75,40 @@ class AAA(BaseTracker):
         if anchor:
             # Add only boxes whose score is over than threshold to offline tracker
             self.offline.track(
-                boxes[detected], features[detected], feature_scores[detected]
+                boxes, features, feature_scores
             )
 
             # Caluclate optimal path
-            path = self.offline.run()
+            path = self.offline.run(detected)
 
             # Get the last box's id
-            final_box_id = detected[path[-1][1]]
+            final_box_id = path[-1][1]
 
-            # Edit final box
-            path[-1][1] = final_box_id
-
-            # Reset offline tracker
-            self.offline.initialize(boxes[final_box_id], features[final_box_id])
-
-            # Get offline tracking results
+            # Change to ndarray
             self.prev_boxes = np.stack(self.prev_boxes)
-            offline_results = np.array(
-                [self.prev_boxes[frame, ind[1]] for frame, ind in enumerate(path)]
-            )
+
+            if self.reset_offline:
+                # Reset offline tracker
+                self.offline.initialize(boxes[final_box_id], features[final_box_id])
+
+                # Get offline tracking results
+                offline_results = np.array(
+                    [self.prev_boxes[frame, ind[1]] for frame, ind in enumerate(path)]
+                )
+
+            else:
+                offline_results = np.array(
+                    [self.prev_boxes[frame, ind[1]] for frame, ind in enumerate(path[-len(self.prev_boxes):])]
+                )
 
             # Calc losses of experts
             gradient_losses = self._calc_expert_losses(offline_results)
 
-            # Update weight of experts
-            self.learner.update(gradient_losses)
-
             # Clean previous boxes
             self.prev_boxes = []
+
+            # Update weight of experts
+            self.learner.update(gradient_losses)
 
             # Return last box of offline results
             predict = boxes[final_box_id]

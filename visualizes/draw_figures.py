@@ -10,7 +10,7 @@ from matplotlib.ticker import MultipleLocator
 
 from algorithms.aaa_util import calc_overlap
 from evaluations import ope_benchmark
-from visualizes.draw_tables import get_mean_succ, get_mean_ratio, calc_rank
+from visualizes.draw_tables import get_mean_succ, get_mean_ratio, calc_rank, is_algorithm
 
 plt.rcParams.update({"font.size": 12})
 sns.set()
@@ -22,13 +22,6 @@ ANNO_SIZE = 20
 
 def diffmean(x):
     return x - np.mean(x)
-
-
-def is_algorithm(tracker_name):
-    for algorithm in ["HDT", "MCCT", "Random", "Max", "AAA"]:
-        if tracker_name.startswith(algorithm):
-            return True
-    return False
 
 
 def draw_pie(
@@ -127,11 +120,7 @@ def draw_curves(
                 for v in success_rets[dataset_name][tracker_name].values()
                 if not any(np.isnan(v))
             ]
-            vis_name = (
-                tracker_name.split("_")[0]
-                if is_algorithm(tracker_name)
-                else tracker_name
-            )
+            vis_name = tracker_name.split("/")[0]
             line = ax.plot(
                 thresholds,
                 np.mean(value, axis=0),
@@ -160,11 +149,7 @@ def draw_curves(
                 for v in precision_rets[dataset_name][tracker_name].values()
                 if not any(np.isnan(v))
             ]
-            vis_name = (
-                tracker_name.split("_")[0]
-                if is_algorithm(tracker_name)
-                else tracker_name
-            )
+            vis_name = tracker_name.split("/")[0]
             ax.plot(
                 thresholds,
                 np.mean(value, axis=0),
@@ -190,7 +175,7 @@ def draw_curves(
     fig.text(0.5125, 0.47, "Threshold for IoU", ha="center", va="center")
     plt.xlabel("Threshold for distance")
 
-    changed_trackers = [tracker_name.split("_")[0] for tracker_name in trackers_name]
+    changed_trackers = [tracker_name.split("/")[0] for tracker_name in trackers_name]
     fig.legend(
         lines,
         changed_trackers,
@@ -238,11 +223,7 @@ def draw_rank(
             )
 
             for tracker_name, rank in zip(group_trackers[g], ranks.T):
-                vis_name = (
-                    tracker_name.split("/")[0]
-                    if is_algorithm(tracker_name)
-                    else tracker_name
-                )
+                vis_name = tracker_name.split("/")[0]
                 ax.plot(
                     xs,
                     [np.sum(rank == x) / len(seq_names) for x in xs],
@@ -268,9 +249,9 @@ def draw_rank(
             if g == len(group_names) - 1:
                 ax.set_xticklabels(
                     [
-                        "1(Best)",
+                        "Best",
                         # str(len(group_trackers[g]) // 2 + 1),
-                        f"{len(group_trackers[g])}(Worst)",
+                        "Worst",
                     ]
                 )
             else:
@@ -324,26 +305,27 @@ def draw_succ_with_thresholds(
     modes,
     thresholds,
     success_rets,
+    anchor_successes_rets,
     anchor_frames,
     gt_trajs,
     figsize,
     save_dir,
     file_name=None,
 ):
-    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=figsize, sharex=True)
+    fig, axes = plt.subplots(nrows=3, ncols=1, figsize=figsize, sharex=True)
     fig.add_subplot(111, frameon=False)
 
     lines = []
 
     mean_succ = get_mean_succ(thresholds, modes, success_rets)
+    mean_anchor_succ = get_mean_succ(thresholds, modes, anchor_successes_rets)
     mean_ratio = get_mean_ratio(thresholds, modes, anchor_frames, gt_trajs)
 
     for i, mode_name in enumerate(modes):
         # draw success plot
         ax = axes[0]
 
-        values = diffmean(mean_succ[:, i])
-        # values = mean_succ[:, i]
+        values = mean_succ[:, i]
         line = ax.plot(thresholds, values, label=mode_name, linewidth=LINE_WIDTH)[0]
         lines.append(line)
 
@@ -358,12 +340,33 @@ def draw_succ_with_thresholds(
             mew=2,
         )
 
-    axes[0].set_ylabel("Diff AUC")
+    axes[0].set_ylabel("AUC")
+
+    for i, mode_name in enumerate(modes):
+        # draw success plot
+        ax = axes[1]
+
+        values = mean_anchor_succ[:, i]
+        line = ax.plot(thresholds, values, label=mode_name, linewidth=LINE_WIDTH)[0]
+        lines.append(line)
+
+        max_threshold = np.argmax(values)
+        ax.plot(
+            thresholds[max_threshold],
+            values[max_threshold],
+            "o",
+            ms=10,
+            mec=line.get_color(),
+            mfc="none",
+            mew=2,
+        )
+
+    axes[1].set_ylabel("AUC at anchor")
 
     if anchor_frames is not None:
         for i, mode_name in enumerate(modes):
             # draw highest score
-            ax = axes[1]
+            ax = axes[2]
 
             ax.plot(
                 thresholds,
@@ -372,7 +375,7 @@ def draw_succ_with_thresholds(
                 label=mode_name,
                 linewidth=LINE_WIDTH,
             )
-        axes[1].set_ylabel("Anchor ratio")
+        axes[2].set_ylabel("Anchor ratio")
 
     # hide tick and tick label of the big axes
     plt.tick_params(
@@ -386,7 +389,7 @@ def draw_succ_with_thresholds(
     plt.grid(False)
     plt.xlabel("Threshold")
 
-    fig.legend(lines, modes, frameon=False, loc="upper center", ncol=len(modes))
+    fig.legend(lines, modes, frameon=False, loc="upper center", ncol=len(modes), bbox_to_anchor=(0.5, 0.95))
 
     plt.subplots_adjust(wspace=0, hspace=0.1)
 
@@ -462,16 +465,12 @@ def draw_result(
                 for i in range(len(trackers_name)):
                     box = tracker_trajs[i, :frame]
                     error = 1 - calc_overlap(gt_traj[:frame], box)
-                    tracker_name = (
-                        trackers_name[i].split("/")[0]
-                        if is_algorithm(trackers_name[i])
-                        else trackers_name[i]
-                    )
+                    vis_name = trackers_name[i].split("/")[0]
                     error_ax.plot(
                         range(len(error)),
                         error,
-                        color=color_map[tracker_name],
-                        label=tracker_name,
+                        color=color_map[vis_name],
+                        label=vis_name,
                         linewidth=2 if is_algorithm(trackers_name[i]) else 1,
                     )
                     error_ax.set(

@@ -88,9 +88,9 @@ def run_dataset(dataset, dataset_name, trackers, experts=None, threads=0, debug=
     print("Done")
 
 
-def run(tracker, dataset_name, experts=None):
+def run(tracker, dataset_name, experts=None, debug=False):
     dataset = select_datasets(dataset_name)
 
     run_dataset(
-        dataset, dataset_name, [tracker], experts=experts, threads=0, debug=False
+        dataset, dataset_name, [tracker], experts=experts, threads=0, debug=debug
     )

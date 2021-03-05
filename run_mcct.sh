@@ -17,10 +17,10 @@ done
 
 siamdw_experts=("SiamDWGroup/SiamFCRes22/OTB" "SiamDWGroup/SiamFCIncep22/OTB" "SiamDWGroup/SiamFCNext22/OTB" "SiamDWGroup/SiamRPNRes22/OTB" "SiamDWGroup/SiamFCRes22/VOT" "SiamDWGroup/SiamFCIncep22/VOT" "SiamDWGroup/SiamFCNext22/VOT" "SiamDWGroup/SiamRPNRes22/VOT")
 for (( i=0; i<${#datasets[@]}; i++ )); do
-        python ./track_algorithm.py -a MCCT -m SiamDW -d ${datasets[$i]} -e ${siamdw_experts[@]} -f 0.1
+        python ./track_algorithm.py -a MCCT -m SiamDW -d ${datasets[$i]} -e ${siamdw_experts[@]} -t 0.1
 done
 
 siamrpn_experts=("SiamRPN++Group/AlexNet/VOT" "SiamRPN++Group/AlexNet/OTB" "SiamRPN++Group/ResNet-50/VOT" "SiamRPN++Group/ResNet-50/OTB" "SiamRPN++Group/ResNet-50/VOTLT" "SiamRPN++Group/MobileNetV2/VOT" "SiamRPN++Group/SiamMask/VOT")
 for (( i=0; i<${#datasets[@]}; i++ )); do
-        python ./track_algorithm.py -a MCCT -m SiamRPN++ -d ${datasets[$i]} -e ${siamrpn_experts[@]} -f 0.1
+        python ./track_algorithm.py -a MCCT -m SiamRPN++ -d ${datasets[$i]} -e ${siamrpn_experts[@]} -t 0.1
 done
