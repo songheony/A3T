@@ -7,7 +7,7 @@ def minmax(x):
 
 
 def is_algorithm(tracker_name):
-    for algorithm in ["HDT", "MCCT", "Random", "WithoutDelay", "AAA"]:
+    for algorithm in ["HDT", "MCCT", "Random", "WithoutDelay", "A3T"]:
         if tracker_name.startswith(algorithm):
             return True
     return False
@@ -184,10 +184,10 @@ def make_score_table(
 
 
 def find_rank(
-    datasets, algorithms, experts, success_rets, save_dir, filename="Ranking"
+    dataset_names, algorithms, experts, success_rets, save_dir, filename="Ranking"
 ):
     text = ""
-    for i, dataset_name in enumerate(datasets):
+    for i, dataset_name in enumerate(dataset_names):
         text += f"{dataset_name}\n"
         text += "-" * 10 + "\n"
         seq_names = sorted(success_rets[dataset_name][experts[0]].keys())

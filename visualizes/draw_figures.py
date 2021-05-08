@@ -81,7 +81,7 @@ def draw_pie(
             specific_names,
             frameon=False,
             loc="center left",
-            bbox_to_anchor=(-0.1, 0.5),
+            bbox_to_anchor=(0, 0.5),
         )
 
     if file_name is None:
@@ -350,16 +350,16 @@ def draw_succ_with_thresholds(
         line = ax.plot(thresholds, values, label=mode_name, linewidth=LINE_WIDTH)[0]
         lines.append(line)
 
-        max_threshold = np.argmax(values)
-        ax.plot(
-            thresholds[max_threshold],
-            values[max_threshold],
-            "o",
-            ms=10,
-            mec=line.get_color(),
-            mfc="none",
-            mew=2,
-        )
+        # max_threshold = np.argmax(values)
+        # ax.plot(
+        #     thresholds[max_threshold],
+        #     values[max_threshold],
+        #     "o",
+        #     ms=10,
+        #     mec=line.get_color(),
+        #     mfc="none",
+        #     mew=2,
+        # )
 
     axes[1].set_ylabel("AUC at anchor")
 
@@ -491,13 +491,13 @@ def draw_result(
                         ylabel="Weight",
                         xlim=(0, len(tracker_weight)),
                         ylim=(
-                            np.min(tracker_weight) - 0.05,
-                            np.max(tracker_weight) + 0.05,
+                            -0.05,
+                            1.05,
                         ),
                     )
                 weight_ax.set_xticks([])
 
-                if algorithm_name.startswith("AAA"):
+                if algorithm_name.startswith("A3T"):
                     # draw anchor line
                     for i in range(frame):
                         if offline_bb[i - 1] is not None:
@@ -538,9 +538,10 @@ def draw_result(
                         sample_ax.add_patch(rect)
 
                         if algorithm_name is not None:
-                            if (frame > 0) and (
-                                np.argmax(tracker_weight[frame - 1]) == i
-                            ):
+                            scores = calc_overlap(
+                                tracker_trajs[-1, frame], tracker_trajs[:-1, frame]
+                            )
+                            if (frame > 0) and np.argmax(scores) == i:
                                 sample_ax.annotate(
                                     tracker_name,
                                     xy=(box[0], box[1]),
@@ -648,7 +649,7 @@ def draw_graph(
             continue
 
         seq_dir = save_dir / seq.name
-        os.makedirs(save_dir, exist_ok=True)
+        os.makedirs(seq_dir, exist_ok=True)
 
         offline_bb, tracker_weight = ope.get_algorithm_data(seq.name, algorithm_name)
 
@@ -658,22 +659,23 @@ def draw_graph(
         # draw error graph
         if iserror:
             for i in range(len(trackers_name)):
+                vis_name = trackers_name[i].split("/")[0]
                 error = error_rets[trackers_name[i]][seq.name]
                 ax.plot(
                     range(len(error)),
                     error,
-                    color=color_map[tracker_name],
-                    label=tracker_name,
+                    color=color_map[vis_name],
+                    label=vis_name,
                     linewidth=LINE_WIDTH * 2
-                    if is_algorithm(tracker_name)
+                    if is_algorithm(vis_name)
                     else LINE_WIDTH,
-                    alpha=0.8 if is_algorithm(tracker_name) else 1,
+                    alpha=0.8 if is_algorithm(vis_name) else 1,
                 )
                 ax.set(ylabel="Error", xlim=(0, len(error)), ylim=(-0.05, 1.05))
             ax.set_xticks([])
             if legend:
                 ax.legend(
-                    ncol=len(trackers_name), frameon=False, bbox_to_anchor=(0.2, 1.1)
+                    ncol=len(trackers_name), frameon=False, bbox_to_anchor=(0.3, 1.1)
                 )
 
         # draw weight graph
@@ -689,17 +691,17 @@ def draw_graph(
                 ax.set(
                     ylabel="Weight",
                     xlim=(0, len(tracker_weight)),
-                    ylim=(np.min(tracker_weight) - 0.05, np.max(tracker_weight) + 0.05),
+                    ylim=(-0.05, 1.05),
                 )
             ax.set_xticks([])
 
-        if algorithm_name.startswith("AAA"):
-            # draw anchor line
-            for i in range(len(tracker_weight)):
-                if offline_bb[i - 1] is not None:
-                    ax.axvline(
-                        x=i, color="gray", linestyle="--", linewidth=0.1, alpha=0.3
-                    )
+        # if algorithm_name.startswith("A3T"):
+        #     # draw anchor line
+        #     for i in range(len(tracker_weight)):
+        #         if offline_bb[i - 1] is not None:
+        #             ax.axvline(
+        #                 x=i, color="gray", linestyle="--", linewidth=0.1, alpha=0.3
+        #             )
 
         for sframe, text in sframes:
             # draw text

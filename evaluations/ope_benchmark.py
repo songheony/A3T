@@ -186,14 +186,10 @@ class OPEBenchmark:
             offline_results = np.array(offline_results)
 
             # calc
-            error_ret[seq.name] = np.sum(
-                1 - calc_overlap(gt_traj[valid_idx], tracker_traj[valid_idx])
-            )
+            error_ret[seq.name] = 1 - calc_overlap(gt_traj[valid_idx], tracker_traj[valid_idx])
             valid_results = tracker_traj[: len(offline_results)]
             if len(offline_results) > 0:
-                loss_ret[seq.name] = np.sum(
-                    1 - calc_overlap(offline_results, valid_results)
-                )
+                loss_ret[seq.name] = 1 - calc_overlap(offline_results, valid_results)
             else:
                 loss_ret[seq.name] = np.nan
 

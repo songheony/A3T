@@ -164,110 +164,110 @@ def figure5(
 
 
 def figure6(
-    otb_dataset, tpl_dataset, high_algorithm, high_experts, color_map, save_dir
+    otb_dataset, tpl_dataset, superfast_algorithm, superfast_experts, color_map, save_dir
 ):
     otb_seqs = ["Girl2"]
     draw_graph(
         otb_dataset,
         "OTB2015",
-        high_algorithm,
-        high_experts,
+        superfast_algorithm,
+        superfast_experts,
         color_map,
         save_dir / "Figure6",
         otb_seqs,
         iserror=True,
         legend=True,
         sframes=[
-            (14, "(a)"),
-            (87, "(b)"),
-            (131, "(c)"),
-            (150, "(d)"),
-            (575, "(e)"),
-            (931, "(f)"),
-            (1235, "(g)"),
-            (1495, "(h)"),
+            (1, "(a)"),
+            (38, "(b)"),
+            (137, "(c)"),
+            (233, "(d)"),
+            (352, "(e)"),
+            (633, "(f)"),
+            (809, "(g)"),
+            (1239, "(h)"),
         ],
     )
     draw_graph(
         otb_dataset,
         "OTB2015",
-        high_algorithm,
-        high_experts,
+        superfast_algorithm,
+        superfast_experts,
         color_map,
         save_dir / "Figure6",
         otb_seqs,
         iserror=False,
         legend=False,
         sframes=[
-            (14, "(a)"),
-            (87, "(b)"),
-            (131, "(c)"),
-            (150, "(d)"),
-            (575, "(e)"),
-            (931, "(f)"),
-            (1235, "(g)"),
-            (1495, "(h)"),
+            (1, "(a)"),
+            (38, "(b)"),
+            (137, "(c)"),
+            (233, "(d)"),
+            (352, "(e)"),
+            (633, "(f)"),
+            (809, "(g)"),
+            (1239, "(h)"),
         ],
     )
     draw_result(
         otb_dataset,
         "OTB2015",
-        high_algorithm,
-        high_experts,
+        superfast_algorithm,
+        superfast_experts,
         color_map,
         save_dir / "Figure6",
         otb_seqs,
         show=["frame"],
     )
 
-    tpl_seqs = ["tpl_Yo_yos_ce1"]
+    tpl_seqs = ['tpl_Ball_ce2']
     draw_graph(
         tpl_dataset,
         "TColor128",
-        high_algorithm,
-        high_experts,
+        superfast_algorithm,
+        superfast_experts,
         color_map,
         save_dir / "Figure6",
         tpl_seqs,
         iserror=True,
         legend=False,
         sframes=[
-            (2, "(i)"),
-            (29, "(j)"),
-            (36, "(k)"),
-            (109, "(l)"),
-            (119, "(m)"),
-            (175, "(n)"),
-            (203, "(o)"),
-            (212, "(p)"),
+            (1, "(i)"),
+            (254, "(j)"),
+            (275, "(k)"),
+            (329, "(l)"),
+            (342, "(m)"),
+            (416, "(n)"),
+            (494, "(o)"),
+            (571, "(p)"),
         ],
     )
     draw_graph(
         tpl_dataset,
         "TColor128",
-        high_algorithm,
-        high_experts,
+        superfast_algorithm,
+        superfast_experts,
         color_map,
         save_dir / "Figure6",
         tpl_seqs,
         iserror=False,
         legend=False,
         sframes=[
-            (2, "(i)"),
-            (29, "(j)"),
-            (36, "(k)"),
-            (109, "(l)"),
-            (119, "(m)"),
-            (175, "(n)"),
-            (203, "(o)"),
-            (212, "(p)"),
+            (1, "(i)"),
+            (254, "(j)"),
+            (275, "(k)"),
+            (329, "(l)"),
+            (342, "(m)"),
+            (416, "(n)"),
+            (494, "(o)"),
+            (571, "(p)"),
         ],
     )
     draw_result(
         tpl_dataset,
         "TColor128",
-        high_algorithm,
-        high_experts,
+        superfast_algorithm,
+        superfast_experts,
         color_map,
         save_dir / "Figure6",
         tpl_seqs,
@@ -276,7 +276,7 @@ def figure6(
 
 
 def figure7(thresholds, threshold_successes, threshold_anchor_successes, threshold_anchors, gt_trajs, save_dir):
-    figsize = (15, 8)
+    figsize = (15, 5)
     modes = threshold_successes.keys()
     draw_succ_with_thresholds(
         modes,
@@ -292,50 +292,54 @@ def figure7(thresholds, threshold_successes, threshold_anchor_successes, thresho
 
 
 def figure8(
-    otb_dataset, high_algorithm, high_mcct_algorithm, high_experts, color_map, save_dir
+    otb_dataset, superfast_algorithm, superfast_mcct_algorithm, superfast_experts, color_map, save_dir
 ):
     target_seqs = ["Bird1", "Tiger1"]
     draw_result(
         otb_dataset,
-        high_mcct_algorithm,
-        high_experts,
+        "OTB2015",
+        superfast_mcct_algorithm,
+        superfast_experts,
         color_map,
-        save_dir / "Figure8",
+        save_dir / "Figure8" / "MCCT",
         target_seqs,
         show=["frame"],
     )
 
     draw_result(
         otb_dataset,
-        high_algorithm,
-        high_experts,
+        "OTB2015",
+        superfast_algorithm,
+        superfast_experts,
         color_map,
-        save_dir / "Figure8",
+        save_dir / "Figure8" / "Ours",
         target_seqs,
         show=["frame"],
     )
 
 
 def figure9(
-    otb_dataset, high_algorithm, high_hdt_algorithm, high_experts, color_map, save_dir
+    otb_dataset, superfast_algorithm, superfast_hdt_algorithm, superfast_experts, color_map, save_dir
 ):
-    target_seqs = ["Human4_2", "Skating1"]
+    target_seqs = ['Human4_2', 'Skating1']
     draw_result(
         otb_dataset,
-        high_hdt_algorithm,
-        high_experts,
+        "OTB2015",
+        superfast_hdt_algorithm,
+        superfast_experts,
         color_map,
-        save_dir / "Figure9",
+        save_dir / "Figure9" / "HDT",
         target_seqs,
         show=["frame"],
     )
 
     draw_result(
         otb_dataset,
-        high_algorithm,
-        high_experts,
+        "OTB2015",
+        superfast_algorithm,
+        superfast_experts,
         color_map,
-        save_dir / "Figure9",
+        save_dir / "Figure9" / "Ours",
         target_seqs,
         show=["frame"],
     )
@@ -427,7 +431,7 @@ def main(experiments, all_experts, all_experts_name):
     save_dir = Path(path_config.VISUALIZATION_PATH)
     os.makedirs(save_dir, exist_ok=True)
 
-    total_colors = sns.color_palette("hls", len(all_experts) + 1).as_hex()[::-1]
+    total_colors = sns.color_palette("hls", len(all_experts) + 2).as_hex()
     color_map = {
         tracker_name: color
         for tracker_name, color in zip(all_experts, total_colors[1:])
@@ -437,7 +441,7 @@ def main(experiments, all_experts, all_experts_name):
     color_map["Random"] = total_colors[0]
     color_map["WithoutOffline"] = total_colors[0]
     color_map["WithoutDelay"] = total_colors[0]
-    color_map["AAA"] = total_colors[0]
+    color_map["A3T"] = total_colors[0]
 
     datasets_name = [
         "OTB2015",
@@ -468,8 +472,8 @@ def main(experiments, all_experts, all_experts_name):
         datasets_name, all_experts, all_experts_name, success_rets, color_map, save_dir
     )
 
-    # vot = select_datasets("VOT2018")
-    # figure2(vot, all_experts, color_map, save_dir)
+    # Figure 2
+    figure2(datasets[5], all_experts, color_map, save_dir)
 
     # Super Fast
     superfast_algorithm, superfast_baselines, superfast_experts = experiments[
@@ -527,7 +531,7 @@ def main(experiments, all_experts, all_experts_name):
     # Table6
     score_table(
         datasets_name,
-        super_fast_algorithm,
+        superfast_algorithm,
         [],
         superfast_experts,
         superfast_anchor_success_rets,
@@ -554,11 +558,9 @@ def main(experiments, all_experts, all_experts_name):
         save_dir,
     )
 
-    # # otb = select_datasets("OTB")
-    # # tpl = select_datasets("TPL")
-    # # figure6(otb, tpl, high_algorithm, high_experts, save_dir)
-    # # figure8(otb, high_algorithm, high_baselines[1], high_experts, save_dir)
-    # # figure9(otb, high_algorithm, high_baselines[0], high_experts, save_dir)
+    figure6(datasets[0], datasets[1], superfast_algorithm, superfast_experts, color_map, save_dir)
+    figure8(datasets[0], superfast_algorithm, superfast_baselines[2], superfast_experts, color_map, save_dir)
+    figure9(datasets[0], superfast_algorithm, superfast_baselines[1], superfast_experts, color_map, save_dir)
 
     # Fast
     fast_algorithm, fast_baselines, fast_experts = experiments["Fast"]
@@ -806,26 +808,9 @@ def main(experiments, all_experts, all_experts_name):
     target_modes = ["SuperFast", "Fast", "Normal", "SiamDW", "SiamRPN++"]
     (
         threshold_successes, threshold_anchor_successes, threshold_anchors, gt_trajs
-    ) = get_parameter_results(path_config.EVALUATION_PATH, "AAA", target_modes)
+    ) = get_parameter_results(path_config.EVALUATION_PATH, "A3T", target_modes)
     thresholds = list(threshold_successes[target_modes[0]].keys())
     figure7(thresholds, threshold_successes, threshold_anchor_successes, threshold_anchors, gt_trajs, save_dir)
-
-    # Tuning - AAA
-    # target_modes = ["SuperFast", "Fast", "Normal"]
-    # (
-    #     threshold_successes, threshold_precisions, threshold_anchor_successes, threshold_anchors, gt_trajs
-    # ) = get_tuning_results(path_config.EVALUATION_PATH, "AAA", target_modes)
-    # thresholds = list(threshold_successes[target_modes[0]].keys())
-    # threshold_table("AAA", thresholds, threshold_successes, threshold_precisions, threshold_anchor_successes, threshold_anchors, gt_trajs, save_dir)
-    # figure7(thresholds, threshold_successes, threshold_anchors, gt_trajs, save_dir)
-
-    # Tuning-HDT
-    # target_modes = ["SuperFast", "Fast", "Normal", "SiamDW", "SiamRPN++"]
-    # (
-    #     threshold_successes, threshold_precisions, threshold_anchor_successes, threshold_anchors, gt_trajs
-    # ) = get_tuning_results(path_config.EVALUATION_PATH, "HDT", target_modes)
-    # thresholds = list(threshold_successes[target_modes[0]].keys())
-    # threshold_table("HDT", thresholds, threshold_successes, threshold_precisions, threshold_anchor_successes, threshold_anchors, gt_trajs, save_dir)
 
 
 if __name__ == "__main__":
@@ -846,27 +831,27 @@ if __name__ == "__main__":
         "SPM",
     ]
     all_experts_name = [
-        "DaSiamRPN (ECCV 2018)",
-        "DiMP (ICCV 2019)",
-        "DROL (AAAI 2020)",
-        "KYS (ECCV 2020)",
-        "Ocean (ECCV 2020)",
-        "PrDiMP (CVPR 2020)",
-        "RPT (ECCVW 2020)",
-        "SiamBAN (CVPR 2020)",
-        "SiamCAR (CVPR 2020)",
-        "SiamDW (CVPR 2019)",
-        "SiamFC++ (AAAI 2020)",
-        "SiamRPN (CVPR 2018)",
-        "SiamRPN++ (CVPR 2019)",
-        "SPM (CVPR 2019)",
+        "DaSiamRPN",
+        "DiMP",
+        "DROL",
+        "KYS",
+        "Ocean",
+        "PrDiMP",
+        "RPT",
+        "SiamBAN",
+        "SiamCAR",
+        "SiamDW",
+        "SiamFC++",
+        "SiamRPN",
+        "SiamRPN++",
+        "SPM",
     ]
 
-    super_fast_algorithm = "AAA/SuperFast/0.70"
-    fast_algorithm = "AAA/Fast/0.72"
-    normal_algorithm = "AAA/Normal/0.74"
-    siamdw_algorithm = "AAA/SiamDW/0.73"
-    siamrpn_algorithm = "AAA/SiamRPN++/0.75"
+    super_fast_algorithm = "A3T/SuperFast/0.70"
+    fast_algorithm = "A3T/Fast/0.72"
+    normal_algorithm = "A3T/Normal/0.74"
+    siamdw_algorithm = "A3T/SiamDW/0.73"
+    siamrpn_algorithm = "A3T/SiamRPN++/0.75"
 
     super_fast_baselines = [
         "Random/SuperFast",
